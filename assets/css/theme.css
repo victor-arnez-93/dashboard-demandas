@@ -1,0 +1,68 @@
+:root {
+  color-scheme: dark;
+  --font-title: "Rajdhani", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --primary: #284B63;
+  --primary-hover: #35647f;
+  --accent: #F96900;
+  --accent-hover: #ff7b1d;
+  --sand: #D4CDAB;
+  --success: #2bbf88;
+  --warning: #f1a93b;
+  --danger: #ee5b68;
+  --background: #090d10;
+  --background-image: url("../img/fundoescuro.png");
+  --background-tint: rgba(5,8,10,.36);
+  --background-soft: #0d1318;
+  --surface: #111a20;
+  --surface-raised: #17232b;
+  --surface-hover: #1d2c36;
+  --border: rgba(212,205,171,.13);
+  --border-strong: rgba(212,205,171,.26);
+  --text: #FFFFFF;
+  --text-soft: #c5c8c5;
+  --text-muted: #828b8f;
+  --sidebar: rgba(7,12,15,.92);
+  --topbar: rgba(9,13,16,.84);
+  --overlay: rgba(0,0,0,.68);
+  --gradient: linear-gradient(115deg,#284B63,#35647f 45%,#F96900);
+  --hero: radial-gradient(circle at 88% 10%,rgba(249,105,0,.16),transparent 34%),radial-gradient(circle at 0 100%,rgba(40,75,99,.35),transparent 38%),linear-gradient(145deg,rgba(18,28,35,.96),rgba(9,14,18,.95));
+  --shadow: 0 16px 44px rgba(0,0,0,.25);
+  --shadow-glow: 0 14px 34px rgba(249,105,0,.17);
+  --radius: 16px;
+  --sidebar-width: 276px;
+  --sidebar-small: 84px;
+  --topbar-height: 74px;
+  --transition: 220ms cubic-bezier(.2,.8,.2,1);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --primary: #284B63;
+  --primary-hover: #1e3d52;
+  --accent: #F96900;
+  --accent-hover: #df5900;
+  --sand: #a89e70;
+  --success: #087d58;
+  --warning: #a86200;
+  --danger: #c93748;
+  --background: #f4f1e8;
+  --background-image: url("../img/fundoclaro.png");
+  --background-tint: rgba(255,255,255,.25);
+  --background-soft: #ece8dc;
+  --surface: rgba(255,255,255,.93);
+  --surface-raised: #f6f3eb;
+  --surface-hover: #ece8dc;
+  --border: rgba(40,75,99,.13);
+  --border-strong: rgba(40,75,99,.25);
+  --text: #111518;
+  --text-soft: #48565e;
+  --text-muted: #78848a;
+  --sidebar: rgba(255,255,255,.9);
+  --topbar: rgba(250,248,242,.86);
+  --overlay: rgba(17,25,29,.52);
+  --gradient: linear-gradient(115deg,#284B63,#35647f 55%,#F96900);
+  --hero: radial-gradient(circle at 88% 10%,rgba(249,105,0,.12),transparent 34%),radial-gradient(circle at 0 100%,rgba(40,75,99,.13),transparent 38%),linear-gradient(145deg,rgba(255,255,255,.97),rgba(245,242,233,.94));
+  --shadow: 0 16px 40px rgba(40,75,99,.12);
+  --shadow-glow: 0 14px 30px rgba(249,105,0,.15);
+}

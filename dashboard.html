@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FLUUX — Organização e acompanhamento de demandas.">
+  <meta name="theme-color" content="#090d10">
+  <title>FLUUX — Organização de Demandas</title>
+  <script>
+    document.documentElement.dataset.theme =
+      matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  </script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
+
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-logo"><img src="assets/img/logo.jpeg" alt="FLUUX"></div>
+    <span class="spinner"></span>
+    <p>Conectando ao sistema...</p>
+  </div>
+
+  <div class="app-shell" id="appShell" hidden>
+    <aside class="sidebar" id="sidebar" aria-label="Navegação principal">
+      <div class="brand">
+        <div class="brand-glass"><img src="assets/img/logo.jpeg" alt="FLUUX"></div>
+        <div class="brand-copy">
+          <strong data-app-name>FLUUX</strong>
+          <small data-app-subtitle>Organização de Demandas</small>
+        </div>
+        <button class="icon-btn sidebar-close" id="sidebarClose" type="button" aria-label="Fechar menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-control">
+        <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Recolher menu" title="Recolher ou expandir menu">
+          <i class="fa-solid fa-angles-left"></i><span>Recolher menu</span>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-label">VISÃO GERAL</span>
+        <button class="nav-item active" type="button" data-view="dashboard">
+          <i class="fa-solid fa-table-cells-large"></i><span>Início</span>
+        </button>
+        <button class="nav-item nav-new" type="button" data-view="nova-demanda">
+          <i class="fa-solid fa-plus"></i><span>Nova demanda</span>
+        </button>
+        <button class="nav-item" type="button" data-view="demandas">
+          <i class="fa-solid fa-list-check"></i><span>Demandas</span><b class="nav-count" id="navDemandCount">0</b>
+        </button>
+        <button class="nav-item" type="button" data-view="analises">
+          <i class="fa-solid fa-chart-column"></i><span>Análises</span>
+        </button>
+        <button class="nav-item" type="button" data-view="relatorios">
+          <i class="fa-regular fa-file-lines"></i><span>Relatórios</span>
+        </button>
+
+        <span class="nav-label nav-label-spaced">SISTEMA</span>
+        <button class="nav-item" type="button" data-view="configuracoes">
+          <i class="fa-solid fa-sliders"></i><span>Configurações</span>
+        </button>
+      </nav>
+
+      <footer class="sidebar-footer">
+        <span>Desenvolvido por</span>
+        <strong>Victor Arnez</strong>
+        <small>FLUUX · <span data-app-version>v1.0.0</span></small>
+      </footer>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+    <div class="app-column">
+      <header class="topbar">
+        <div class="topbar-start">
+          <button class="icon-btn mobile-menu" id="mobileMenuButton" type="button" aria-label="Abrir menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="breadcrumb">
+            <span>Organização</span><i class="fa-solid fa-chevron-right"></i><strong id="currentViewLabel">Início</strong>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="topbar-info weather" id="weatherButton" type="button" aria-label="Abrir previsão do tempo">
+            <i id="weatherIcon" class="fa-solid fa-cloud-sun"></i>
+            <span><strong id="weatherTemp">--°</strong><small id="weatherCity">Carregando clima</small></span>
+          </button>
+          <div class="topbar-info clock" aria-live="polite">
+            <i class="fa-regular fa-clock"></i>
+            <span><strong id="currentTime">--:--</strong><small id="currentDate">--</small></span>
+          </div>
+          <button class="icon-btn" id="themeButton" type="button" aria-label="Alternar tema">
+            <i class="fa-solid fa-sun"></i>
+          </button>
+          <div class="user-area">
+            <button class="user-chip" id="userMenuButton" type="button" aria-expanded="false">
+              <span class="avatar" id="headerAvatar">FG</span>
+              <span><strong id="headerUserName">Fernando Gonçalves</strong><small id="headerUserRole">Gestão de Demandas</small></span>
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="user-menu" id="userMenu" hidden>
+              <div class="user-menu-head">
+                <span class="avatar large" id="menuAvatar">FG</span>
+                <span><strong id="menuUserName">Fernando Gonçalves</strong><small id="menuUserEmail">—</small></span>
+              </div>
+              <button type="button" data-go-view="configuracoes"><i class="fa-solid fa-gear"></i> Configurações</button>
+              <button class="logout" id="logoutButton" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content" id="mainContent" tabindex="-1">
+        <section class="view active" data-view-panel="dashboard">
+          <div class="welcome-line">
+            <div><small id="greeting">Boa noite</small><h2>Bem-vindo, <strong id="welcomeName">Fernando Gonçalves</strong>.</h2></div>
+            <p id="welcomeDate">Acompanhe o que precisa da sua atenção hoje.</p>
+          </div>
+
+          <div class="hero">
+            <div class="hero-copy">
+              <span class="eyebrow"><i class="fa-solid fa-bolt"></i> VISÃO EXECUTIVA</span>
+              <h1>Organize prioridades.<br><em>Acompanhe resultados.</em></h1>
+              <p>Demandas, prazos e andamento em uma visão clara para facilitar decisões e apresentações.</p>
+            </div>
+            <div class="hero-actions" role="group" aria-label="Ações rápidas">
+              <button class="btn-primary" type="button" data-go-view="nova-demanda"><i class="fa-solid fa-plus"></i> Nova demanda</button>
+              <button class="btn-secondary" type="button" data-go-view="demandas"><i class="fa-solid fa-list-check"></i> Ver demandas</button>
+              <button class="btn-secondary" id="presentationButton" type="button"><i class="fa-solid fa-display"></i> Apresentar</button>
+            </div>
+          </div>
+
+          <div class="section-heading">
+            <div><h2>Resumo do período</h2><p>Indicadores calculados a partir das demandas registradas.</p></div>
+            <div class="period-selector" role="group" aria-label="Selecionar período">
+              <button type="button" data-period="7">7 dias</button>
+              <button class="active" type="button" data-period="30">30 dias</button>
+              <button type="button" data-period="90">90 dias</button>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <article class="kpi-card blue"><span class="kpi-top"><i class="fa-solid fa-layer-group"></i><b>PERÍODO</b></span><small>Total de demandas</small><strong id="kpiTotal">0</strong><p>registros criados</p></article>
+            <article class="kpi-card orange"><span class="kpi-top"><i class="fa-solid fa-spinner"></i><b>ATIVAS</b></span><small>Em andamento</small><strong id="kpiProgress">0</strong><p id="kpiProgressText">0% do total</p></article>
+            <article class="kpi-card green"><span class="kpi-top"><i class="fa-solid fa-circle-check"></i><b>CONCLUÍDAS</b></span><small>Finalizadas</small><strong id="kpiDone">0</strong><p id="kpiDoneText">0% do total</p></article>
+            <article class="kpi-card sand"><span class="kpi-top"><i class="fa-solid fa-calendar-xmark"></i><b>ATENÇÃO</b></span><small>Atrasadas</small><strong id="kpiOverdue">0</strong><p>prazo vencido</p></article>
+          </div>
+
+          <div class="charts-grid">
+            <article class="panel panel-chart">
+              <div class="panel-head"><div><small>FLUXO DE TRABALHO</small><h3>Recebidas x concluídas</h3></div></div>
+              <div class="chart chart-line"><canvas id="flowChart"></canvas></div>
+            </article>
+            <article class="panel panel-chart">
+              <div class="panel-head"><div><small>DISTRIBUIÇÃO</small><h3>Demandas por status</h3></div></div>
+              <div class="chart chart-donut"><canvas id="statusChart"></canvas><span class="donut-center"><strong id="donutTotal">0</strong><small>demandas</small></span></div>
+              <div class="legend" id="statusLegend"></div>
+            </article>
+          </div>
+
+          <article class="panel table-panel">
+            <div class="panel-head table-head">
+              <div><small>ACOMPANHAMENTO</small><h3>Demandas recentes</h3></div>
+              <button class="text-btn" type="button" data-go-view="demandas">Ver todas <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Demanda</th><th>Responsável</th><th>Prioridade</th><th>Prazo</th><th>Status</th></tr></thead>
+                <tbody id="recentDemandsBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="view" data-view-panel="nova-demanda" hidden>
+          <div class="page-heading">
+            <div><small>REGISTRO</small><h1 id="demandFormHeading">Nova demanda</h1><p>Cadastre informações completas para gerar acompanhamento e relatórios úteis.</p></div>
+          </div>
+          <form class="panel demand-form" id="demandForm" novalidate>
+            <input id="demandId" type="hidden">
+            <div class="form-section">
+              <div class="form-section-title"><i class="fa-regular fa-file-lines"></i><div><h3>Informações principais</h3><p>Identifique claramente o que precisa ser feito.</p></div></div>
+              <div class="form-grid">
+                <label class="field full"><span>Título *</span><input id="demandTitle" type="text" maxlength="160" placeholder="Ex.: Revisar documentação do processo" required></label>
+                <label class="field full"><span>Descrição *</span><textarea id="demandDescription" rows="5" maxlength="4000" placeholder="Contexto, objetivo e resultado esperado..." required></textarea></label>
+                <label class="field"><span>Solicitante</span><input id="demandRequester" type="text" maxlength="120" placeholder="Nome ou área solicitante"></label>
+                <label class="field"><span>Responsável *</span><input id="demandResponsible" type="text" maxlength="120" placeholder="Pessoa responsável" required></label>
+                <label class="field"><span>Departamento</span><input id="demandDepartment" type="text" maxlength="100" placeholder="Ex.: Administrativo"></label>
+                <label class="field"><span>Categoria *</span><select id="demandCategory" required><option value="">Selecione</option><option>Administrativo</option><option>Atendimento</option><option>Comercial</option><option>Documentação</option><option>Financeiro</option><option>Operacional</option><option>Planejamento</option><option>Processos</option><option>Projetos</option><option>Tecnologia</option><option>Outro</option></select></label>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-section-title"><i class="fa-regular fa-calendar"></i><div><h3>Planejamento e controle</h3><p>Defina prioridade, situação e prazo.</p></div></div>
+              <div class="form-grid four">
+                <label class="field"><span>Prioridade *</span><select id="demandPriority" required><option>Normal</option><option>Baixa</option><option>Alta</option><option>Urgente</option></select></label>
+                <label class="field"><span>Status *</span><select id="demandStatus" required><option>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Cancelada</option></select></label>
+                <label class="field"><span>Data de entrada *</span><input id="demandStartDate" type="date" required></label>
+                <label class="field"><span>Prazo *</span><input id="demandDueDate" type="date" required></label>
+                <label class="field"><span>Horas estimadas</span><input id="demandEstimatedHours" type="number" min="0" step=".5" placeholder="0"></label>
+                <label class="field"><span>Horas realizadas</span><input id="demandActualHours" type="number" min="0" step=".5" placeholder="0"></label>
+                <label class="field wide"><span>Tags</span><input id="demandTags" type="text" maxlength="300" placeholder="urgente, reunião, cliente (separe por vírgulas)"></label>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-section-title"><i class="fa-regular fa-note-sticky"></i><div><h3>Observações</h3><p>Registre dependências, retornos ou detalhes adicionais.</p></div></div>
+              <label class="field"><span>Notas internas</span><textarea id="demandNotes" rows="4" maxlength="4000" placeholder="Informações de acompanhamento..."></textarea></label>
+            </div>
+            <div class="form-actions">
+              <button class="btn-ghost" id="cancelDemandEdit" type="button">Cancelar</button>
+              <button class="btn-primary" id="saveDemandButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar demanda</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="view" data-view-panel="demandas" hidden>
+          <div class="page-heading">
+            <div><small>ORGANIZAÇÃO</small><h1>Demandas</h1><p>Consulte, filtre, atualize e acompanhe todos os registros.</p></div>
+            <button class="btn-primary" type="button" data-go-view="nova-demanda"><i class="fa-solid fa-plus"></i> Nova demanda</button>
+          </div>
+          <article class="panel">
+            <div class="filter-bar">
+              <label class="search-field"><i class="fa-solid fa-magnifying-glass"></i><input id="demandSearch" type="search" placeholder="Buscar por título, código, responsável..."></label>
+              <label class="select-field"><select id="statusFilter"><option value="">Todos os status</option><option>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Cancelada</option><option>Atrasada</option></select><i class="fa-solid fa-chevron-down"></i></label>
+              <label class="select-field"><select id="priorityFilter"><option value="">Todas as prioridades</option><option>Baixa</option><option>Normal</option><option>Alta</option><option>Urgente</option></select><i class="fa-solid fa-chevron-down"></i></label>
+              <label class="select-field"><select id="categoryFilter"><option value="">Todas as categorias</option></select><i class="fa-solid fa-chevron-down"></i></label>
+              <button class="btn-ghost" id="clearDemandFilters" type="button"><i class="fa-solid fa-filter-circle-xmark"></i> Limpar</button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Código</th><th>Demanda</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Prazo</th><th>Status</th><th aria-label="Ações"></th></tr></thead>
+                <tbody id="allDemandsBody"></tbody>
+              </table>
+            </div>
+            <div class="table-footer"><span id="tableCount">0 demandas exibidas</span><span>Dados sincronizados com o Supabase</span></div>
+          </article>
+        </section>
+
+        <section class="view" data-view-panel="analises" hidden>
+          <div class="page-heading"><div><small>INDICADORES</small><h1>Análises</h1><p>Distribuições calculadas sobre os registros e filtros do sistema.</p></div></div>
+          <div class="analysis-grid">
+            <article class="panel panel-chart"><div class="panel-head"><div><small>VOLUME</small><h3>Demandas por responsável</h3></div></div><div class="chart analysis-chart"><canvas id="managerChart"></canvas></div></article>
+            <article class="panel panel-chart"><div class="panel-head"><div><small>CATEGORIAS</small><h3>Distribuição por assunto</h3></div></div><div class="chart analysis-chart"><canvas id="categoryChart"></canvas></div></article>
+            <article class="panel panel-chart full-chart"><div class="panel-head"><div><small>PRIORIDADE</small><h3>Volume por prioridade e status</h3></div></div><div class="chart analysis-chart"><canvas id="priorityChart"></canvas></div></article>
+          </div>
+        </section>
+
+        <section class="view" data-view-panel="relatorios" hidden>
+          <div class="page-heading report-heading">
+            <div><small>EXPORTAÇÃO</small><h1>Relatórios</h1><p>Filtre o período e exporte os dados reais em PDF ou Excel.</p></div>
+            <div class="header-actions">
+              <button class="btn-secondary" id="exportPdfButton" type="button"><i class="fa-regular fa-file-pdf"></i> Exportar PDF</button>
+              <button class="btn-primary" id="exportExcelButton" type="button"><i class="fa-regular fa-file-excel"></i> Exportar Excel</button>
+            </div>
+          </div>
+          <article class="panel report-filter">
+            <div class="period-selector report-period">
+              <button type="button" data-report-period="today">Hoje</button>
+              <button type="button" data-report-period="7">7 dias</button>
+              <button class="active" type="button" data-report-period="30">30 dias</button>
+              <button type="button" data-report-period="custom">Personalizado</button>
+            </div>
+            <div class="report-filter-grid">
+              <label class="field"><span>Data inicial</span><input id="reportStartDate" type="date"></label>
+              <label class="field"><span>Data final</span><input id="reportEndDate" type="date"></label>
+              <label class="field"><span>Status</span><select id="reportStatus"><option value="">Todos</option><option>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Cancelada</option><option>Atrasada</option></select></label>
+              <label class="field"><span>Prioridade</span><select id="reportPriority"><option value="">Todas</option><option>Baixa</option><option>Normal</option><option>Alta</option><option>Urgente</option></select></label>
+              <label class="field"><span>Categoria</span><select id="reportCategory"><option value="">Todas</option></select></label>
+              <label class="field"><span>Responsável</span><input id="reportResponsible" type="search" placeholder="Todos"></label>
+            </div>
+          </article>
+          <div class="report-cards">
+            <article class="kpi-card"><small>Total no período</small><strong id="reportTotal">0</strong><p>demandas filtradas</p></article>
+            <article class="kpi-card green"><small>Concluídas</small><strong id="reportDone">0</strong><p id="reportDoneRate">0% de conclusão</p></article>
+            <article class="kpi-card orange"><small>Em andamento</small><strong id="reportProgress">0</strong><p>demandas ativas</p></article>
+            <article class="kpi-card sand"><small>Atrasadas</small><strong id="reportOverdue">0</strong><p>exigem atenção</p></article>
+          </div>
+          <article class="panel report-table">
+            <div class="panel-head"><div><small>DETALHAMENTO</small><h3>Demandas do relatório</h3></div><b id="reportPeriodLabel">Últimos 30 dias</b></div>
+            <div class="table-scroll">
+              <table><thead><tr><th>Código</th><th>Demanda</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Entrada</th><th>Prazo</th></tr></thead><tbody id="reportBody"></tbody></table>
+            </div>
+          </article>
+        </section>
+
+        <section class="view" data-view-panel="configuracoes" hidden>
+          <div class="page-heading"><div><small>PREFERÊNCIAS</small><h1>Configurações</h1><p>Personalize seu perfil, sistema, aparência e localização.</p></div></div>
+          <form id="settingsForm" class="settings-stack">
+            <article class="panel settings-card">
+              <div class="settings-title"><i class="fa-solid fa-user"></i><div><h3>Perfil</h3><p>Estas informações aparecem na saudação e no menu do usuário.</p></div></div>
+              <div class="profile-settings">
+                <div class="avatar-editor">
+                  <span class="avatar xlarge" id="settingsAvatar">FG</span>
+                  <label class="btn-secondary compact"><i class="fa-solid fa-camera"></i> Escolher foto<input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+                  <small>PNG, JPG ou WebP · até 2 MB</small>
+                </div>
+                <div class="form-grid">
+                  <label class="field"><span>Nome de exibição</span><input id="settingsFullName" type="text" maxlength="120" required></label>
+                  <label class="field"><span>Cargo / área</span><input id="settingsRole" type="text" maxlength="120"></label>
+                  <label class="field full"><span>E-mail de acesso</span><input id="settingsEmail" type="email" readonly></label>
+                </div>
+              </div>
+            </article>
+            <article class="panel settings-card">
+              <div class="settings-title"><i class="fa-solid fa-display"></i><div><h3>Sistema</h3><p>O nome salvo será aplicado no título, menu e identidade do painel.</p></div></div>
+              <div class="form-grid">
+                <label class="field"><span>Nome do sistema</span><input id="settingsAppName" type="text" maxlength="60" required></label>
+                <label class="field"><span>Subtítulo</span><input id="settingsAppSubtitle" type="text" maxlength="100" required></label>
+              </div>
+            </article>
+            <article class="panel settings-card">
+              <div class="settings-title"><i class="fa-solid fa-palette"></i><div><h3>Aparência</h3><p>O tema é salvo no seu perfil e acompanha o acesso.</p></div></div>
+              <div class="theme-options">
+                <label><input type="radio" name="settingsTheme" value="dark"><span><i class="fa-solid fa-moon"></i><strong>Escuro</strong><small>Preto, azul e laranja</small></span></label>
+                <label><input type="radio" name="settingsTheme" value="light"><span><i class="fa-solid fa-sun"></i><strong>Claro</strong><small>Branco, areia e azul</small></span></label>
+              </div>
+            </article>
+            <article class="panel settings-card">
+              <div class="settings-title"><i class="fa-solid fa-location-dot"></i><div><h3>Clima</h3><p>Pesquise a cidade usada no cabeçalho e na previsão de três dias.</p></div></div>
+              <div class="city-setting">
+                <label class="field"><span>Cidade</span><input id="settingsCity" type="search" placeholder="Ex.: Tatuí, SP"></label>
+                <button class="btn-secondary" id="searchCityButton" type="button"><i class="fa-solid fa-magnifying-glass"></i> Localizar</button>
+                <span id="cityResult">Local atual: Tatuí, São Paulo</span>
+              </div>
+            </article>
+            <div class="settings-save"><button class="btn-primary" id="saveSettingsButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar configurações</button></div>
+          </form>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="presentation-exit" id="presentationExit" hidden>
+    <button class="btn-primary" id="exitPresentationButton" type="button"><i class="fa-solid fa-arrow-left"></i> Voltar ao painel</button><kbd>Esc</kbd>
+  </div>
+
+  <div class="modal-layer" id="weatherModal" hidden>
+    <div class="modal-backdrop" data-close-modal="weatherModal"></div>
+    <section class="modal-card weather-modal-card" role="dialog" aria-modal="true" aria-labelledby="weatherModalTitle">
+      <div class="modal-head"><div><small>PREVISÃO DO TEMPO</small><h2 id="weatherModalTitle">Próximos 3 dias</h2><p id="weatherModalCity">—</p></div><button class="icon-btn" type="button" data-close-modal="weatherModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="weather-days" id="weatherDays"><span class="spinner"></span></div>
+      <footer>Dados meteorológicos fornecidos por Open-Meteo.</footer>
+    </section>
+  </div>
+
+  <div class="modal-layer" id="demandDetailModal" hidden>
+    <div class="modal-backdrop" data-close-modal="demandDetailModal"></div>
+    <section class="modal-card detail-modal-card" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="modal-head"><div><small id="detailCode">DEMANDA</small><h2 id="detailTitle">Detalhes</h2></div><button class="icon-btn" type="button" data-close-modal="demandDetailModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>
+      <div id="demandDetailContent" class="detail-content"></div>
+      <div class="modal-actions detail-actions"><button class="btn-ghost" type="button" data-close-modal="demandDetailModal">Fechar</button><button class="btn-primary" id="detailEditButton" type="button"><i class="fa-solid fa-pen"></i> Editar</button></div>
+    </section>
+  </div>
+
+  <div class="modal-layer" id="confirmModal" hidden>
+    <div class="modal-backdrop" data-close-modal="confirmModal"></div>
+    <section class="modal-card confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <i class="confirm-icon fa-solid fa-triangle-exclamation"></i>
+      <h2 id="confirmTitle">Confirmar ação</h2>
+      <p id="confirmText">Deseja continuar?</p>
+      <div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="confirmModal">Cancelar</button><button class="btn-danger" id="confirmActionButton" type="button">Confirmar</button></div>
+    </section>
+  </div>
+
+  <div class="fatal-layer" id="fatalLayer" hidden>
+    <section>
+      <i class="fa-solid fa-plug-circle-xmark"></i>
+      <h1>Não foi possível iniciar o FLUUX</h1>
+      <p id="fatalMessage">Confira a configuração e tente novamente.</p>
+      <button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button>
+      <a href="index.html">Voltar ao login</a>
+    </section>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="assets/js/env.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

@@ -80,6 +80,7 @@ export async function saveDemand(payload, id = null) {
     description: payload.description,
     requester: payload.requester || null,
     responsible: payload.responsible,
+    manager: payload.manager,
     department: payload.department || null,
     category: payload.category,
     priority: payload.priority,

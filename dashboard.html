@@ -25,7 +25,7 @@
   <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
 
   <div class="boot-screen" id="bootScreen">
-    <div class="boot-logo"><img src="assets/img/logo.jpeg" alt="FLUUX"></div>
+    <div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div>
     <span class="spinner"></span>
     <p>Conectando ao sistema...</p>
   </div>
@@ -33,7 +33,7 @@
   <div class="app-shell" id="appShell" hidden>
     <aside class="sidebar" id="sidebar" aria-label="Navegação principal">
       <div class="brand">
-        <div class="brand-glass"><img src="assets/img/logo.jpeg" alt="FLUUX"></div>
+        <div class="brand-glass"><img src="assets/img/logo.png" alt="FLUUX"></div>
         <div class="brand-copy">
           <strong data-app-name>FLUUX</strong>
           <small data-app-subtitle>Organização de Demandas</small>
@@ -76,7 +76,7 @@
       <footer class="sidebar-footer">
         <span>Desenvolvido por</span>
         <strong>Victor Arnez</strong>
-        <small>FLUUX · <span data-app-version>v1.0.0</span></small>
+        <small>FLUUX · <span data-app-version>v1.1.0</span></small>
       </footer>
     </aside>
 
@@ -94,10 +94,21 @@
         </div>
 
         <div class="topbar-actions">
-          <button class="topbar-info weather" id="weatherButton" type="button" aria-label="Abrir previsão do tempo">
-            <i id="weatherIcon" class="fa-solid fa-cloud-sun"></i>
-            <span><strong id="weatherTemp">--°</strong><small id="weatherCity">Carregando clima</small></span>
-          </button>
+          <div class="weather-area">
+            <button class="topbar-info weather" id="weatherButton" type="button" aria-label="Abrir previsão do tempo" aria-expanded="false" aria-controls="weatherPopover">
+              <i id="weatherIcon" class="fa-solid fa-cloud-sun"></i>
+              <span><strong id="weatherTemp">--°</strong><small id="weatherCity">Carregando clima</small></span>
+              <i class="weather-chevron fa-solid fa-chevron-down"></i>
+            </button>
+            <section class="weather-popover" id="weatherPopover" aria-label="Previsão do tempo" hidden>
+              <header>
+                <div><small>PREVISÃO DO TEMPO</small><strong id="weatherPopoverCity">Local atual</strong></div>
+                <button class="icon-btn" id="refreshWeatherButton" type="button" aria-label="Atualizar clima"><i class="fa-solid fa-rotate"></i></button>
+              </header>
+              <div class="weather-days" id="weatherDays"><span class="spinner"></span></div>
+              <footer>Open-Meteo · localização automática quando permitida</footer>
+            </section>
+          </div>
           <div class="topbar-info clock" aria-live="polite">
             <i class="fa-regular fa-clock"></i>
             <span><strong id="currentTime">--:--</strong><small id="currentDate">--</small></span>
@@ -159,6 +170,20 @@
             <article class="kpi-card sand"><span class="kpi-top"><i class="fa-solid fa-calendar-xmark"></i><b>ATENÇÃO</b></span><small>Atrasadas</small><strong id="kpiOverdue">0</strong><p>prazo vencido</p></article>
           </div>
 
+          <article class="panel hours-overview">
+            <div class="hours-heading">
+              <div><small>CONTROLE DE ESFORÇO</small><h3>Horas estimadas × realizadas</h3><p>Comparativo das demandas do período selecionado.</p></div>
+              <span class="hours-status" id="hoursStatus"><i class="fa-solid fa-gauge-high"></i> Sem horas registradas</span>
+            </div>
+            <div class="hours-summary">
+              <div><small>Estimadas</small><strong id="dashboardEstimatedHours">0h</strong></div>
+              <div><small>Realizadas</small><strong id="dashboardActualHours">0h</strong></div>
+              <div><small>Diferença</small><strong id="dashboardHoursDifference">0h</strong></div>
+              <div><small>Utilização</small><strong id="dashboardHoursRate">0%</strong></div>
+            </div>
+            <div class="hours-progress" aria-label="Percentual de horas realizadas sobre as estimadas"><span id="dashboardHoursProgress"></span></div>
+          </article>
+
           <div class="charts-grid">
             <article class="panel panel-chart">
               <div class="panel-head"><div><small>FLUXO DE TRABALHO</small><h3>Recebidas x concluídas</h3></div></div>
@@ -178,7 +203,7 @@
             </div>
             <div class="table-scroll">
               <table>
-                <thead><tr><th>Demanda</th><th>Responsável</th><th>Prioridade</th><th>Prazo</th><th>Status</th></tr></thead>
+                <thead><tr><th>Demanda</th><th>Gestor</th><th>Prioridade</th><th>Prazo</th><th>Status</th></tr></thead>
                 <tbody id="recentDemandsBody"></tbody>
               </table>
             </div>
@@ -198,6 +223,7 @@
                 <label class="field full"><span>Descrição *</span><textarea id="demandDescription" rows="5" maxlength="4000" placeholder="Contexto, objetivo e resultado esperado..." required></textarea></label>
                 <label class="field"><span>Solicitante</span><input id="demandRequester" type="text" maxlength="120" placeholder="Nome ou área solicitante"></label>
                 <label class="field"><span>Responsável *</span><input id="demandResponsible" type="text" maxlength="120" placeholder="Pessoa responsável" required></label>
+                <label class="field"><span>Gestor *</span><input id="demandManager" type="text" maxlength="120" list="managerOptions" placeholder="Gestor da demanda" required></label>
                 <label class="field"><span>Departamento</span><input id="demandDepartment" type="text" maxlength="100" placeholder="Ex.: Administrativo"></label>
                 <label class="field"><span>Categoria *</span><select id="demandCategory" required><option value="">Selecione</option><option>Administrativo</option><option>Atendimento</option><option>Comercial</option><option>Documentação</option><option>Financeiro</option><option>Operacional</option><option>Planejamento</option><option>Processos</option><option>Projetos</option><option>Tecnologia</option><option>Outro</option></select></label>
               </div>
@@ -223,6 +249,7 @@
               <button class="btn-primary" id="saveDemandButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar demanda</button>
             </div>
           </form>
+          <datalist id="managerOptions"></datalist>
         </section>
 
         <section class="view" data-view-panel="demandas" hidden>
@@ -232,15 +259,16 @@
           </div>
           <article class="panel">
             <div class="filter-bar">
-              <label class="search-field"><i class="fa-solid fa-magnifying-glass"></i><input id="demandSearch" type="search" placeholder="Buscar por título, código, responsável..."></label>
+              <label class="search-field"><i class="fa-solid fa-magnifying-glass"></i><input id="demandSearch" type="search" placeholder="Buscar por título, código, gestor ou responsável..."></label>
               <label class="select-field"><select id="statusFilter"><option value="">Todos os status</option><option>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Cancelada</option><option>Atrasada</option></select><i class="fa-solid fa-chevron-down"></i></label>
               <label class="select-field"><select id="priorityFilter"><option value="">Todas as prioridades</option><option>Baixa</option><option>Normal</option><option>Alta</option><option>Urgente</option></select><i class="fa-solid fa-chevron-down"></i></label>
+              <label class="select-field"><select id="managerFilter"><option value="">Todos os gestores</option></select><i class="fa-solid fa-chevron-down"></i></label>
               <label class="select-field"><select id="categoryFilter"><option value="">Todas as categorias</option></select><i class="fa-solid fa-chevron-down"></i></label>
               <button class="btn-ghost" id="clearDemandFilters" type="button"><i class="fa-solid fa-filter-circle-xmark"></i> Limpar</button>
             </div>
             <div class="table-scroll">
               <table>
-                <thead><tr><th>Código</th><th>Demanda</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Prazo</th><th>Status</th><th aria-label="Ações"></th></tr></thead>
+                <thead><tr><th>Código</th><th>Demanda</th><th>Gestor</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Prazo</th><th>Status</th><th aria-label="Ações"></th></tr></thead>
                 <tbody id="allDemandsBody"></tbody>
               </table>
             </div>
@@ -251,8 +279,9 @@
         <section class="view" data-view-panel="analises" hidden>
           <div class="page-heading"><div><small>INDICADORES</small><h1>Análises</h1><p>Distribuições calculadas sobre os registros e filtros do sistema.</p></div></div>
           <div class="analysis-grid">
-            <article class="panel panel-chart"><div class="panel-head"><div><small>VOLUME</small><h3>Demandas por responsável</h3></div></div><div class="chart analysis-chart"><canvas id="managerChart"></canvas></div></article>
+            <article class="panel panel-chart"><div class="panel-head"><div><small>GESTÃO</small><h3>Demandas por gestor</h3></div></div><div class="chart analysis-chart"><canvas id="managerChart"></canvas></div></article>
             <article class="panel panel-chart"><div class="panel-head"><div><small>CATEGORIAS</small><h3>Distribuição por assunto</h3></div></div><div class="chart analysis-chart"><canvas id="categoryChart"></canvas></div></article>
+            <article class="panel panel-chart full-chart"><div class="panel-head"><div><small>CAPACIDADE</small><h3>Horas estimadas × realizadas por gestor</h3></div></div><div class="chart analysis-chart"><canvas id="hoursChart"></canvas></div></article>
             <article class="panel panel-chart full-chart"><div class="panel-head"><div><small>PRIORIDADE</small><h3>Volume por prioridade e status</h3></div></div><div class="chart analysis-chart"><canvas id="priorityChart"></canvas></div></article>
           </div>
         </section>
@@ -278,6 +307,7 @@
               <label class="field"><span>Status</span><select id="reportStatus"><option value="">Todos</option><option>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Cancelada</option><option>Atrasada</option></select></label>
               <label class="field"><span>Prioridade</span><select id="reportPriority"><option value="">Todas</option><option>Baixa</option><option>Normal</option><option>Alta</option><option>Urgente</option></select></label>
               <label class="field"><span>Categoria</span><select id="reportCategory"><option value="">Todas</option></select></label>
+              <label class="field"><span>Gestor</span><select id="reportManager"><option value="">Todos</option></select></label>
               <label class="field"><span>Responsável</span><input id="reportResponsible" type="search" placeholder="Todos"></label>
             </div>
           </article>
@@ -286,29 +316,35 @@
             <article class="kpi-card green"><small>Concluídas</small><strong id="reportDone">0</strong><p id="reportDoneRate">0% de conclusão</p></article>
             <article class="kpi-card orange"><small>Em andamento</small><strong id="reportProgress">0</strong><p>demandas ativas</p></article>
             <article class="kpi-card sand"><small>Atrasadas</small><strong id="reportOverdue">0</strong><p>exigem atenção</p></article>
+            <article class="kpi-card blue"><small>Horas estimadas</small><strong id="reportEstimatedHours">0h</strong><p>esforço planejado</p></article>
+            <article class="kpi-card orange"><small>Horas realizadas</small><strong id="reportActualHours">0h</strong><p id="reportHoursRate">0% do estimado</p></article>
           </div>
           <article class="panel report-table">
             <div class="panel-head"><div><small>DETALHAMENTO</small><h3>Demandas do relatório</h3></div><b id="reportPeriodLabel">Últimos 30 dias</b></div>
             <div class="table-scroll">
-              <table><thead><tr><th>Código</th><th>Demanda</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Entrada</th><th>Prazo</th></tr></thead><tbody id="reportBody"></tbody></table>
+              <table><thead><tr><th>Código</th><th>Demanda</th><th>Gestor</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Entrada</th><th>Prazo</th><th>Est.</th><th>Real.</th></tr></thead><tbody id="reportBody"></tbody></table>
             </div>
           </article>
         </section>
 
         <section class="view" data-view-panel="configuracoes" hidden>
-          <div class="page-heading"><div><small>PREFERÊNCIAS</small><h1>Configurações</h1><p>Personalize seu perfil, sistema, aparência e localização.</p></div></div>
-          <form id="settingsForm" class="settings-stack">
+          <div class="page-heading settings-heading">
+            <div><small>PREFERÊNCIAS</small><h1>Configurações</h1><p>Atualize seu perfil e a identidade do sistema quando necessário.</p></div>
+            <button class="btn-secondary" id="editSettingsButton" type="button"><i class="fa-solid fa-pen"></i> Editar</button>
+          </div>
+          <div class="settings-lock-status" id="settingsLockStatus"><i class="fa-solid fa-lock"></i><span>Configurações protegidas contra alterações acidentais.</span></div>
+          <form id="settingsForm" class="settings-stack settings-locked">
             <article class="panel settings-card">
               <div class="settings-title"><i class="fa-solid fa-user"></i><div><h3>Perfil</h3><p>Estas informações aparecem na saudação e no menu do usuário.</p></div></div>
               <div class="profile-settings">
                 <div class="avatar-editor">
                   <span class="avatar xlarge" id="settingsAvatar">FG</span>
-                  <label class="btn-secondary compact"><i class="fa-solid fa-camera"></i> Escolher foto<input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+                  <label class="btn-secondary compact avatar-button is-disabled" id="avatarButton"><i class="fa-solid fa-camera"></i> Escolher foto<input id="avatarFile" data-settings-control type="file" accept="image/png,image/jpeg,image/webp" hidden disabled></label>
                   <small>PNG, JPG ou WebP · até 2 MB</small>
                 </div>
                 <div class="form-grid">
-                  <label class="field"><span>Nome de exibição</span><input id="settingsFullName" type="text" maxlength="120" required></label>
-                  <label class="field"><span>Cargo / área</span><input id="settingsRole" type="text" maxlength="120"></label>
+                  <label class="field"><span>Nome de exibição</span><input id="settingsFullName" data-settings-control type="text" maxlength="120" required disabled></label>
+                  <label class="field"><span>Cargo / área</span><input id="settingsRole" data-settings-control type="text" maxlength="120" disabled></label>
                   <label class="field full"><span>E-mail de acesso</span><input id="settingsEmail" type="email" readonly></label>
                 </div>
               </div>
@@ -316,26 +352,11 @@
             <article class="panel settings-card">
               <div class="settings-title"><i class="fa-solid fa-display"></i><div><h3>Sistema</h3><p>O nome salvo será aplicado no título, menu e identidade do painel.</p></div></div>
               <div class="form-grid">
-                <label class="field"><span>Nome do sistema</span><input id="settingsAppName" type="text" maxlength="60" required></label>
-                <label class="field"><span>Subtítulo</span><input id="settingsAppSubtitle" type="text" maxlength="100" required></label>
+                <label class="field"><span>Nome do sistema</span><input id="settingsAppName" data-settings-control type="text" maxlength="60" required disabled></label>
+                <label class="field"><span>Subtítulo</span><input id="settingsAppSubtitle" data-settings-control type="text" maxlength="100" required disabled></label>
               </div>
             </article>
-            <article class="panel settings-card">
-              <div class="settings-title"><i class="fa-solid fa-palette"></i><div><h3>Aparência</h3><p>O tema é salvo no seu perfil e acompanha o acesso.</p></div></div>
-              <div class="theme-options">
-                <label><input type="radio" name="settingsTheme" value="dark"><span><i class="fa-solid fa-moon"></i><strong>Escuro</strong><small>Preto, azul e laranja</small></span></label>
-                <label><input type="radio" name="settingsTheme" value="light"><span><i class="fa-solid fa-sun"></i><strong>Claro</strong><small>Branco, areia e azul</small></span></label>
-              </div>
-            </article>
-            <article class="panel settings-card">
-              <div class="settings-title"><i class="fa-solid fa-location-dot"></i><div><h3>Clima</h3><p>Pesquise a cidade usada no cabeçalho e na previsão de três dias.</p></div></div>
-              <div class="city-setting">
-                <label class="field"><span>Cidade</span><input id="settingsCity" type="search" placeholder="Ex.: Tatuí, SP"></label>
-                <button class="btn-secondary" id="searchCityButton" type="button"><i class="fa-solid fa-magnifying-glass"></i> Localizar</button>
-                <span id="cityResult">Local atual: Tatuí, São Paulo</span>
-              </div>
-            </article>
-            <div class="settings-save"><button class="btn-primary" id="saveSettingsButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar configurações</button></div>
+            <div class="settings-save" id="settingsSaveActions" hidden><button class="btn-primary" id="saveSettingsButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar configurações</button></div>
           </form>
         </section>
       </main>
@@ -344,15 +365,6 @@
 
   <div class="presentation-exit" id="presentationExit" hidden>
     <button class="btn-primary" id="exitPresentationButton" type="button"><i class="fa-solid fa-arrow-left"></i> Voltar ao painel</button><kbd>Esc</kbd>
-  </div>
-
-  <div class="modal-layer" id="weatherModal" hidden>
-    <div class="modal-backdrop" data-close-modal="weatherModal"></div>
-    <section class="modal-card weather-modal-card" role="dialog" aria-modal="true" aria-labelledby="weatherModalTitle">
-      <div class="modal-head"><div><small>PREVISÃO DO TEMPO</small><h2 id="weatherModalTitle">Próximos 3 dias</h2><p id="weatherModalCity">—</p></div><button class="icon-btn" type="button" data-close-modal="weatherModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>
-      <div class="weather-days" id="weatherDays"><span class="spinner"></span></div>
-      <footer>Dados meteorológicos fornecidos por Open-Meteo.</footer>
-    </section>
   </div>
 
   <div class="modal-layer" id="demandDetailModal" hidden>

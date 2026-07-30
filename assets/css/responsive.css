@@ -44,22 +44,21 @@
   .section-heading,.page-heading { align-items:flex-start; flex-direction:column; }
   .period-selector { width:100%; overflow:auto; }
   .period-selector button { flex:1; min-width:72px; }
+  .hours-heading { align-items:flex-start; flex-direction:column; }
+  .hours-summary { grid-template-columns:repeat(2,1fr); }
   .form-grid,.form-grid.four,.report-filter-grid { grid-template-columns:1fr; }
   .field.full,.field.wide { grid-column:auto; }
   .filter-bar { grid-template-columns:1fr; }
   .search-field { grid-column:auto; }
   .profile-settings { grid-template-columns:1fr; }
-  .city-setting { grid-template-columns:1fr; }
-  .city-setting .btn-secondary { width:100%; }
-  .theme-options { grid-template-columns:1fr; }
   .header-actions { width:100%; }
   .header-actions button { flex:1; }
-  .weather-days { grid-template-columns:1fr; }
   .detail-content { grid-template-columns:1fr; }
   .detail-block.full { grid-column:auto; }
 }
 @media (max-width:540px) {
   .kpi-grid,.report-cards { grid-template-columns:1fr; }
+  .hours-summary { grid-template-columns:1fr; }
   .kpi-card { min-height:140px; }
   .user-chip { padding:3px; }
   .chart-line { height:235px; }

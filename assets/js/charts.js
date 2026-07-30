@@ -96,17 +96,63 @@ export function renderDashboardCharts(days = 30) {
 
 export function renderAnalysisCharts() {
   const demands = state.demands;
-  const responsible = [...new Set(demands.map(item => item.responsible).filter(Boolean))].slice(0, 12);
+  const managerName = item => item.manager?.trim() || "Gestor não informado";
+  const managers = [...new Set(demands.map(managerName))]
+    .sort((a, b) => demands.filter(item => managerName(item) === b).length - demands.filter(item => managerName(item) === a).length)
+    .slice(0, 12);
   const categories = [...new Set(demands.map(item => item.category).filter(Boolean))].slice(0, 12);
   create("managerChart", {
     type: "bar",
-    data: { labels: responsible, datasets: [{ data: responsible.map(name => demands.filter(item => item.responsible === name).length), backgroundColor: css("--primary"), borderRadius: 8 }] },
+    data: {
+      labels: managers,
+      datasets: [{
+        label: "Demandas",
+        data: managers.map(name => demands.filter(item => managerName(item) === name).length),
+        backgroundColor: css("--primary"),
+        borderRadius: 8,
+      }],
+    },
     options: baseOptions(),
   });
   create("categoryChart", {
     type: "bar",
     data: { labels: categories, datasets: [{ data: categories.map(name => demands.filter(item => item.category === name).length), backgroundColor: css("--accent"), borderRadius: 7 }] },
     options: { ...baseOptions(), indexAxis: "y" },
+  });
+  create("hoursChart", {
+    type: "bar",
+    data: {
+      labels: managers,
+      datasets: [
+        {
+          label: "Estimadas",
+          data: managers.map(name => demands
+            .filter(item => managerName(item) === name)
+            .reduce((total, item) => total + Number(item.estimated_hours || 0), 0)),
+          backgroundColor: css("--primary"),
+          borderRadius: 7,
+        },
+        {
+          label: "Realizadas",
+          data: managers.map(name => demands
+            .filter(item => managerName(item) === name)
+            .reduce((total, item) => total + Number(item.actual_hours || 0), 0)),
+          backgroundColor: css("--accent"),
+          borderRadius: 7,
+        },
+      ],
+    },
+    options: {
+      ...baseOptions(),
+      plugins: {
+        ...baseOptions().plugins,
+        legend: { display: true, labels: { color: css("--text-soft"), boxWidth: 10, font: { size: 9 } } },
+      },
+      scales: {
+        ...baseOptions().scales,
+        y: { ...baseOptions().scales.y, ticks: { ...baseOptions().scales.y.ticks, precision: 1 } },
+      },
+    },
   });
   const priorities = ["Baixa", "Normal", "Alta", "Urgente"];
   create("priorityChart", {

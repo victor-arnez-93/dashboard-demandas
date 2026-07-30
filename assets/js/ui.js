@@ -68,7 +68,6 @@ export function applyTheme(theme) {
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", selected === "light" ? "#f4f1e8" : "#090d10");
   const icon = document.querySelector("#themeButton i");
   if (icon) icon.className = `fa-solid ${selected === "light" ? "fa-moon" : "fa-sun"}`;
-  document.querySelectorAll('input[name="settingsTheme"]').forEach(input => input.checked = input.value === selected);
   dispatchEvent(new CustomEvent("fluux:themechange", { detail: { theme: selected } }));
 }
 
@@ -127,12 +126,15 @@ export function renderDemandDetail(demand) {
   const cells = [
     ["Status", effectiveStatus(demand)],
     ["Prioridade", demand.priority],
+    ["Gestor", demand.manager || "Gestor não informado"],
     ["Responsável", demand.responsible],
     ["Solicitante", demand.requester || "—"],
     ["Categoria", demand.category],
     ["Departamento", demand.department || "—"],
     ["Entrada", formatDate(demand.start_date, { year: true })],
     ["Prazo", formatDate(demand.due_date, { year: true })],
+    ["Horas estimadas", `${Number(demand.estimated_hours || 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}h`],
+    ["Horas realizadas", `${Number(demand.actual_hours || 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}h`],
     ["Descrição", demand.description, true],
     ["Observações", demand.notes || "—", true],
     ["Tags", (demand.tags || []).join(", ") || "—", true],

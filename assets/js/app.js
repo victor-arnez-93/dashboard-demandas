@@ -9,12 +9,15 @@ import {
   applyIdentity, applyAvatar, openModal, closeModal, renderDemandDetail, initClock,
 } from "./ui.js";
 import { periodDemands, renderDashboardCharts, renderAnalysisCharts, redrawCharts } from "./charts.js";
-import { fetchWeather, openWeather, searchCity } from "./weather.js";
+import { closeWeather, initializeWeather, openWeather } from "./weather.js";
 import { initReports, renderReport } from "./reports.js";
 
 let dashboardPeriod = 30;
 let confirmCallback = null;
-let citySelection = null;
+let settingsEditing = false;
+
+const managerName = demand => demand.manager?.trim() || "Gestor não informado";
+const formatHours = value => `${Number(value || 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}h`;
 
 function emptyRow(columns, text) {
   return `<tr><td class="empty-table" colspan="${columns}">${escapeHtml(text)}</td></tr>`;
@@ -27,9 +30,9 @@ function demandRow(demand, compact = false) {
   </button>`;
   const priorityBadge = `<span class="badge ${slug(demand.priority)}">${escapeHtml(demand.priority)}</span>`;
   const statusBadge = `<span class="badge ${slug(status)}">${escapeHtml(status)}</span>`;
-  if (compact) return `<tr><td>${demandCell}</td><td>${escapeHtml(demand.responsible)}</td><td>${priorityBadge}</td><td>${formatDate(demand.due_date)}</td><td>${statusBadge}</td></tr>`;
+  if (compact) return `<tr><td>${demandCell}</td><td>${escapeHtml(managerName(demand))}</td><td>${priorityBadge}</td><td>${formatDate(demand.due_date)}</td><td>${statusBadge}</td></tr>`;
   return `<tr>
-    <td>${demandCode(demand)}</td><td>${demandCell}</td><td>${escapeHtml(demand.responsible)}</td><td>${escapeHtml(demand.category)}</td>
+    <td>${demandCode(demand)}</td><td>${demandCell}</td><td>${escapeHtml(managerName(demand))}</td><td>${escapeHtml(demand.responsible)}</td><td>${escapeHtml(demand.category)}</td>
     <td>${priorityBadge}</td><td>${formatDate(demand.due_date)}</td><td>${statusBadge}</td>
     <td><div class="row-actions"><button type="button" data-action="view" data-id="${demand.id}" title="Ver"><i class="fa-regular fa-eye"></i></button><button type="button" data-action="edit" data-id="${demand.id}" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="delete" type="button" data-action="delete" data-id="${demand.id}" title="Excluir"><i class="fa-regular fa-trash-can"></i></button></div></td>
   </tr>`;
@@ -47,6 +50,23 @@ function renderDashboard() {
   document.getElementById("kpiProgressText").textContent = `${Math.round(progress / Math.max(demands.length, 1) * 100)}% do total`;
   document.getElementById("kpiDoneText").textContent = `${Math.round(done / Math.max(demands.length, 1) * 100)}% do total`;
   document.getElementById("navDemandCount").textContent = state.demands.length;
+  const estimatedHours = demands.reduce((total, item) => total + Number(item.estimated_hours || 0), 0);
+  const actualHours = demands.reduce((total, item) => total + Number(item.actual_hours || 0), 0);
+  const difference = actualHours - estimatedHours;
+  const rate = estimatedHours > 0 ? actualHours / estimatedHours * 100 : actualHours > 0 ? 100 : 0;
+  document.getElementById("dashboardEstimatedHours").textContent = formatHours(estimatedHours);
+  document.getElementById("dashboardActualHours").textContent = formatHours(actualHours);
+  document.getElementById("dashboardHoursDifference").textContent = `${difference > 0 ? "+" : ""}${formatHours(difference)}`;
+  document.getElementById("dashboardHoursRate").textContent = `${Math.round(rate)}%`;
+  document.getElementById("dashboardHoursProgress").style.width = `${Math.min(rate, 100)}%`;
+  const hoursStatus = document.getElementById("hoursStatus");
+  const status = estimatedHours === 0 && actualHours > 0 ? ["Horas realizadas sem estimativa", "over", "fa-triangle-exclamation"] :
+    estimatedHours === 0 ? ["Sem horas registradas", "neutral", "fa-gauge-high"] :
+    rate > 100 ? [`${Math.round(rate - 100)}% acima da estimativa`, "over", "fa-triangle-exclamation"] :
+    rate >= 85 ? ["Próximo da estimativa", "near", "fa-clock"] :
+    ["Dentro da estimativa", "ok", "fa-circle-check"];
+  hoursStatus.className = `hours-status ${status[1]}`;
+  hoursStatus.innerHTML = `<i class="fa-solid ${status[2]}"></i> ${status[0]}`;
   const recent = state.demands.slice(0, 6);
   document.getElementById("recentDemandsBody").innerHTML = recent.length ? recent.map(item => demandRow(item, true)).join("") : emptyRow(5, "Nenhuma demanda cadastrada. Use “Nova demanda” para começar.");
   renderDashboardCharts(dashboardPeriod);
@@ -56,29 +76,44 @@ function filteredDemands() {
   const search = document.getElementById("demandSearch").value.trim().toLocaleLowerCase("pt-BR");
   const status = document.getElementById("statusFilter").value;
   const priority = document.getElementById("priorityFilter").value;
+  const manager = document.getElementById("managerFilter").value;
   const category = document.getElementById("categoryFilter").value;
   return state.demands.filter(item => {
-    const searchable = `${demandCode(item)} ${item.title} ${item.description} ${item.responsible} ${item.requester || ""} ${item.category}`.toLocaleLowerCase("pt-BR");
+    const searchable = `${demandCode(item)} ${item.title} ${item.description} ${managerName(item)} ${item.responsible} ${item.requester || ""} ${item.category}`.toLocaleLowerCase("pt-BR");
     return (!search || searchable.includes(search)) &&
       (!status || effectiveStatus(item) === status) &&
       (!priority || item.priority === priority) &&
+      (!manager || managerName(item) === manager) &&
       (!category || item.category === category);
   });
 }
 
 function renderDemands() {
   const demands = filteredDemands();
-  document.getElementById("allDemandsBody").innerHTML = demands.length ? demands.map(item => demandRow(item)).join("") : emptyRow(8, "Nenhuma demanda corresponde aos filtros.");
+  document.getElementById("allDemandsBody").innerHTML = demands.length ? demands.map(item => demandRow(item)).join("") : emptyRow(9, "Nenhuma demanda corresponde aos filtros.");
   document.getElementById("tableCount").textContent = `${demands.length} ${demands.length === 1 ? "demanda exibida" : "demandas exibidas"}`;
 }
 
 function populateDynamicFilters() {
   const categories = [...new Set(state.demands.map(item => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const managers = [...new Set(state.demands.map(managerName))].sort((a, b) => a.localeCompare(b, "pt-BR"));
   ["categoryFilter", "reportCategory"].forEach(id => {
     const select = document.getElementById(id);
+    const current = select.value;
     const first = id === "categoryFilter" ? "Todas as categorias" : "Todas";
     select.innerHTML = `<option value="">${first}</option>${categories.map(item => `<option>${escapeHtml(item)}</option>`).join("")}`;
+    if ([...select.options].some(option => option.value === current)) select.value = current;
   });
+  ["managerFilter", "reportManager"].forEach(id => {
+    const select = document.getElementById(id);
+    const current = select.value;
+    const first = id === "managerFilter" ? "Todos os gestores" : "Todos";
+    select.innerHTML = `<option value="">${first}</option>${managers.map(item => `<option>${escapeHtml(item)}</option>`).join("")}`;
+    if ([...select.options].some(option => option.value === current)) select.value = current;
+  });
+  document.getElementById("managerOptions").innerHTML = managers
+    .filter(item => item !== "Gestor não informado")
+    .map(item => `<option value="${escapeHtml(item)}"></option>`).join("");
 }
 
 function refreshAll() {
@@ -115,6 +150,7 @@ function editDemand(id) {
   document.getElementById("demandDescription").value = demand.description;
   document.getElementById("demandRequester").value = demand.requester || "";
   document.getElementById("demandResponsible").value = demand.responsible;
+  document.getElementById("demandManager").value = demand.manager || "";
   document.getElementById("demandDepartment").value = demand.department || "";
   document.getElementById("demandCategory").value = [...document.getElementById("demandCategory").options].some(option => option.value === demand.category) ? demand.category : "Outro";
   document.getElementById("demandPriority").value = demand.priority;
@@ -136,6 +172,7 @@ function demandPayload() {
     description: document.getElementById("demandDescription").value.trim(),
     requester: document.getElementById("demandRequester").value.trim(),
     responsible: document.getElementById("demandResponsible").value.trim(),
+    manager: document.getElementById("demandManager").value.trim(),
     department: document.getElementById("demandDepartment").value.trim(),
     category: document.getElementById("demandCategory").value,
     priority: document.getElementById("demandPriority").value,
@@ -154,6 +191,7 @@ function validateDemand(payload) {
     ["demandTitle", payload.title.length >= 4],
     ["demandDescription", payload.description.length >= 5],
     ["demandResponsible", Boolean(payload.responsible)],
+    ["demandManager", Boolean(payload.manager)],
     ["demandCategory", Boolean(payload.category)],
     ["demandStartDate", Boolean(payload.start_date)],
     ["demandDueDate", Boolean(payload.due_date)],
@@ -184,9 +222,27 @@ function fillSettings() {
   document.getElementById("settingsEmail").value = state.user.email || "";
   document.getElementById("settingsAppName").value = state.settings.app_name;
   document.getElementById("settingsAppSubtitle").value = state.settings.app_subtitle;
-  document.getElementById("settingsCity").value = state.settings.weather_city;
-  document.getElementById("cityResult").textContent = `Local atual: ${state.settings.weather_city}`;
+  document.getElementById("avatarFile").value = "";
+  applyAvatar(state.profile.avatar_url, state.profile.full_name);
   applyTheme(state.profile.theme);
+}
+
+function setSettingsEditing(enabled) {
+  settingsEditing = Boolean(enabled);
+  const form = document.getElementById("settingsForm");
+  const editButton = document.getElementById("editSettingsButton");
+  const status = document.getElementById("settingsLockStatus");
+  form.classList.toggle("settings-locked", !settingsEditing);
+  document.querySelectorAll("[data-settings-control]").forEach(control => control.disabled = !settingsEditing);
+  document.getElementById("avatarButton").classList.toggle("is-disabled", !settingsEditing);
+  document.getElementById("settingsSaveActions").hidden = !settingsEditing;
+  editButton.innerHTML = settingsEditing
+    ? `<i class="fa-solid fa-xmark"></i> Cancelar edição`
+    : `<i class="fa-solid fa-pen"></i> Editar`;
+  status.classList.toggle("is-editing", settingsEditing);
+  status.innerHTML = settingsEditing
+    ? `<i class="fa-solid fa-lock-open"></i><span>Edição liberada. Revise os campos e salve as alterações.</span>`
+    : `<i class="fa-solid fa-lock"></i><span>Configurações protegidas contra alterações acidentais.</span>`;
 }
 
 function bindNavigation() {
@@ -222,12 +278,12 @@ function bindEvents() {
     document.querySelectorAll("[data-period]").forEach(item => item.classList.toggle("active", item === button));
     renderDashboard();
   }));
-  ["demandSearch", "statusFilter", "priorityFilter", "categoryFilter"].forEach(id => {
+  ["demandSearch", "statusFilter", "priorityFilter", "managerFilter", "categoryFilter"].forEach(id => {
     const element = document.getElementById(id);
     element.addEventListener(id === "demandSearch" ? "input" : "change", renderDemands);
   });
   document.getElementById("clearDemandFilters").addEventListener("click", () => {
-    ["demandSearch", "statusFilter", "priorityFilter", "categoryFilter"].forEach(id => document.getElementById(id).value = "");
+    ["demandSearch", "statusFilter", "priorityFilter", "managerFilter", "categoryFilter"].forEach(id => document.getElementById(id).value = "");
     renderDemands();
   });
   document.querySelectorAll("#allDemandsBody,#recentDemandsBody").forEach(body => body.addEventListener("click", event => {
@@ -270,13 +326,23 @@ function bindEvents() {
       showToast(id ? "Demanda atualizada com sucesso." : "Demanda cadastrada com sucesso.", "success");
     } catch (error) {
       log.error("DEMANDAS", "Falha ao salvar.", error);
-      showToast(`Não foi possível salvar: ${error.message}`, "error");
+      const migrationPending = /manager/i.test(error.message || "") && /column|schema cache|could not find/i.test(error.message || "");
+      showToast(
+        migrationPending
+          ? "Execute supabase-migration-v1.1.sql no Supabase antes de salvar demandas com gestor."
+          : `Não foi possível salvar: ${error.message}`,
+        "error",
+      );
     } finally {
       button.disabled = false;
     }
   });
   document.getElementById("cancelDemandEdit").addEventListener("click", () => { resetDemandForm(); setActiveView("demandas"); });
   document.getElementById("weatherButton").addEventListener("click", openWeather);
+  document.getElementById("refreshWeatherButton").addEventListener("click", event => {
+    event.stopPropagation();
+    initializeWeather({ requestLocation: true, force: true });
+  });
   document.getElementById("userMenuButton").addEventListener("click", event => {
     event.stopPropagation();
     const menu = document.getElementById("userMenu");
@@ -288,6 +354,7 @@ function bindEvents() {
       document.getElementById("userMenu").hidden = true;
       document.getElementById("userMenuButton").setAttribute("aria-expanded", "false");
     }
+    if (!event.target.closest(".weather-area")) closeWeather();
   });
   document.getElementById("logoutButton").addEventListener("click", () => askConfirmation("Sair do sistema", "Deseja encerrar sua sessão no FLUUX?", async () => {
     await getSupabase().auth.signOut();
@@ -325,24 +392,18 @@ function bindEvents() {
   addEventListener("fluux:viewchange", event => {
     if (event.detail.view === "analises") setTimeout(renderAnalysisCharts, 20);
     if (event.detail.view === "relatorios") renderReport();
-    if (event.detail.view === "configuracoes") fillSettings();
+    if (event.detail.view === "configuracoes") {
+      fillSettings();
+      setSettingsEditing(false);
+    }
   });
   addEventListener("fluux:themechange", () => setTimeout(() => redrawCharts(dashboardPeriod), 25));
 }
 
 function bindSettings() {
-  document.getElementById("searchCityButton").addEventListener("click", async () => {
-    const button = document.getElementById("searchCityButton");
-    try {
-      button.disabled = true;
-      citySelection = await searchCity(document.getElementById("settingsCity").value);
-      document.getElementById("settingsCity").value = citySelection.city;
-      document.getElementById("cityResult").textContent = `Cidade localizada: ${citySelection.city}`;
-    } catch (error) {
-      showToast(error.message, "error");
-    } finally {
-      button.disabled = false;
-    }
+  document.getElementById("editSettingsButton").addEventListener("click", () => {
+    if (settingsEditing) fillSettings();
+    setSettingsEditing(!settingsEditing);
   });
   document.getElementById("avatarFile").addEventListener("change", event => {
     const file = event.target.files?.[0];
@@ -361,28 +422,22 @@ function bindSettings() {
       let avatarUrl = state.profile.avatar_url;
       const file = document.getElementById("avatarFile").files?.[0];
       if (file) avatarUrl = await uploadAvatar(file);
-      const theme = document.querySelector('input[name="settingsTheme"]:checked')?.value || "dark";
       await Promise.all([
         saveProfile({
           full_name: document.getElementById("settingsFullName").value.trim(),
           role: document.getElementById("settingsRole").value.trim(),
           avatar_url: avatarUrl,
-          theme,
         }),
         saveSettings({
           app_name: document.getElementById("settingsAppName").value.trim(),
           app_subtitle: document.getElementById("settingsAppSubtitle").value.trim(),
-          weather_city: citySelection?.city || state.settings.weather_city,
-          weather_latitude: citySelection?.latitude || state.settings.weather_latitude,
-          weather_longitude: citySelection?.longitude || state.settings.weather_longitude,
         }),
       ]);
-      citySelection = null;
       document.getElementById("avatarFile").value = "";
       applyIdentity();
       applyTheme(state.profile.theme);
       fillSettings();
-      await fetchWeather();
+      setSettingsEditing(false);
       showToast("Configurações salvas com sucesso.", "success");
     } catch (error) {
       log.error("CONFIG", "Falha ao salvar configurações.", error);
@@ -411,6 +466,7 @@ async function boot() {
     applyTheme(state.profile.theme);
     applyIdentity();
     fillSettings();
+    setSettingsEditing(false);
     initClock();
     resetDemandForm();
     populateDynamicFilters();
@@ -423,7 +479,7 @@ async function boot() {
     const hash = location.hash.slice(1);
     const initial = hash === "inicio" || !VIEW_LABELS[hash] ? "dashboard" : hash;
     setActiveView(initial, false);
-    fetchWeather();
+    initializeWeather({ requestLocation: true });
     getSupabase().auth.onAuthStateChange((event, nextSession) => {
       if (event === "SIGNED_OUT" || !nextSession) location.replace("index.html");
     });

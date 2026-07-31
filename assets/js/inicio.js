@@ -78,7 +78,6 @@ function renderDashboard() {
   document.getElementById("dashboardActualHours").textContent = formatHours(actual);
   document.getElementById("dashboardHoursDifference").textContent = `${difference > 0 ? "+" : ""}${formatHours(difference)}`;
   document.getElementById("dashboardHoursRate").textContent = `${Math.round(rate)}%`;
-  document.getElementById("dashboardHoursProgress").style.width = `${Math.min(rate, 100)}%`;
 
   const status = document.getElementById("hoursStatus");
   if (!estimated && !actual) {

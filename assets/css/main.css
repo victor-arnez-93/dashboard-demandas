@@ -89,13 +89,14 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  padding: 9px 18px;
   border: 1px solid rgba(255,255,255,.26);
   border-radius: 20px;
   background: linear-gradient(145deg, rgba(255,255,255,.20), rgba(40,75,99,.14)), color-mix(in srgb, var(--surface) 62%, transparent);
   box-shadow: inset 0 1px rgba(255,255,255,.30), var(--shadow);
   backdrop-filter: blur(18px) saturate(150%);
 }
-.boot-logo img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.42); }
+.boot-logo img { width: 100%; height: 100%; object-fit: contain; transform: none; }
 .boot-screen p { color: var(--text-soft); font-size: 12px; }
 .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -115,26 +116,28 @@ a { color: inherit; }
   backdrop-filter: blur(18px) saturate(140%);
   transition: width var(--transition), transform var(--transition);
 }
-.brand { display: flex; min-height: 102px; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); }
+.brand { display: flex; min-height: 112px; align-items: center; gap: 14px; padding: 17px 16px; border-bottom: 1px solid var(--border); }
 .brand-glass {
   display: flex;
-  width: 104px;
-  height: 60px;
-  flex: 0 0 104px;
+  width: 116px;
+  height: 72px;
+  flex: 0 0 116px;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  padding: 8px 10px;
   border: 1px solid rgba(255,255,255,.28);
   border-radius: 18px;
   background: linear-gradient(145deg, rgba(255,255,255,.23), rgba(40,75,99,.12)), color-mix(in srgb, var(--surface) 58%, transparent);
   box-shadow: inset 0 1px rgba(255,255,255,.32), 0 10px 24px rgba(0,0,0,.15);
   backdrop-filter: blur(16px) saturate(145%);
 }
-.brand-glass img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.46); }
+.brand-glass img { width: 100%; height: 100%; object-fit: contain; transform: none; }
 .brand-copy { min-width: 0; }
 .brand-copy strong, .brand-copy small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .brand-copy strong { font: 700 21px var(--font-title); }
-.brand-copy small { margin-top: -2px; color: var(--text-soft); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
+.brand-copy small { margin-top: -1px; color: var(--text-soft); font-size: 9px; font-weight: 500; letter-spacing: .055em; text-transform: uppercase; }
+[data-theme="light"] .brand-copy small { color: var(--primary); }
 .sidebar-close { display: none !important; margin-left: auto; }
 .sidebar-control { display: flex; justify-content: flex-end; padding: 14px 16px 3px; }
 .sidebar-toggle {
@@ -337,15 +340,15 @@ a { color: inherit; }
 [data-theme="light"] .weather-day > span { color: var(--primary); }
 
 /* Elementos globais */
-.eyebrow { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); font: 700 9px var(--font-title); letter-spacing: .15em; }
+.eyebrow { display: inline-flex; align-items: center; gap: 7px; color: var(--accent); font: 700 11px var(--font-title); letter-spacing: .15em; }
 .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
 .page-heading h1 { margin: 4px 0 4px; font-size: clamp(30px, 3.2vw, 42px); line-height: 1; }
-.page-heading p { margin: 0; color: var(--text-soft); font-size: 12px; }
+.page-heading p { margin: 0; color: var(--text-soft); font-size: 13px; font-weight: 500; }
 .header-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); backdrop-filter: blur(14px); }
 .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 20px 22px; border-bottom: 1px solid var(--border); }
 .panel-head h2, .panel-head h3 { margin: 2px 0 0; }
-.panel-head small { color: var(--accent); font: 700 8px var(--font-title); letter-spacing: .15em; }
+.panel-head small { color: var(--accent); font: 700 10px var(--font-title); letter-spacing: .15em; }
 
 .btn-primary, .btn-secondary, .btn-ghost, .btn-danger {
   display: inline-flex;

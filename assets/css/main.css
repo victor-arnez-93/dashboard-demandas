@@ -36,8 +36,9 @@ body::after {
   pointer-events: none;
 }
 body.modal-open { overflow: hidden; }
-button,input,select,textarea { color: inherit; font: inherit; }
-button,select { cursor: pointer; }
+button,input,select,textarea { color:inherit; font:inherit; }
+select,select option,select optgroup { background-color:var(--surface-raised); color:var(--text); }
+button,select { cursor:pointer; }
 button { -webkit-tap-highlight-color: transparent; }
 img,canvas { display: block; max-width: 100%; }
 h1,h2,h3,p { margin-top: 0; }

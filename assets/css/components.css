@@ -167,7 +167,13 @@
 .legend i { width:8px; height:8px; border-radius:3px; }
 .table-panel { margin-top:18px; }
 .table-head { align-items:center; }
-.table-scroll { width:100%; overflow:auto; }
+.table-scroll { width:100%; overflow:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
+.table-scroll thead th { position:sticky; z-index:2; top:0; background:color-mix(in srgb,var(--surface) 96%,transparent); backdrop-filter:blur(12px); }
+.recent-table-scroll { max-height:318px; }
+.demands-table-scroll,.converter-table-scroll { max-height:366px; }
+.report-table-scroll { max-height:305px; }
+.catalog-table-scroll { max-height:390px; }
+.truncate-cell { max-width:250px; overflow:hidden; text-overflow:ellipsis; }
 table { width:100%; border-collapse:collapse; white-space:nowrap; }
 th { padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text-muted); font-size:8px; letter-spacing:.08em; text-align:left; text-transform:uppercase; }
 td { padding:12px; border-bottom:1px solid var(--border); color:var(--text-soft); font-size:10px; }
@@ -280,3 +286,44 @@ tbody tr:hover { background:color-mix(in srgb,var(--surface-hover) 55%,transpare
 .toast.success>i { color:var(--success); }.toast.error>i { color:var(--danger); }.toast.info>i { color:var(--accent); }
 .toast p { margin:0; font-size:10px; }
 .toast button { width:28px; height:28px; border:0; background:transparent; color:var(--text-muted); }
+
+/* Campos condicionais */
+.conditional-field:not([hidden]) { animation:conditional-in .2s ease both; }
+@keyframes conditional-in { from { opacity:0; transform:translateY(-5px); } }
+
+/* Cadastros */
+.catalog-panel { overflow:hidden; }
+.catalog-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:17px; border-bottom:1px solid var(--border); }
+.catalog-tabs { display:flex; flex-wrap:wrap; gap:7px; }
+.catalog-tabs button { display:inline-flex; min-height:38px; align-items:center; gap:7px; padding:8px 12px; border:1px solid var(--border); border-radius:13px; background:var(--surface-raised); color:var(--text-soft); font-size:9px; font-weight:700; transition:all var(--transition); }
+.catalog-tabs button:hover { border-color:var(--accent); color:var(--text); }
+.catalog-tabs button.active { border-color:color-mix(in srgb,var(--accent) 55%,var(--border)); background:var(--gradient); box-shadow:0 8px 18px color-mix(in srgb,var(--primary) 18%,transparent); color:#fff; }
+.catalog-search { width:min(330px,100%); }
+.catalog-name { display:flex; align-items:center; gap:9px; }
+.catalog-name i { display:grid; width:30px; height:30px; place-items:center; border-radius:9px; background:color-mix(in srgb,var(--primary) 14%,transparent); color:var(--primary); }
+.catalog-status { display:inline-flex; padding:4px 8px; border-radius:99px; font-size:8px; font-weight:700; }
+.catalog-status.active { background:color-mix(in srgb,var(--success) 13%,transparent); color:var(--success); }
+.catalog-status.inactive { background:color-mix(in srgb,var(--text-muted) 13%,transparent); color:var(--text-muted); }
+.compact-modal { width:min(520px,100%); }
+.modal-form { padding:22px; }
+.modal-form .modal-actions { margin:18px -22px -22px; border-top:1px solid var(--border); }
+
+/* Sustentação de conversores */
+.converter-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:15px; margin-bottom:18px; }
+.converter-kpis .kpi-card { min-height:138px; }
+.kpi-card .text-kpi { max-width:100%; overflow:hidden; font-size:clamp(19px,1.7vw,27px); line-height:1.05; text-overflow:ellipsis; white-space:nowrap; }
+.converter-filter-bar { grid-template-columns:minmax(260px,1.3fr) minmax(125px,.45fr) minmax(125px,.45fr) minmax(170px,.65fr) auto; }
+.compact-filter { gap:3px; }
+.compact-filter span { color:var(--text-muted); font-size:8px; }
+.compact-filter input { min-height:30px; padding:5px 8px; }
+.converter-modal-card { width:min(900px,100%); }
+.converter-modal-card .modal-form { padding:22px 24px; }
+.converter-modal-card .modal-actions { margin:20px -24px -22px; }
+
+/* Resumo de conversores nos relatórios */
+.report-converters { margin-top:18px; padding:20px; }
+.report-converter-kpis { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+.report-converter-kpis>span { padding:12px 14px; border:1px solid var(--border); border-radius:12px; background:var(--surface-raised); }
+.report-converter-kpis small { display:block; color:var(--text-muted); font-size:8px; }
+.report-converter-kpis strong { display:block; margin-top:3px; overflow:hidden; font:700 18px var(--font-title); text-overflow:ellipsis; white-space:nowrap; }
+

@@ -355,6 +355,16 @@ function pdfDateTime(value = new Date()) {
   });
 }
 
+function pdfStoredDate(value) {
+  if (!value) return "—";
+
+  const normalized = /^\d{4}-\d{2}-\d{2}$/.test(String(value))
+    ? `${value}T12:00:00`
+    : value;
+
+  return pdfDate(new Date(normalized));
+}
+
 function pdfIntervalLabel() {
   const interval = currentInterval();
   return `${pdfDate(interval.start)} a ${pdfDate(interval.end)}`;
@@ -366,7 +376,10 @@ function pdfFilterSummary() {
   const priority = document.getElementById("reportPriority").value;
   const manager = document.getElementById("reportManager").value;
   const category = document.getElementById("reportCategory").value;
-  const responsible = document.getElementById("reportResponsible").value.trim();
+  const responsible = document
+    .getElementById("reportResponsible")
+    .value
+    .trim();
 
   if (status) labels.push(`Status: ${status}`);
   if (priority) labels.push(`Prioridade: ${priority}`);
@@ -374,7 +387,9 @@ function pdfFilterSummary() {
   if (category) labels.push(`Categoria: ${category}`);
   if (responsible) labels.push(`Responsável: ${responsible}`);
 
-  return labels.length ? labels.join(" · ") : "Todos os registros do período";
+  return labels.length
+    ? labels.join(" · ")
+    : "Todos os registros do período selecionado";
 }
 
 function pdfPercentage(value) {
@@ -384,80 +399,311 @@ function pdfPercentage(value) {
 function pdfUtilizationLabel(estimated, actual) {
   if (!estimated && !actual) return "0%";
   if (!estimated) return "Sem estimativa";
+
   return `${Math.round((actual / estimated) * 100)}%`;
 }
 
-function pdfDrawSectionTitle(doc, title, y, color = [40, 75, 99]) {
-  doc.setTextColor(...color);
+function pdfValue(value, fallback = "—") {
+  if (Array.isArray(value)) {
+    const text = value
+      .filter(Boolean)
+      .join(", ")
+      .trim();
+
+    return text || fallback;
+  }
+
+  if (value === 0) return "0";
+
+  const text = String(value ?? "").trim();
+  return text || fallback;
+}
+
+function pdfDrawLogo(
+  doc,
+  logo,
+  centerX,
+  y,
+  maxWidth,
+  maxHeight,
+) {
+  if (!logo) {
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(17);
+    doc.text(
+      "FLUUX",
+      centerX,
+      y + maxHeight - 1,
+      { align: "center" },
+    );
+    return;
+  }
+
+  try {
+    const properties = doc.getImageProperties(logo);
+    const ratio = properties.width / properties.height;
+
+    let width = maxWidth;
+    let height = width / ratio;
+
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * ratio;
+    }
+
+    doc.addImage(
+      logo,
+      "PNG",
+      centerX - width / 2,
+      y,
+      width,
+      height,
+      undefined,
+      "FAST",
+    );
+  } catch {
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(17);
+    doc.text(
+      "FLUUX",
+      centerX,
+      y + maxHeight - 1,
+      { align: "center" },
+    );
+  }
+}
+
+function pdfDrawSectionTitle(doc, title, y) {
+  doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10.2);
   doc.text(String(title).toUpperCase(), 15, y);
-  doc.setDrawColor(166, 172, 175);
-  doc.setLineWidth(0.22);
+
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.25);
   doc.line(15, y + 2.5, 195, y + 2.5);
+
   return y + 7;
 }
 
 function pdfDrawCompactHeader(doc, logo) {
-  const page = doc.internal.getCurrentPageInfo().pageNumber;
-  if (page === 1) return;
-
-  if (logo) {
-    doc.addImage(logo, "PNG", 15, 7, 24, 8.5, undefined, "FAST");
-  } else {
-    doc.setTextColor(0, 111, 151);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("FLUUX", 15, 14);
+  if (
+    doc.internal.getCurrentPageInfo().pageNumber === 1
+  ) {
+    return;
   }
 
-  doc.setTextColor(40, 75, 99);
+  pdfDrawLogo(
+    doc,
+    logo,
+    28,
+    7,
+    24,
+    8,
+  );
+
+  doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.8);
-  doc.text("RELATÓRIO DE DEMANDAS", 195, 13, { align: "right" });
-  doc.setDrawColor(249, 105, 0);
-  doc.setLineWidth(0.45);
+  doc.text(
+    "RELATÓRIO DE DEMANDAS",
+    195,
+    13,
+    { align: "right" },
+  );
+
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.35);
   doc.line(15, 19, 195, 19);
 }
 
-function pdfEnsureSpace(doc, y, required, logo) {
+function pdfEnsureSpace(
+  doc,
+  y,
+  required,
+  logo,
+) {
   if (y + required <= 274) return y;
+
   doc.addPage();
   pdfDrawCompactHeader(doc, logo);
+
   return 28;
 }
 
 function pdfDrawFooter(doc) {
   const pages = doc.getNumberOfPages();
 
-  for (let page = 1; page <= pages; page += 1) {
+  for (
+    let page = 1;
+    page <= pages;
+    page += 1
+  ) {
     doc.setPage(page);
-    doc.setDrawColor(190, 194, 196);
+
+    doc.setDrawColor(90, 90, 90);
     doc.setLineWidth(0.2);
     doc.line(15, 281, 195, 281);
-    doc.setTextColor(115, 122, 126);
+
+    doc.setTextColor(70, 70, 70);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
-    doc.text("FLUUX · Organização de Demandas", 15, 286.5);
-    doc.text(`Página ${page} de ${pages}`, 195, 286.5, { align: "right" });
+
+    doc.text(
+      "FLUUX · Organização de Demandas",
+      15,
+      286.5,
+    );
+
+    doc.text(
+      `Página ${page} de ${pages}`,
+      195,
+      286.5,
+      { align: "right" },
+    );
   }
+}
+
+function pdfTableBase(doc, logo) {
+  return {
+    theme: "grid",
+
+    styles: {
+      font: "helvetica",
+      fontSize: 6.6,
+      cellPadding: 2,
+      textColor: [20, 20, 20],
+      lineColor: [145, 145, 145],
+      lineWidth: 0.18,
+      overflow: "linebreak",
+      valign: "middle",
+    },
+
+    headStyles: {
+      fillColor: [0, 0, 0],
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+      lineColor: [0, 0, 0],
+      lineWidth: 0.18,
+    },
+
+    alternateRowStyles: {
+      fillColor: [245, 245, 245],
+    },
+
+    margin: {
+      left: 15,
+      right: 15,
+      top: 24,
+      bottom: 19,
+    },
+
+    showHead: "everyPage",
+    rowPageBreak: "avoid",
+
+    didDrawPage: () =>
+      pdfDrawCompactHeader(doc, logo),
+  };
+}
+
+function pdfDemandRows(records) {
+  return records.map(item => [
+    demandCode(item),
+
+    [
+      `Demanda: ${pdfValue(item.title)}`,
+      `Descrição: ${pdfValue(item.description)}`,
+      `Solicitante: ${pdfValue(item.requester)}`,
+      `Tags: ${pdfValue(item.tags)}`,
+      `Observações: ${pdfValue(item.notes)}`,
+    ].join("\n"),
+
+    [
+      `Gestor: ${pdfValue(
+        item.manager?.trim(),
+        "Gestor não informado",
+      )}`,
+      `Responsável: ${pdfValue(item.responsible)}`,
+      `Departamento: ${pdfValue(item.department)}`,
+      `Categoria: ${pdfValue(item.category)}`,
+      `Prioridade: ${pdfValue(item.priority)}`,
+      `Status: ${effectiveStatus(item)}`,
+    ].join("\n"),
+
+    [
+      `Entrada: ${pdfStoredDate(item.start_date)}`,
+      `Prazo: ${pdfStoredDate(item.due_date)}`,
+      `Conclusão: ${pdfStoredDate(item.completed_at)}`,
+      `Estimadas: ${formatHours(
+        item.estimated_hours,
+      )}`,
+      `Realizadas: ${formatHours(
+        item.actual_hours,
+      )}`,
+    ].join("\n"),
+  ]);
+}
+
+function pdfConverterRows(records) {
+  return records.map(item => [
+    [
+      converterCode(item),
+      `Data: ${pdfStoredDate(item.service_date)}`,
+    ].join("\n"),
+
+    [
+      `Local: ${pdfValue(item.location_name)}`,
+      `Ponto: ${pdfValue(item.point_reference)}`,
+    ].join("\n"),
+
+    [
+      `Atendimento: ${pdfValue(item.service_type)}`,
+      `Conversão: ${pdfValue(
+        item.conversion_direction,
+      )}`,
+      `Quantidade: ${Number(
+        item.quantity_replaced || 0,
+      )}`,
+      `Status: ${pdfValue(item.status)}`,
+    ].join("\n"),
+
+    [
+      `Responsável: ${pdfValue(
+        item.responsible_name,
+      )}`,
+      `Motivo: ${pdfValue(item.issue_reason)}`,
+      `Observações: ${pdfValue(item.notes)}`,
+    ].join("\n"),
+  ]);
 }
 
 async function exportPdf() {
   reportDemands = getDemands();
   reportConverters = getConverters();
 
-  if (!reportDemands.length && !reportConverters.length) {
-    showToast("Não há dados nos filtros atuais para exportar.", "error");
+  if (
+    !reportDemands.length &&
+    !reportConverters.length
+  ) {
+    showToast(
+      "Não há dados nos filtros atuais para exportar.",
+      "error",
+    );
     return;
   }
 
   if (!window.jspdf?.jsPDF) {
-    showToast("A biblioteca de PDF não foi carregada.", "error");
+    showToast(
+      "A biblioteca de PDF não foi carregada.",
+      "error",
+    );
     return;
   }
 
   const { jsPDF } = window.jspdf;
+
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -466,165 +712,297 @@ async function exportPdf() {
   });
 
   const generatedAt = new Date();
-  const logo = await imageData("assets/img/logo.png");
+  const logo = await imageData(
+    "assets/img/logo.png",
+  );
+
   const metrics = demandMetrics(reportDemands);
-  const converters = converterSummary(reportConverters);
+  const converters = converterSummary(
+    reportConverters,
+  );
   const managers = managerSummary(reportDemands);
+  const tableBase = pdfTableBase(doc, logo);
 
   doc.setProperties({
-    title: `FLUUX — Relatório de Demandas — ${periodLabel()}`,
-    subject: `Demandas e conversores — ${pdfIntervalLabel()}`,
-    author: state.profile?.full_name || "FLUUX",
-    creator: "FLUUX — Organização de Demandas",
+    title:
+      `FLUUX — Relatório de Demandas — ` +
+      periodLabel(),
+
+    subject:
+      `Demandas e conversores — ` +
+      pdfIntervalLabel(),
+
+    author:
+      state.profile?.full_name || "FLUUX",
+
+    creator:
+      "FLUUX — Organização de Demandas",
   });
 
-  if (logo) {
-    doc.addImage(logo, "PNG", 85, 7, 40, 14, undefined, "FAST");
-  } else {
-    doc.setTextColor(0, 111, 151);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(19);
-    doc.text("FLUUX", 105, 18, { align: "center" });
-  }
+  pdfDrawLogo(
+    doc,
+    logo,
+    105,
+    7,
+    34,
+    11,
+  );
 
-  doc.setTextColor(17, 21, 24);
+  doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(17);
-  doc.text("RELATÓRIO DE DEMANDAS", 105, 29, { align: "center" });
 
-  doc.setTextColor(76, 85, 90);
+  doc.text(
+    "RELATÓRIO DE DEMANDAS",
+    105,
+    27,
+    { align: "center" },
+  );
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.text(`Período: ${periodLabel()} · ${pdfIntervalLabel()}`, 105, 35, { align: "center" });
-  doc.text(`Gerado em ${pdfDateTime(generatedAt)}`, 105, 40, { align: "center" });
 
-  doc.setDrawColor(249, 105, 0);
-  doc.setLineWidth(0.8);
-  doc.line(15, 46, 195, 46);
+  doc.text(
+    `Período: ${periodLabel()} · ` +
+      pdfIntervalLabel(),
+    105,
+    33,
+    { align: "center" },
+  );
 
-  let y = pdfDrawSectionTitle(doc, "Resumo do período", 54);
-  const summaryMetrics = [
-    ["Total de demandas", String(metrics.total)],
-    ["Concluídas", String(metrics.done)],
-    ["Em andamento", String(metrics.progress)],
-    ["Atrasadas", String(metrics.overdue)],
-    ["Horas estimadas", formatHours(metrics.estimated)],
-    ["Horas realizadas", formatHours(metrics.actual)],
-    ["Taxa de conclusão", pdfPercentage(metrics.completionRate)],
-    ["Utilização das horas", pdfUtilizationLabel(metrics.estimated, metrics.actual)],
-  ];
+  doc.text(
+    `Gerado em ${pdfDateTime(generatedAt)}`,
+    105,
+    38,
+    { align: "center" },
+  );
 
-  const cardGap = 4;
-  const cardWidth = 88;
-  const cardHeight = 15;
-  const rowGap = 3;
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.line(15, 44, 195, 44);
 
-  summaryMetrics.forEach(([label, value], index) => {
-    const column = index % 2;
-    const row = Math.floor(index / 2);
-    const x = 15 + column * (cardWidth + cardGap);
-    const cardY = y + row * (cardHeight + rowGap);
+  let y = pdfDrawSectionTitle(
+    doc,
+    "Resumo do período",
+    52,
+  );
 
-    doc.setFillColor(250, 250, 249);
-    doc.setDrawColor(207, 211, 213);
-    doc.setLineWidth(0.25);
-    doc.roundedRect(x, cardY, cardWidth, cardHeight, 1.4, 1.4, "FD");
+  doc.autoTable({
+    ...tableBase,
 
-    doc.setTextColor(91, 99, 104);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
-    doc.text(String(label).toUpperCase(), x + 4, cardY + 5.2);
+    startY: y,
 
-    doc.setTextColor(22, 28, 31);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10.8);
-    doc.text(String(value), x + 4, cardY + 11.6);
+    head: [[
+      "Indicador",
+      "Valor",
+      "Indicador",
+      "Valor",
+    ]],
+
+    body: [
+      [
+        "Total de demandas",
+        String(metrics.total),
+        "Concluídas",
+        String(metrics.done),
+      ],
+      [
+        "Em andamento",
+        String(metrics.progress),
+        "Atrasadas",
+        String(metrics.overdue),
+      ],
+      [
+        "Horas estimadas",
+        formatHours(metrics.estimated),
+        "Horas realizadas",
+        formatHours(metrics.actual),
+      ],
+      [
+        "Taxa de conclusão",
+        pdfPercentage(metrics.completionRate),
+        "Utilização das horas",
+        pdfUtilizationLabel(
+          metrics.estimated,
+          metrics.actual,
+        ),
+      ],
+    ],
+
+    styles: {
+      ...tableBase.styles,
+      fontSize: 7.2,
+      cellPadding: 2.4,
+    },
+
+    columnStyles: {
+      0: {
+        cellWidth: 52,
+        fontStyle: "bold",
+      },
+
+      1: {
+        cellWidth: 38,
+      },
+
+      2: {
+        cellWidth: 52,
+        fontStyle: "bold",
+      },
+
+      3: {
+        cellWidth: 38,
+      },
+    },
   });
 
-  y += 4 * (cardHeight + rowGap) + 2;
+  y = doc.lastAutoTable.finalY + 6;
 
   const executiveText = metrics.total
-    ? `No período selecionado foram registradas ${metrics.total} demanda${metrics.total === 1 ? "" : "s"}. ` +
-      `${metrics.done} foram concluída${metrics.done === 1 ? "" : "s"}, com taxa de conclusão de ${pdfPercentage(metrics.completionRate)}. ` +
-      `As horas realizadas representam ${pdfUtilizationLabel(metrics.estimated, metrics.actual)} do esforço estimado.`
-    : "Não houve demandas no período selecionado. O documento apresenta somente os registros de sustentação de conversores encontrados nos filtros atuais.";
+    ? (
+      `No período selecionado foram registradas ` +
+      `${metrics.total} demanda${
+        metrics.total === 1 ? "" : "s"
+      }. ` +
+      `${metrics.done} foram concluída${
+        metrics.done === 1 ? "" : "s"
+      }, com taxa de conclusão de ` +
+      `${pdfPercentage(metrics.completionRate)}. ` +
+      `As horas realizadas representam ` +
+      `${pdfUtilizationLabel(
+        metrics.estimated,
+        metrics.actual,
+      )} do esforço estimado.`
+    )
+    : (
+      "Não houve demandas no período selecionado. " +
+      "O documento apresenta somente os registros " +
+      "de sustentação de conversores encontrados " +
+      "no período."
+    );
 
-  doc.setTextColor(52, 60, 64);
+  doc.setTextColor(0, 0, 0);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  const executiveLines = doc.splitTextToSize(executiveText, 180);
-  doc.text(executiveLines, 15, y);
+
+  const executiveLines =
+    doc.splitTextToSize(
+      executiveText,
+      180,
+    );
+
+  doc.text(
+    executiveLines,
+    15,
+    y,
+  );
+
   y += executiveLines.length * 4 + 3;
 
-  doc.setTextColor(89, 97, 102);
   doc.setFontSize(7.2);
-  const filterLines = doc.splitTextToSize(`Filtros aplicados: ${pdfFilterSummary()}`, 180);
-  doc.text(filterLines, 15, y);
+
+  const filterLines =
+    doc.splitTextToSize(
+      `Filtros aplicados: ${pdfFilterSummary()}`,
+      180,
+    );
+
+  doc.text(
+    filterLines,
+    15,
+    y,
+  );
+
   y += filterLines.length * 3.5 + 5;
 
   if (reportDemands.length) {
-    y = pdfEnsureSpace(doc, y, 42, logo);
-    y = pdfDrawSectionTitle(doc, "Demandas do período", y);
+    y = pdfEnsureSpace(
+      doc,
+      y,
+      44,
+      logo,
+    );
+
+    y = pdfDrawSectionTitle(
+      doc,
+      "Demandas do período",
+      y,
+    );
 
     doc.autoTable({
+      ...tableBase,
+
       startY: y,
-      head: [["Código", "Demanda", "Gestor", "Responsável", "Status", "Prazo", "Est.", "Real."]],
-      body: reportDemands.map(item => [
-        demandCode(item),
-        item.title || "—",
-        item.manager?.trim() || "Gestor não informado",
-        item.responsible || "—",
-        effectiveStatus(item),
-        formatDate(item.due_date, { year: true }),
-        formatHours(item.estimated_hours),
-        formatHours(item.actual_hours),
-      ]),
-      theme: "grid",
+
+      head: [[
+        "Código",
+        "Demanda e conteúdo",
+        "Gestão e classificação",
+        "Datas e esforço",
+      ]],
+
+      body: pdfDemandRows(
+        reportDemands,
+      ),
+
       styles: {
-        font: "helvetica",
-        fontSize: 6.25,
-        cellPadding: 1.8,
-        textColor: [45, 54, 59],
-        lineColor: [204, 209, 211],
-        lineWidth: 0.16,
-        overflow: "linebreak",
-        valign: "middle",
+        ...tableBase.styles,
+        fontSize: 6.15,
+        cellPadding: 2.1,
+        valign: "top",
       },
-      headStyles: {
-        fillColor: [40, 75, 99],
-        textColor: [255, 255, 255],
-        fontStyle: "bold",
-        fontSize: 6.1,
-        halign: "left",
-      },
-      alternateRowStyles: {
-        fillColor: [248, 248, 246],
-      },
+
       columnStyles: {
-        0: { cellWidth: 16 },
-        1: { cellWidth: 43 },
-        2: { cellWidth: 24 },
-        3: { cellWidth: 26 },
-        4: { cellWidth: 21 },
-        5: { cellWidth: 20 },
-        6: { cellWidth: 14, halign: "center" },
-        7: { cellWidth: 16, halign: "center" },
+        0: {
+          cellWidth: 18,
+          fontStyle: "bold",
+        },
+
+        1: {
+          cellWidth: 70,
+        },
+
+        2: {
+          cellWidth: 52,
+        },
+
+        3: {
+          cellWidth: 40,
+        },
       },
-      margin: { left: 15, right: 15, top: 24, bottom: 19 },
-      showHead: "everyPage",
-      rowPageBreak: "avoid",
-      didDrawPage: () => pdfDrawCompactHeader(doc, logo),
     });
 
     y = doc.lastAutoTable.finalY + 8;
 
     if (managers.length) {
-      y = pdfEnsureSpace(doc, y, 44, logo);
-      y = pdfDrawSectionTitle(doc, "Resumo por gestor", y);
+      y = pdfEnsureSpace(
+        doc,
+        y,
+        42,
+        logo,
+      );
+
+      y = pdfDrawSectionTitle(
+        doc,
+        "Resumo por gestor",
+        y,
+      );
 
       doc.autoTable({
+        ...tableBase,
+
         startY: y,
-        head: [["Gestor", "Demandas", "Concluídas", "Atrasadas", "Est.", "Real."]],
+
+        head: [[
+          "Gestor",
+          "Demandas",
+          "Concluídas",
+          "Atrasadas",
+          "Est.",
+          "Real.",
+          "Utilização",
+        ]],
+
         body: managers.map(item => [
           item.manager,
           String(item.demands),
@@ -632,38 +1010,52 @@ async function exportPdf() {
           String(item.overdue),
           formatHours(item.estimated),
           formatHours(item.actual),
+          pdfUtilizationLabel(
+            item.estimated,
+            item.actual,
+          ),
         ]),
-        theme: "grid",
+
         styles: {
-          font: "helvetica",
-          fontSize: 7,
-          cellPadding: 2.1,
-          textColor: [45, 54, 59],
-          lineColor: [204, 209, 211],
-          lineWidth: 0.16,
-          valign: "middle",
+          ...tableBase.styles,
+          fontSize: 6.8,
         },
-        headStyles: {
-          fillColor: [237, 240, 241],
-          textColor: [27, 45, 55],
-          fontStyle: "bold",
-          fontSize: 6.7,
-        },
-        alternateRowStyles: {
-          fillColor: [250, 250, 249],
-        },
+
         columnStyles: {
-          0: { cellWidth: 62 },
-          1: { cellWidth: 25, halign: "center" },
-          2: { cellWidth: 26, halign: "center" },
-          3: { cellWidth: 24, halign: "center" },
-          4: { cellWidth: 21, halign: "center" },
-          5: { cellWidth: 22, halign: "center" },
+          0: {
+            cellWidth: 54,
+          },
+
+          1: {
+            cellWidth: 21,
+            halign: "center",
+          },
+
+          2: {
+            cellWidth: 23,
+            halign: "center",
+          },
+
+          3: {
+            cellWidth: 22,
+            halign: "center",
+          },
+
+          4: {
+            cellWidth: 20,
+            halign: "center",
+          },
+
+          5: {
+            cellWidth: 20,
+            halign: "center",
+          },
+
+          6: {
+            cellWidth: 20,
+            halign: "center",
+          },
         },
-        margin: { left: 15, right: 15, top: 24, bottom: 19 },
-        showHead: "everyPage",
-        rowPageBreak: "avoid",
-        didDrawPage: () => pdfDrawCompactHeader(doc, logo),
       });
 
       y = doc.lastAutoTable.finalY + 8;
@@ -671,70 +1063,110 @@ async function exportPdf() {
   }
 
   if (reportConverters.length) {
-    y = pdfEnsureSpace(doc, y, 50, logo);
-    y = pdfDrawSectionTitle(doc, "Sustentação de conversores", y, [249, 105, 0]);
+    y = pdfEnsureSpace(
+      doc,
+      y,
+      48,
+      logo,
+    );
 
-    doc.setTextColor(65, 73, 78);
+    y = pdfDrawSectionTitle(
+      doc,
+      "Sustentação de conversores",
+      y,
+    );
+
+    doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    const converterIntro = `${reportConverters.length} atendimento${reportConverters.length === 1 ? "" : "s"} · ` +
-      `${converters.quantity} conversor${converters.quantity === 1 ? "" : "es"} trocado${converters.quantity === 1 ? "" : "s"} · ` +
-      `Local mais recorrente: ${converters.topLocation}`;
-    const converterLines = doc.splitTextToSize(converterIntro, 180);
-    doc.text(converterLines, 15, y);
+
+    const converterIntro =
+      `${reportConverters.length} atendimento${
+        reportConverters.length === 1
+          ? ""
+          : "s"
+      } · ` +
+      `${converters.quantity} conversor${
+        converters.quantity === 1
+          ? ""
+          : "es"
+      } trocado${
+        converters.quantity === 1
+          ? ""
+          : "s"
+      } · ` +
+      `Local mais recorrente: ` +
+      `${converters.topLocation}`;
+
+    const converterLines =
+      doc.splitTextToSize(
+        converterIntro,
+        180,
+      );
+
+    doc.text(
+      converterLines,
+      15,
+      y,
+    );
+
     y += converterLines.length * 4 + 3;
 
     doc.autoTable({
+      ...tableBase,
+
       startY: y,
-      head: [["Código", "Data", "Local", "Ponto", "Atendimento", "Qtd.", "Status"]],
-      body: reportConverters.map(item => [
-        converterCode(item),
-        formatDate(item.service_date, { year: true }),
-        item.location_name || "—",
-        item.point_reference || "—",
-        item.service_type || "—",
-        String(item.quantity_replaced || 0),
-        item.status || "—",
-      ]),
-      theme: "grid",
+
+      head: [[
+        "Código e data",
+        "Local e ponto",
+        "Atendimento",
+        "Resultado e observações",
+      ]],
+
+      body: pdfConverterRows(
+        reportConverters,
+      ),
+
       styles: {
-        font: "helvetica",
-        fontSize: 6.7,
-        cellPadding: 2,
-        textColor: [45, 54, 59],
-        lineColor: [204, 209, 211],
-        lineWidth: 0.16,
-        overflow: "linebreak",
-        valign: "middle",
+        ...tableBase.styles,
+        fontSize: 6.2,
+        cellPadding: 2.1,
+        valign: "top",
       },
-      headStyles: {
-        fillColor: [249, 105, 0],
-        textColor: [255, 255, 255],
-        fontStyle: "bold",
-        fontSize: 6.5,
-      },
-      alternateRowStyles: {
-        fillColor: [250, 248, 244],
-      },
+
       columnStyles: {
-        0: { cellWidth: 18 },
-        1: { cellWidth: 23 },
-        2: { cellWidth: 37 },
-        3: { cellWidth: 31 },
-        4: { cellWidth: 31 },
-        5: { cellWidth: 15, halign: "center" },
-        6: { cellWidth: 25 },
+        0: {
+          cellWidth: 26,
+          fontStyle: "bold",
+        },
+
+        1: {
+          cellWidth: 48,
+        },
+
+        2: {
+          cellWidth: 47,
+        },
+
+        3: {
+          cellWidth: 59,
+        },
       },
-      margin: { left: 15, right: 15, top: 24, bottom: 19 },
-      showHead: "everyPage",
-      rowPageBreak: "avoid",
-      didDrawPage: () => pdfDrawCompactHeader(doc, logo),
     });
   }
 
   pdfDrawFooter(doc);
-  doc.save(`fluux_relatorio_demandas_${fileDate(generatedAt)}.pdf`);
-  showToast("PDF profissional gerado com sucesso.", "success");
+
+  doc.save(
+    `fluux_relatorio_demandas_` +
+    `${fileDate(generatedAt)}.pdf`,
+  );
+
+  showToast(
+    "PDF em preto e branco gerado com sucesso.",
+    "success",
+  );
 }
 
 bootPage(() => {

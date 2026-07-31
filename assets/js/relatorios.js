@@ -609,41 +609,130 @@ function pdfTableBase(doc, logo) {
 }
 
 function pdfDemandRows(records) {
-  return records.map(item => [
-    demandCode(item),
+  const rows = [];
 
-    [
-      `Demanda: ${pdfValue(item.title)}`,
-      `Descrição: ${pdfValue(item.description)}`,
-      `Solicitante: ${pdfValue(item.requester)}`,
-      `Tags: ${pdfValue(item.tags)}`,
-      `Observações: ${pdfValue(item.notes)}`,
-    ].join("\n"),
+  records.forEach((item, index) => {
+    const fillColor = index % 2 === 0
+      ? [255, 255, 255]
+      : [246, 246, 246];
 
-    [
-      `Gestor: ${pdfValue(
-        item.manager?.trim(),
-        "Gestor não informado",
-      )}`,
+    const manager =
+      item.manager?.trim() ||
+      "Gestor não informado";
+
+    const managementLines = [
+      `Gestor: ${manager}`,
       `Responsável: ${pdfValue(item.responsible)}`,
-      `Departamento: ${pdfValue(item.department)}`,
-      `Categoria: ${pdfValue(item.category)}`,
-      `Prioridade: ${pdfValue(item.priority)}`,
-      `Status: ${effectiveStatus(item)}`,
-    ].join("\n"),
 
-    [
+      item.requester
+        ? `Solicitante: ${pdfValue(item.requester)}`
+        : null,
+
+      [
+        item.department
+          ? `Departamento: ${pdfValue(item.department)}`
+          : null,
+
+        item.category
+          ? `Categoria: ${pdfValue(item.category)}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+
+      `Prioridade: ${pdfValue(item.priority)} · ` +
+        `Status: ${effectiveStatus(item)}`,
+    ].filter(Boolean);
+
+    const effortLines = [
       `Entrada: ${pdfStoredDate(item.start_date)}`,
       `Prazo: ${pdfStoredDate(item.due_date)}`,
-      `Conclusão: ${pdfStoredDate(item.completed_at)}`,
-      `Estimadas: ${formatHours(
-        item.estimated_hours,
-      )}`,
-      `Realizadas: ${formatHours(
-        item.actual_hours,
-      )}`,
-    ].join("\n"),
-  ]);
+
+      item.completed_at
+        ? `Conclusão: ${pdfStoredDate(item.completed_at)}`
+        : null,
+
+      `Horas: ${formatHours(item.estimated_hours)} estimadas · ` +
+        `${formatHours(item.actual_hours)} realizadas`,
+    ].filter(Boolean);
+
+    /*
+     * Primeira linha:
+     * identificação e informações operacionais compactas.
+     */
+    rows.push([
+      {
+        content: demandCode(item),
+        rowSpan: 2,
+
+        styles: {
+          fillColor,
+          fontStyle: "bold",
+          valign: "top",
+        },
+      },
+
+      {
+        content: pdfValue(item.title),
+
+        styles: {
+          fillColor,
+          fontStyle: "bold",
+          valign: "top",
+        },
+      },
+
+      {
+        content: managementLines.join("\n"),
+
+        styles: {
+          fillColor,
+          valign: "top",
+        },
+      },
+
+      {
+        content: effortLines.join("\n"),
+
+        styles: {
+          fillColor,
+          valign: "top",
+        },
+      },
+    ]);
+
+    /*
+     * Segunda linha:
+     * descrição em largura maior e texto justificado.
+     */
+    rows.push([
+      {
+        content: pdfValue(
+          item.description,
+          "Sem descrição complementar.",
+        ),
+
+        colSpan: 3,
+
+        styles: {
+          fillColor,
+          halign: "justify",
+          valign: "top",
+          fontSize: 6.4,
+          textColor: [35, 35, 35],
+
+          cellPadding: {
+            top: 1.2,
+            right: 2.2,
+            bottom: 2.8,
+            left: 2.2,
+          },
+        },
+      },
+    ]);
+  });
+
+  return rows;
 }
 
 function pdfConverterRows(records) {
@@ -936,20 +1025,25 @@ async function exportPdf() {
 
       head: [[
         "Código",
-        "Demanda e conteúdo",
+        "Demanda",
         "Gestão e classificação",
         "Datas e esforço",
       ]],
 
-      body: pdfDemandRows(
-        reportDemands,
-      ),
+      body: pdfDemandRows(reportDemands),
 
       styles: {
         ...tableBase.styles,
-        fontSize: 6.15,
+        fontSize: 6.35,
         cellPadding: 2.1,
         valign: "top",
+        overflow: "linebreak",
+      },
+
+      headStyles: {
+        ...tableBase.headStyles,
+        fontSize: 6.5,
+        cellPadding: 2.3,
       },
 
       columnStyles: {
@@ -959,17 +1053,23 @@ async function exportPdf() {
         },
 
         1: {
-          cellWidth: 70,
+          cellWidth: 58,
         },
 
         2: {
-          cellWidth: 52,
+          cellWidth: 61,
         },
 
         3: {
-          cellWidth: 40,
+          cellWidth: 43,
         },
       },
+
+      alternateRowStyles: {
+        fillColor: [255, 255, 255],
+      },
+
+      rowPageBreak: "avoid",
     });
 
     y = doc.lastAutoTable.finalY + 8;

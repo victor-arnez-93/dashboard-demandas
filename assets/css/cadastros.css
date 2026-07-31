@@ -1,28 +1,558 @@
-.catalog-panel { overflow: hidden; }
-.catalog-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
-.catalog-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
-.catalog-tab { display: inline-flex; min-height: 42px; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-raised); color: var(--text-soft); font-size: 10px; font-weight: 700; transition: all var(--transition); }
-.catalog-tab:hover { border-color: var(--accent); color: var(--text); }
-.catalog-tab.active { border-color: color-mix(in srgb, var(--accent) 65%, var(--border)); background: var(--button-gradient); box-shadow: var(--shadow-soft); color: #fff; }
-.catalog-search { width: min(340px,100%); }
-.catalog-table-scroll { max-height: 388px; overflow: auto; }
-.catalog-table-scroll tbody tr { height: 68px; }
-.catalog-name { display: flex; align-items: center; gap: 10px; }
-.catalog-name i { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 11px; background: var(--primary-soft); color: var(--primary); }
-.catalog-name strong { color: var(--text); }
-.catalog-status { display: inline-flex; padding: 5px 9px; border-radius: 999px; font-size: 8px; font-weight: 700; }
-.catalog-status.active { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
-.catalog-status.inactive { background: color-mix(in srgb, var(--text-muted) 13%, transparent); color: var(--text-muted); }
-.catalog-hint { margin: 14px 0 0; color: var(--text-muted); font-size: 9px; }
-.catalog-modal { width: min(540px,100%); }
-.catalog-modal-form { display: grid; gap: 14px; padding: 22px; }
-.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 12px 13px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-raised); }
-.switch { position: relative; width: 44px; height: 24px; }
-.switch input { position: absolute; opacity: 0; }
-.switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--text-muted); transition: all var(--transition); }
-.switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: all var(--transition); }
-.switch input:checked + span { background: var(--success); }
-.switch input:checked + span::after { transform: translateX(20px); }
-@media (max-width: 900px) { .catalog-toolbar { align-items: stretch; flex-direction: column; } .catalog-search { width: 100%; } }
-@media (max-width: 600px) { .catalog-tabs { display: grid; grid-template-columns: 1fr 1fr; } .catalog-tab { justify-content: center; } }
-.catalog-table-scroll table { min-width: 820px; }
+/* ============================================================
+   CADASTROS.CSS — GESTORES, RESPONSÁVEIS, DEPARTAMENTOS,
+   CATEGORIAS E LOCAIS
+   Somente regras específicas desta página.
+============================================================ */
+
+body[data-page="cadastros"] .page-heading p {
+  max-width: 760px;
+  color: var(--text-soft);
+  font-size: 15px;
+  font-weight: 550;
+  line-height: 1.55;
+}
+
+.catalog-panel {
+  overflow: hidden;
+}
+
+/* ============================================================
+   ABAS E BUSCA
+============================================================ */
+
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.catalog-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.catalog-tab {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    color var(--transition),
+    transform var(--transition),
+    box-shadow var(--transition);
+}
+
+.catalog-tab i {
+  color: var(--text-muted);
+  font-size: 13px;
+  transition: color var(--transition);
+}
+
+.catalog-tab:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.catalog-tab:hover i {
+  color: var(--accent);
+}
+
+.catalog-tab.active {
+  border-color: color-mix(in srgb, var(--accent) 72%, var(--border));
+  background: var(--button-gradient);
+  box-shadow: var(--shadow-soft);
+  color: #ffffff;
+}
+
+.catalog-tab.active i {
+  color: #ffffff;
+}
+
+.catalog-search {
+  width: min(360px, 100%);
+  min-height: 48px;
+}
+
+.catalog-search input {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ============================================================
+   TABELA
+============================================================ */
+
+.catalog-table-scroll {
+  max-height: 392px;
+  overflow: auto;
+}
+
+.catalog-table-scroll table {
+  width: 100%;
+  min-width: 860px;
+}
+
+.catalog-table-scroll th,
+.catalog-table-scroll td {
+  padding-inline: 17px;
+}
+
+.catalog-table-scroll tbody tr {
+  height: 72px;
+}
+
+.catalog-table-scroll tbody tr:hover {
+  background: color-mix(in srgb, var(--primary-soft) 42%, transparent);
+}
+
+.catalog-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.catalog-name i {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.catalog-name strong {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.catalog-description {
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.catalog-status {
+  display: inline-flex;
+  min-width: 58px;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.catalog-status.active {
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+  color: var(--success);
+}
+
+.catalog-status.inactive {
+  background: color-mix(in srgb, var(--text-muted) 13%, transparent);
+  color: var(--text-muted);
+}
+
+.catalog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.catalog-actions .action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+}
+
+.catalog-actions .action-btn[data-action="toggle"]:hover {
+  border-color: color-mix(in srgb, var(--sand) 70%, var(--border));
+  color: var(--sand);
+}
+
+.catalog-actions .action-btn[data-action="delete"]:hover {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 9%, var(--surface-raised));
+  color: var(--danger);
+}
+
+.catalog-footer {
+  min-height: 48px;
+}
+
+.catalog-footer span {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.catalog-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 14px 0 0;
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.catalog-hint i {
+  margin-top: 2px;
+  color: var(--accent);
+}
+
+.catalog-hint strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ============================================================
+   MODAL DE CADASTRO
+============================================================ */
+
+.catalog-modal {
+  width: min(590px, 100%);
+  overflow: hidden;
+}
+
+.catalog-modal-head {
+  align-items: flex-start;
+  padding: 24px 24px 20px;
+}
+
+.catalog-modal-head > div {
+  min-width: 0;
+}
+
+.catalog-modal-head small {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.catalog-modal-head h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 27px;
+  line-height: 1.08;
+}
+
+.catalog-modal-head p {
+  max-width: 430px;
+  margin: 7px 0 0;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.catalog-modal-form {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+
+.catalog-modal-form .field {
+  gap: 8px;
+}
+
+.catalog-modal-form .field > span {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.catalog-modal-form .field input,
+.catalog-modal-form .field textarea {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.catalog-description-field:not([hidden]) {
+  display: grid;
+}
+
+.switch-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 17px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface-raised);
+}
+
+.switch-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.switch-copy strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.switch-copy small {
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  flex: 0 0 50px;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.switch span {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 34%, var(--surface));
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.switch span::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.28);
+  transition: transform var(--transition);
+}
+
+.switch input:checked + span {
+  border-color: color-mix(in srgb, var(--success) 70%, transparent);
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.switch input:checked + span::after {
+  transform: translateX(22px);
+}
+
+.switch input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.catalog-modal-actions {
+  padding: 18px 24px;
+  background: color-mix(in srgb, var(--surface-raised) 74%, transparent);
+}
+
+/* ============================================================
+   MODAL DE EXCLUSÃO
+============================================================ */
+
+.catalog-delete-modal {
+  width: min(500px, 100%);
+  overflow: hidden;
+  padding-top: 27px;
+  text-align: center;
+}
+
+.delete-modal-icon {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 15px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  border-radius: 19px;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  font-size: 23px;
+}
+
+.delete-modal-eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--danger);
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.catalog-delete-modal h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 28px;
+}
+
+.catalog-delete-modal > p {
+  max-width: 390px;
+  margin: 10px auto 0;
+  padding-inline: 24px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.catalog-delete-modal > p strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.delete-modal-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 20px 24px 0;
+  padding: 14px 15px;
+  border: 1px solid color-mix(in srgb, var(--danger) 24%, var(--border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface-raised));
+  color: var(--text-soft);
+  text-align: left;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.delete-modal-warning i {
+  margin-top: 2px;
+  color: var(--danger);
+}
+
+.delete-modal-actions {
+  margin-top: 24px;
+  padding: 18px 24px;
+  background: color-mix(in srgb, var(--surface-raised) 74%, transparent);
+}
+
+/* ============================================================
+   CONTRASTE — TEMA CLARO
+============================================================ */
+
+[data-theme="light"] body[data-page="cadastros"] .page-heading p,
+[data-theme="light"] body[data-page="cadastros"] .catalog-description,
+[data-theme="light"] body[data-page="cadastros"] .catalog-hint,
+[data-theme="light"] body[data-page="cadastros"] .catalog-modal-head p,
+[data-theme="light"] body[data-page="cadastros"] .catalog-modal-form .field > span,
+[data-theme="light"] body[data-page="cadastros"] .switch-copy small,
+[data-theme="light"] body[data-page="cadastros"] .catalog-delete-modal > p,
+[data-theme="light"] body[data-page="cadastros"] .delete-modal-warning {
+  color: #40545f;
+}
+
+[data-theme="light"] body[data-page="cadastros"] .catalog-tab {
+  background: rgba(255, 255, 255, 0.74);
+}
+
+[data-theme="light"] body[data-page="cadastros"] .switch-row,
+[data-theme="light"] body[data-page="cadastros"] .catalog-modal-actions,
+[data-theme="light"] body[data-page="cadastros"] .delete-modal-actions {
+  background: rgba(246, 247, 246, 0.82);
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+============================================================ */
+
+@media (max-width: 1080px) {
+  .catalog-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .catalog-search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .catalog-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-tab {
+    width: 100%;
+  }
+
+  .catalog-table-scroll table {
+    min-width: 780px;
+  }
+
+  .catalog-modal-head {
+    padding: 21px 18px 17px;
+  }
+
+  .catalog-modal-form {
+    padding: 20px 18px;
+  }
+
+  .switch-row {
+    gap: 14px;
+  }
+
+  .catalog-modal-actions,
+  .delete-modal-actions {
+    padding: 16px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalog-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .switch-row {
+    align-items: flex-start;
+  }
+
+  .switch-copy strong {
+    font-size: 12px;
+  }
+
+  .delete-modal-warning {
+    margin-inline: 18px;
+  }
+}

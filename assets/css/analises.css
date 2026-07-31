@@ -1,15 +1,448 @@
-.analysis-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; padding: 14px 16px; }
-.analysis-toolbar p { margin: 0; color: var(--text-muted); font-size: 9px; }
-.analysis-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
-.analysis-card { min-height: 390px; padding: 22px; }
-.analysis-card.full { grid-column: 1 / -1; min-height: 430px; }
-.analysis-card .card-heading small { color: var(--accent); font: 700 8px var(--font-title); letter-spacing: .14em; }
-.analysis-card .card-heading h2 { margin: 4px 0 16px; font-size: 22px; }
-.analysis-chart { position: relative; height: 305px; }
-.analysis-card.full .analysis-chart { height: 340px; }
-.converter-analysis-title { display: flex; align-items: center; gap: 12px; grid-column: 1 / -1; margin: 14px 0 -2px; }
-.converter-analysis-title i { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 13px; background: var(--accent-soft); color: var(--accent); }
-.converter-analysis-title h2 { margin: 0; }
-.converter-analysis-title p { margin: 0; color: var(--text-muted); font-size: 9px; }
-@media (max-width: 960px) { .analysis-grid { grid-template-columns: 1fr; } .analysis-card.full, .converter-analysis-title { grid-column: auto; } }
-@media (max-width: 720px) { .analysis-toolbar { align-items: stretch; flex-direction: column; } }
+/* ============================================================
+   ANALISES.CSS — PAINEL DE INDICADORES
+   Somente regras específicas desta página.
+============================================================ */
+
+body[data-page="analises"] .page-heading {
+  margin-bottom: 22px;
+}
+
+body[data-page="analises"] .page-heading .eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+body[data-page="analises"] .page-heading p {
+  color: var(--text-soft);
+  font-size: 15px;
+  font-weight: 550;
+  line-height: 1.55;
+}
+
+/* ============================================================
+   FILTRO DE PERÍODO
+============================================================ */
+
+.analysis-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 20px;
+  padding: 14px 15px 14px 18px;
+}
+
+.analysis-toolbar-copy {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 13px;
+}
+
+.analysis-toolbar-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+  border-radius: 13px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 16px;
+}
+
+.analysis-toolbar-copy > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.analysis-toolbar-copy strong {
+  color: var(--text);
+  font-family: var(--font-title);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.analysis-toolbar-copy p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.analysis-period-switch {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(74px, 1fr));
+  flex: 0 0 auto;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-raised) 86%, transparent);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.analysis-period-switch button {
+  position: relative;
+  min-height: 38px;
+  padding: 8px 14px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text-soft);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    color var(--transition),
+    box-shadow var(--transition),
+    transform var(--transition);
+}
+
+.analysis-period-switch button:hover {
+  border-color: var(--border);
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.analysis-period-switch button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.analysis-period-switch button.active {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+  background: var(--button-gradient);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.14),
+    0 8px 22px rgba(0, 0, 0, 0.16),
+    0 0 0 3px color-mix(in srgb, var(--accent) 7%, transparent);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.analysis-period-switch button.active::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  bottom: 4px;
+  left: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+/* ============================================================
+   CARDS E GRÁFICOS
+============================================================ */
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.analysis-card {
+  position: relative;
+  min-width: 0;
+  min-height: 414px;
+  overflow: hidden;
+  padding: 24px 24px 22px;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition),
+    transform var(--transition);
+}
+
+.analysis-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  opacity: 0.78;
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 72%, var(--accent)),
+    var(--accent)
+  );
+}
+
+.analysis-card::after {
+  content: "";
+  position: absolute;
+  top: -90px;
+  right: -90px;
+  width: 210px;
+  height: 210px;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--primary) 10%, transparent),
+    transparent 70%
+  );
+}
+
+.analysis-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+  box-shadow: var(--shadow), 0 0 0 1px color-mix(in srgb, var(--primary) 5%, transparent);
+  transform: translateY(-2px);
+}
+
+.analysis-card.full {
+  grid-column: 1 / -1;
+  min-height: 458px;
+}
+
+.card-heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.card-heading > div {
+  min-width: 0;
+}
+
+.card-heading small {
+  display: block;
+  color: var(--accent);
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  line-height: 1.2;
+}
+
+.card-heading h2 {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: clamp(22px, 2vw, 26px);
+  line-height: 1.08;
+}
+
+.chart-summary {
+  display: inline-flex;
+  min-height: 30px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-raised) 84%, transparent);
+  color: var(--text-soft);
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.analysis-chart {
+  position: relative;
+  z-index: 1;
+  height: 320px;
+  margin-top: 6px;
+}
+
+.analysis-chart-large {
+  height: 360px;
+}
+
+.analysis-chart canvas {
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.05));
+}
+
+/* ============================================================
+   CONVERSORES
+============================================================ */
+
+.converter-analysis-title {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 14px;
+  margin: 16px 0 0;
+  padding: 3px 2px;
+}
+
+.converter-analysis-title i {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border-radius: 15px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 18px;
+}
+
+.converter-analysis-title > div {
+  min-width: 0;
+}
+
+.converter-analysis-title span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--accent);
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.converter-analysis-title h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 26px;
+  line-height: 1.05;
+}
+
+.converter-analysis-title p {
+  margin: 4px 0 0;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* ============================================================
+   CONTRASTE — TEMA CLARO
+============================================================ */
+
+[data-theme="light"]
+body[data-page="analises"]
+.page-heading p,
+
+[data-theme="light"]
+body[data-page="analises"]
+.analysis-toolbar-copy p,
+
+[data-theme="light"]
+body[data-page="analises"]
+.converter-analysis-title p {
+  color: #40545f;
+}
+
+[data-theme="light"]
+body[data-page="analises"]
+.analysis-toolbar-icon {
+  border-color: color-mix(in srgb, var(--primary) 22%, transparent);
+  background: color-mix(in srgb, var(--primary) 7%, #ffffff);
+}
+
+[data-theme="light"]
+body[data-page="analises"]
+.analysis-period-switch {
+  border-color: #d2dadd;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 8px 20px rgba(40, 75, 99, 0.07);
+}
+
+[data-theme="light"]
+body[data-page="analises"]
+.analysis-period-switch button {
+  color: #40545f;
+}
+
+[data-theme="light"]
+body[data-page="analises"]
+.analysis-period-switch button:hover {
+  border-color: #cad4d8;
+  background: #f2f4f2;
+  color: #1d2f38;
+}
+
+[data-theme="light"]
+body[data-page="analises"]
+.chart-summary {
+  border-color: #d2dadd;
+  background: rgba(255, 255, 255, 0.80);
+  color: #40545f;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+============================================================ */
+
+@media (max-width: 1100px) {
+  .analysis-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .analysis-period-switch {
+    width: 100%;
+  }
+}
+
+@media (max-width: 960px) {
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-card.full,
+  .converter-analysis-title {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  body[data-page="analises"] .page-heading p {
+    font-size: 14px;
+  }
+
+  .analysis-toolbar {
+    padding: 14px;
+  }
+
+  .analysis-toolbar-copy {
+    align-items: flex-start;
+  }
+
+  .analysis-period-switch {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analysis-period-switch button {
+    width: 100%;
+  }
+
+  .analysis-card,
+  .analysis-card.full {
+    min-height: 390px;
+    padding: 21px 17px 18px;
+  }
+
+  .card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .analysis-chart,
+  .analysis-chart-large {
+    height: 300px;
+  }
+
+  .converter-analysis-title {
+    align-items: flex-start;
+  }
+}

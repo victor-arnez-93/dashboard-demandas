@@ -120,13 +120,23 @@ body[data-page="analises"] .page-heading p {
 }
 
 .analysis-period-switch button.active {
-  border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 58%,
+    var(--border)
+  );
   background: var(--button-gradient);
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.14),
     0 8px 22px rgba(0, 0, 0, 0.16),
-    0 0 0 3px color-mix(in srgb, var(--accent) 7%, transparent);
+    0 0 0 3px color-mix(
+      in srgb,
+      var(--accent) 7%,
+      transparent
+    );
   color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.38);
   transform: translateY(-1px);
 }
 
@@ -360,6 +370,7 @@ body[data-page="analises"]
 body[data-page="analises"]
 .analysis-period-switch button {
   color: #40545f;
+  -webkit-text-fill-color: #40545f;
 }
 
 [data-theme="light"]
@@ -368,6 +379,38 @@ body[data-page="analises"]
   border-color: #cad4d8;
   background: #f2f4f2;
   color: #1d2f38;
+  -webkit-text-fill-color: #1d2f38;
+}
+
+/*
+ * O botão ativo precisa vir depois das regras normais do tema claro.
+ * Assim o texto permanece branco sobre o fundo azul/laranja.
+ */
+[data-theme="light"]
+body[data-page="analises"]
+.analysis-period-switch button.active,
+
+[data-theme="light"]
+body[data-page="analises"]
+.analysis-period-switch button.active:hover,
+
+[data-theme="light"]
+body[data-page="analises"]
+.analysis-period-switch button.active:focus-visible {
+  border-color: #f96900;
+  background: linear-gradient(
+    120deg,
+    #284b63 0%,
+    #315a72 58%,
+    #8a4219 100%
+  );
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.38);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.18),
+    0 8px 22px rgba(40, 75, 99, 0.20),
+    0 0 0 3px rgba(249, 105, 0, 0.08);
 }
 
 [data-theme="light"]

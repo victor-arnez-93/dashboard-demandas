@@ -1,11 +1,459 @@
-.filter-bar { display: grid; grid-template-columns: minmax(280px,1.6fr) repeat(4,minmax(150px,.7fr)) auto; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); }
-.filter-bar .input-shell, .filter-bar select { min-height: 46px; }
-.filter-clear { min-width: 98px; }
-.demands-table-scroll { max-height: 392px; overflow: auto; }
-.demands-table-scroll tbody tr { height: 70px; }
-.demands-table td:first-child { white-space: nowrap; }
-.demands-table .demand-cell { min-width: 300px; }
-.manager-missing { color: var(--text-muted); font-style: italic; }
-@media (max-width: 1350px) { .filter-bar { grid-template-columns: repeat(3,1fr); } .filter-bar .search-filter { grid-column: 1 / -1; } }
-@media (max-width: 760px) { .filter-bar { grid-template-columns: 1fr; } .filter-bar .search-filter { grid-column: auto; } }
-.demands-table-scroll table { min-width: 1180px; }
+/* ============================================================
+   DEMANDAS.CSS — LISTAGEM, FILTROS E TABELA DE DEMANDAS
+   Somente regras específicas desta página.
+============================================================ */
+
+body[data-page="demandas"] .page-heading {
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+body[data-page="demandas"] .page-heading .eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+body[data-page="demandas"] .page-heading h1 {
+  margin-top: 7px;
+}
+
+body[data-page="demandas"] .page-heading p {
+  color: var(--text-soft);
+  font-size: 15px;
+  font-weight: 550;
+  line-height: 1.55;
+}
+
+.demands-shell {
+  overflow: visible;
+}
+
+/* ============================================================
+   FILTROS
+============================================================ */
+
+.filter-bar {
+  position: relative;
+  z-index: 20;
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 1.65fr)
+    repeat(4, minmax(152px, 0.78fr))
+    auto;
+  gap: 11px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.filter-bar .input-shell,
+.custom-select-trigger,
+.filter-clear {
+  min-height: 48px;
+}
+
+.search-filter {
+  min-width: 0;
+}
+
+.search-filter input {
+  min-width: 0;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.search-filter input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.filter-clear {
+  min-width: 104px;
+  border-radius: 15px;
+  white-space: nowrap;
+}
+
+/* Select nativo preservado para formulário e acessibilidade,
+   porém fora da interface visual. */
+.filter-native-select {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.custom-select {
+  position: relative;
+  min-width: 0;
+}
+
+.custom-select-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 15px;
+  border: 1px solid var(--border-strong);
+  border-radius: 15px;
+  background: var(--surface-input);
+  color: var(--text);
+  font: 600 14px/1.2 "Inter", sans-serif;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.custom-select-trigger:hover {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border-strong));
+}
+
+.custom-select-trigger:focus-visible,
+.custom-select.open .custom-select-trigger {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.custom-select.open .custom-select-trigger {
+  transform: translateY(-1px);
+}
+
+.custom-select-trigger span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-select-trigger i {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 12px;
+  transition: transform 180ms ease, color 180ms ease;
+}
+
+.custom-select.open .custom-select-trigger i {
+  color: var(--accent);
+  transform: rotate(180deg);
+}
+
+.custom-select-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 100;
+  max-height: 270px;
+  overflow-y: auto;
+  padding: 7px;
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+  animation: custom-select-in 150ms ease both;
+}
+
+.custom-select-menu[hidden] {
+  display: none;
+}
+
+@keyframes custom-select-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+}
+
+.custom-select-option {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-soft);
+  font: 550 13px/1.35 "Inter", sans-serif;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.custom-select-option:hover,
+.custom-select-option:focus-visible {
+  background: var(--primary-soft);
+  color: var(--text);
+  outline: none;
+}
+
+.custom-select-option[aria-selected="true"] {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 19%, transparent),
+    color-mix(in srgb, var(--accent) 12%, transparent)
+  );
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ============================================================
+   TABELA
+============================================================ */
+
+.demands-table-scroll {
+  max-height: 390px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.demands-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.demands-table .col-code {
+  width: 7%;
+}
+
+.demands-table .col-demand {
+  width: 30%;
+}
+
+.demands-table .col-manager {
+  width: 9%;
+}
+
+.demands-table .col-responsible {
+  width: 10%;
+}
+
+.demands-table .col-category {
+  width: 9%;
+}
+
+.demands-table .col-priority {
+  width: 8%;
+}
+
+.demands-table .col-due {
+  width: 7%;
+}
+
+.demands-table .col-status {
+  width: 10%;
+}
+
+.demands-table .col-actions {
+  width: 10%;
+}
+
+.demands-table th,
+.demands-table td {
+  min-width: 0;
+  padding-right: 10px;
+  padding-left: 10px;
+  vertical-align: middle;
+}
+
+.demands-table th {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.demands-table tbody tr {
+  height: 72px;
+}
+
+.demands-table td {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.demands-table td:first-child {
+  color: var(--text-soft);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.demand-summary {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.demand-summary strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demand-summary small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.manager-missing {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.demands-table .action-buttons {
+  justify-content: flex-start;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.demands-table .action-btn {
+  width: 35px;
+  height: 35px;
+  flex: 0 0 35px;
+}
+
+.demands-table-footer {
+  justify-content: flex-start;
+  min-height: 44px;
+  padding: 0 16px;
+}
+
+.demands-table-footer span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ============================================================
+   CONTRASTE — TEMA CLARO
+============================================================ */
+
+[data-theme="light"]
+body[data-page="demandas"]
+.page-heading p {
+  color: #40545f;
+}
+
+[data-theme="light"]
+body[data-page="demandas"]
+.search-filter input::placeholder {
+  color: #697980;
+}
+
+[data-theme="light"]
+body[data-page="demandas"]
+.custom-select-trigger {
+  border-color: #c9d2d6;
+  background: rgba(255, 255, 255, 0.76);
+  color: #1d2f38;
+}
+
+[data-theme="light"]
+body[data-page="demandas"]
+.custom-select-menu {
+  border-color: #c9d2d6;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 42px rgba(38, 58, 66, 0.17);
+}
+
+[data-theme="light"]
+body[data-page="demandas"]
+.custom-select-option {
+  color: #40545f;
+}
+
+[data-theme="light"]
+body[data-page="demandas"]
+.demands-table td {
+  color: #40545f;
+}
+
+[data-theme="light"]
+body[data-page="demandas"]
+.demand-summary small,
+[data-theme="light"]
+body[data-page="demandas"]
+.demands-table-footer span {
+  color: #6a7a82;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+============================================================ */
+
+@media (max-width: 1420px) {
+  .filter-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .filter-bar .search-filter {
+    grid-column: 1 / -1;
+  }
+
+  .filter-clear {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1180px) {
+  .demands-table-scroll {
+    overflow-x: auto;
+  }
+
+  .demands-table {
+    min-width: 1080px;
+  }
+}
+
+@media (max-width: 760px) {
+  body[data-page="demandas"] .page-heading {
+    align-items: flex-start;
+  }
+
+  body[data-page="demandas"] .page-heading p {
+    font-size: 14px;
+  }
+
+  .filter-bar {
+    grid-template-columns: 1fr;
+    padding: 13px;
+  }
+
+  .filter-bar .search-filter {
+    grid-column: auto;
+  }
+
+  .custom-select-menu {
+    position: fixed;
+    top: auto;
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    max-height: min(420px, 60vh);
+    border-radius: 20px;
+  }
+}

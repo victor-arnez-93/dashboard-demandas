@@ -1,10 +1,16 @@
 import { log } from "./logger.js";
-import { getSupabase, isConfigured } from "./supabase-client.js";
+import {
+  configureAuthPersistence,
+  getSupabase,
+  isConfigured,
+  shouldRememberSession,
+} from "./supabase-client.js";
 
 const root = document.documentElement;
 const form = document.getElementById("loginForm");
 const submit = document.getElementById("loginSubmit");
 const message = document.getElementById("loginMessage");
+const remember = document.getElementById("rememberSession");
 
 function setMessage(text = "") {
   message.hidden = !text;
@@ -39,10 +45,14 @@ form?.addEventListener("submit", async event => {
   try {
     submit.disabled = true;
     submit.querySelector("span").textContent = "Entrando...";
+    configureAuthPersistence(remember.checked);
     const sb = getSupabase();
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    log.success("AUTH", "Login concluído.", { email });
+    log.success("AUTH", "Login concluído.", {
+      email,
+      manterConectado: remember.checked,
+    });
     location.replace("dashboard.html");
   } catch (error) {
     log.error("AUTH", "Falha no login.", error);
@@ -57,11 +67,16 @@ form?.addEventListener("submit", async event => {
 async function boot() {
   log.boot();
   applyTheme(root.dataset.theme);
+  remember.checked = shouldRememberSession();
   if (!isConfigured()) {
     setMessage("Conecte este projeto ao Supabase preenchendo assets/js/env.js.");
     log.warn("CONFIG", "Credenciais públicas do Supabase pendentes.");
     return;
   }
+
+  // Só restaura automaticamente quando o usuário escolheu manter a sessão.
+  if (!shouldRememberSession()) return;
+
   try {
     const { data } = await getSupabase().auth.getSession();
     if (data.session) location.replace("dashboard.html");

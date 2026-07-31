@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
+  <link rel="stylesheet" href="assets/css/v1.2.css">
 </head>
 <body>
   <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
@@ -67,7 +68,15 @@
           <i class="fa-regular fa-file-lines"></i><span>Relatórios</span>
         </button>
 
+        <span class="nav-label nav-label-spaced">OPERAÇÃO</span>
+        <button class="nav-item" type="button" data-view="conversores">
+          <i class="fa-solid fa-network-wired"></i><span>Conversores</span><b class="nav-count" id="navConverterCount">0</b>
+        </button>
+
         <span class="nav-label nav-label-spaced">SISTEMA</span>
+        <button class="nav-item" type="button" data-view="cadastros">
+          <i class="fa-solid fa-address-book"></i><span>Cadastros</span>
+        </button>
         <button class="nav-item" type="button" data-view="configuracoes">
           <i class="fa-solid fa-sliders"></i><span>Configurações</span>
         </button>
@@ -76,7 +85,7 @@
       <footer class="sidebar-footer">
         <span>Desenvolvido por</span>
         <strong>Victor Arnez</strong>
-        <small>FLUUX · <span data-app-version>v1.1.0</span></small>
+        <small>FLUUX · <span data-app-version>v1.2.0</span></small>
       </footer>
     </aside>
 
@@ -201,7 +210,7 @@
               <div><small>ACOMPANHAMENTO</small><h3>Demandas recentes</h3></div>
               <button class="text-btn" type="button" data-go-view="demandas">Ver todas <i class="fa-solid fa-arrow-right"></i></button>
             </div>
-            <div class="table-scroll">
+            <div class="table-scroll recent-table-scroll">
               <table>
                 <thead><tr><th>Demanda</th><th>Gestor</th><th>Prioridade</th><th>Prazo</th><th>Status</th></tr></thead>
                 <tbody id="recentDemandsBody"></tbody>
@@ -222,10 +231,14 @@
                 <label class="field full"><span>Título *</span><input id="demandTitle" type="text" maxlength="160" placeholder="Ex.: Revisar documentação do processo" required></label>
                 <label class="field full"><span>Descrição *</span><textarea id="demandDescription" rows="5" maxlength="4000" placeholder="Contexto, objetivo e resultado esperado..." required></textarea></label>
                 <label class="field"><span>Solicitante</span><input id="demandRequester" type="text" maxlength="120" placeholder="Nome ou área solicitante"></label>
-                <label class="field"><span>Responsável *</span><input id="demandResponsible" type="text" maxlength="120" placeholder="Pessoa responsável" required></label>
-                <label class="field"><span>Gestor *</span><input id="demandManager" type="text" maxlength="120" list="managerOptions" placeholder="Gestor da demanda" required></label>
-                <label class="field"><span>Departamento</span><input id="demandDepartment" type="text" maxlength="100" placeholder="Ex.: Administrativo"></label>
-                <label class="field"><span>Categoria *</span><select id="demandCategory" required><option value="">Selecione</option><option>Administrativo</option><option>Atendimento</option><option>Comercial</option><option>Documentação</option><option>Financeiro</option><option>Operacional</option><option>Planejamento</option><option>Processos</option><option>Projetos</option><option>Tecnologia</option><option>Outro</option></select></label>
+                <label class="field"><span>Responsável *</span><select id="demandResponsible" required><option value="">Selecione</option></select></label>
+                <label class="field conditional-field" id="demandResponsibleOtherField" hidden><span>Outro responsável *</span><input id="demandResponsibleOther" type="text" maxlength="120" placeholder="Digite o nome"></label>
+                <label class="field"><span>Gestor *</span><select id="demandManager" required><option value="">Selecione</option></select></label>
+                <label class="field conditional-field" id="demandManagerOtherField" hidden><span>Outro gestor *</span><input id="demandManagerOther" type="text" maxlength="120" placeholder="Digite o nome"></label>
+                <label class="field"><span>Departamento</span><select id="demandDepartment"><option value="">Não informado</option></select></label>
+                <label class="field conditional-field" id="demandDepartmentOtherField" hidden><span>Outro departamento</span><input id="demandDepartmentOther" type="text" maxlength="120" placeholder="Digite o departamento"></label>
+                <label class="field"><span>Categoria *</span><select id="demandCategory" required><option value="">Selecione</option></select></label>
+                <label class="field conditional-field" id="demandCategoryOtherField" hidden><span>Outra categoria *</span><input id="demandCategoryOther" type="text" maxlength="120" placeholder="Digite a categoria"></label>
               </div>
             </div>
             <div class="form-section">
@@ -249,7 +262,6 @@
               <button class="btn-primary" id="saveDemandButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar demanda</button>
             </div>
           </form>
-          <datalist id="managerOptions"></datalist>
         </section>
 
         <section class="view" data-view-panel="demandas" hidden>
@@ -266,7 +278,7 @@
               <label class="select-field"><select id="categoryFilter"><option value="">Todas as categorias</option></select><i class="fa-solid fa-chevron-down"></i></label>
               <button class="btn-ghost" id="clearDemandFilters" type="button"><i class="fa-solid fa-filter-circle-xmark"></i> Limpar</button>
             </div>
-            <div class="table-scroll">
+            <div class="table-scroll demands-table-scroll">
               <table>
                 <thead><tr><th>Código</th><th>Demanda</th><th>Gestor</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Prazo</th><th>Status</th><th aria-label="Ações"></th></tr></thead>
                 <tbody id="allDemandsBody"></tbody>
@@ -283,6 +295,8 @@
             <article class="panel panel-chart"><div class="panel-head"><div><small>CATEGORIAS</small><h3>Distribuição por assunto</h3></div></div><div class="chart analysis-chart"><canvas id="categoryChart"></canvas></div></article>
             <article class="panel panel-chart full-chart"><div class="panel-head"><div><small>CAPACIDADE</small><h3>Horas estimadas × realizadas por gestor</h3></div></div><div class="chart analysis-chart"><canvas id="hoursChart"></canvas></div></article>
             <article class="panel panel-chart full-chart"><div class="panel-head"><div><small>PRIORIDADE</small><h3>Volume por prioridade e status</h3></div></div><div class="chart analysis-chart"><canvas id="priorityChart"></canvas></div></article>
+            <article class="panel panel-chart"><div class="panel-head"><div><small>SUSTENTAÇÃO</small><h3>Trocas por mês</h3></div></div><div class="chart analysis-chart"><canvas id="converterMonthlyChart"></canvas></div></article>
+            <article class="panel panel-chart"><div class="panel-head"><div><small>RECORRÊNCIA</small><h3>Locais com mais problemas</h3></div></div><div class="chart analysis-chart"><canvas id="converterLocationChart"></canvas></div></article>
           </div>
         </section>
 
@@ -299,6 +313,8 @@
               <button type="button" data-report-period="today">Hoje</button>
               <button type="button" data-report-period="7">7 dias</button>
               <button class="active" type="button" data-report-period="30">30 dias</button>
+              <button type="button" data-report-period="month">Mês</button>
+              <button type="button" data-report-period="year">Ano</button>
               <button type="button" data-report-period="custom">Personalizado</button>
             </div>
             <div class="report-filter-grid">
@@ -321,9 +337,70 @@
           </div>
           <article class="panel report-table">
             <div class="panel-head"><div><small>DETALHAMENTO</small><h3>Demandas do relatório</h3></div><b id="reportPeriodLabel">Últimos 30 dias</b></div>
-            <div class="table-scroll">
+            <div class="table-scroll report-table-scroll">
               <table><thead><tr><th>Código</th><th>Demanda</th><th>Gestor</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Entrada</th><th>Prazo</th><th>Est.</th><th>Real.</th></tr></thead><tbody id="reportBody"></tbody></table>
             </div>
+          </article>
+          <article class="panel report-converters">
+            <div class="panel-head"><div><small>SUSTENTAÇÃO</small><h3>Conversores de mídia no período</h3></div><b id="reportConverterSummary">0 trocas</b></div>
+            <div class="report-converter-kpis">
+              <span><small>Atendimentos</small><strong id="reportConverterRecords">0</strong></span>
+              <span><small>Conversores trocados</small><strong id="reportConverterQuantity">0</strong></span>
+              <span><small>Local com mais ocorrências</small><strong id="reportConverterTopLocation">—</strong></span>
+            </div>
+            <div class="table-scroll report-table-scroll">
+              <table><thead><tr><th>Código</th><th>Data</th><th>Local</th><th>Ponto</th><th>Tipo</th><th>Direção</th><th>Qtd.</th><th>Motivo</th><th>Status</th></tr></thead><tbody id="reportConvertersBody"></tbody></table>
+            </div>
+          </article>
+        </section>
+
+
+        <section class="view" data-view-panel="conversores" hidden>
+          <div class="page-heading">
+            <div><small>SUSTENTAÇÃO</small><h1>Conversores de mídia</h1><p>Registre trocas, acompanhe recorrências e identifique os locais que mais exigem atenção.</p></div>
+            <button class="btn-primary" id="newConverterButton" type="button"><i class="fa-solid fa-plus"></i> Novo registro</button>
+          </div>
+          <div class="converter-kpis">
+            <article class="kpi-card blue"><small>Trocas no mês</small><strong id="converterMonthQuantity">0</strong><p>conversores substituídos</p></article>
+            <article class="kpi-card orange"><small>Atendimentos no mês</small><strong id="converterMonthRecords">0</strong><p>registros realizados</p></article>
+            <article class="kpi-card sand"><small>Local mais recorrente</small><strong class="text-kpi" id="converterTopLocation">—</strong><p id="converterTopLocationCount">sem ocorrências</p></article>
+            <article class="kpi-card green"><small>Concluídos</small><strong id="converterDoneRate">0%</strong><p>dos atendimentos</p></article>
+          </div>
+          <article class="panel">
+            <div class="filter-bar converter-filter-bar">
+              <label class="search-field"><i class="fa-solid fa-magnifying-glass"></i><input id="converterSearch" type="search" placeholder="Buscar por local, ponto, motivo ou código..."></label>
+              <label class="field compact-filter"><span>De</span><input id="converterStartFilter" type="date"></label>
+              <label class="field compact-filter"><span>Até</span><input id="converterEndFilter" type="date"></label>
+              <label class="select-field"><select id="converterLocationFilter"><option value="">Todos os locais</option></select><i class="fa-solid fa-chevron-down"></i></label>
+              <button class="btn-ghost" id="clearConverterFilters" type="button"><i class="fa-solid fa-filter-circle-xmark"></i> Limpar</button>
+            </div>
+            <div class="table-scroll converter-table-scroll">
+              <table><thead><tr><th>Código</th><th>Data</th><th>Local</th><th>Ponto</th><th>Atendimento</th><th>Conversão</th><th>Qtd.</th><th>Motivo</th><th>Status</th><th aria-label="Ações"></th></tr></thead><tbody id="converterBody"></tbody></table>
+            </div>
+            <div class="table-footer"><span id="converterTableCount">0 registros exibidos</span><span>Dados sincronizados com o Supabase</span></div>
+          </article>
+        </section>
+
+        <section class="view" data-view-panel="cadastros" hidden>
+          <div class="page-heading">
+            <div><small>BASES REUTILIZÁVEIS</small><h1>Cadastros</h1><p>Mantenha gestores, responsáveis, departamentos, categorias e locais padronizados.</p></div>
+            <button class="btn-primary" id="newCatalogButton" type="button"><i class="fa-solid fa-plus"></i> Novo cadastro</button>
+          </div>
+          <article class="panel catalog-panel">
+            <div class="catalog-toolbar">
+              <div class="catalog-tabs" role="tablist" aria-label="Tipos de cadastro">
+                <button class="active" type="button" data-catalog-type="managers"><i class="fa-solid fa-user-tie"></i> Gestores</button>
+                <button type="button" data-catalog-type="responsibles"><i class="fa-solid fa-user-check"></i> Responsáveis</button>
+                <button type="button" data-catalog-type="departments"><i class="fa-solid fa-building"></i> Departamentos</button>
+                <button type="button" data-catalog-type="categories"><i class="fa-solid fa-tags"></i> Categorias</button>
+                <button type="button" data-catalog-type="locations"><i class="fa-solid fa-location-dot"></i> Locais</button>
+              </div>
+              <label class="search-field catalog-search"><i class="fa-solid fa-magnifying-glass"></i><input id="catalogSearch" type="search" placeholder="Buscar neste cadastro..."></label>
+            </div>
+            <div class="table-scroll catalog-table-scroll">
+              <table><thead><tr><th>Nome</th><th>Descrição</th><th>Status</th><th>Atualizado em</th><th aria-label="Ações"></th></tr></thead><tbody id="catalogBody"></tbody></table>
+            </div>
+            <div class="table-footer"><span id="catalogCount">0 itens</span><span>Itens inativos não aparecem em novos registros</span></div>
           </article>
         </section>
 
@@ -363,10 +440,6 @@
     </div>
   </div>
 
-  <div class="presentation-exit" id="presentationExit" hidden>
-    <button class="btn-primary" id="exitPresentationButton" type="button"><i class="fa-solid fa-arrow-left"></i> Voltar ao painel</button><kbd>Esc</kbd>
-  </div>
-
   <div class="modal-layer" id="demandDetailModal" hidden>
     <div class="modal-backdrop" data-close-modal="demandDetailModal"></div>
     <section class="modal-card detail-modal-card" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
@@ -386,6 +459,57 @@
     </section>
   </div>
 
+
+  <div class="modal-layer" id="catalogModal" hidden>
+    <div class="modal-backdrop" data-close-modal="catalogModal"></div>
+    <section class="modal-card compact-modal" role="dialog" aria-modal="true" aria-labelledby="catalogModalTitle">
+      <div class="modal-head"><div><small id="catalogModalEyebrow">CADASTRO</small><h2 id="catalogModalTitle">Novo item</h2></div><button class="icon-btn" type="button" data-close-modal="catalogModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>
+      <form id="catalogForm" class="modal-form">
+        <input id="catalogId" type="hidden">
+        <label class="field"><span>Nome *</span><input id="catalogName" type="text" maxlength="160" required></label>
+        <label class="field" id="catalogDescriptionField" hidden><span>Descrição</span><textarea id="catalogDescription" rows="3" maxlength="1000" placeholder="Detalhes opcionais sobre o local"></textarea></label>
+        <div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="catalogModal">Cancelar</button><button class="btn-primary" id="saveCatalogButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-layer" id="converterModal" hidden>
+    <div class="modal-backdrop" data-close-modal="converterModal"></div>
+    <section class="modal-card converter-modal-card" role="dialog" aria-modal="true" aria-labelledby="converterModalTitle">
+      <div class="modal-head"><div><small>SUSTENTAÇÃO</small><h2 id="converterModalTitle">Novo registro de conversor</h2></div><button class="icon-btn" type="button" data-close-modal="converterModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>
+      <form id="converterForm" class="modal-form">
+        <input id="converterId" type="hidden">
+        <div class="form-grid">
+          <label class="field"><span>Data do atendimento *</span><input id="converterDate" type="date" required></label>
+          <label class="field"><span>Local *</span><select id="converterLocation" required><option value="">Selecione</option></select></label>
+          <label class="field conditional-field" id="converterLocationOtherField" hidden><span>Outro local *</span><input id="converterLocationOther" type="text" maxlength="160" placeholder="Digite o local"></label>
+          <label class="field"><span>Ponto / referência</span><input id="converterPoint" type="text" maxlength="160" placeholder="Ex.: Rack 02, agência, andar"></label>
+          <label class="field"><span>Tipo de atendimento *</span><select id="converterServiceType" required><option>Troca</option><option>Manutenção</option><option>Diagnóstico</option><option>Instalação</option><option value="__other__">Outro</option></select></label>
+          <label class="field conditional-field" id="converterServiceTypeOtherField" hidden><span>Outro tipo *</span><input id="converterServiceTypeOther" type="text" maxlength="80"></label>
+          <label class="field"><span>Conversão</span><select id="converterDirection"><option value="">Não informado</option><option>UTP → Fibra</option><option>Fibra → UTP</option><option>Bidirecional</option><option value="__other__">Outro</option></select></label>
+          <label class="field conditional-field" id="converterDirectionOtherField" hidden><span>Outra conversão</span><input id="converterDirectionOther" type="text" maxlength="80"></label>
+          <label class="field"><span>Quantidade trocada *</span><input id="converterQuantity" type="number" min="1" step="1" inputmode="numeric" value="1" required></label>
+          <label class="field"><span>Status *</span><select id="converterStatus" required><option>Concluído</option><option>Pendente</option><option>Em andamento</option><option>Aguardando material</option><option value="__other__">Outro</option></select></label>
+          <label class="field conditional-field" id="converterStatusOtherField" hidden><span>Outro status *</span><input id="converterStatusOther" type="text" maxlength="60"></label>
+          <label class="field"><span>Responsável</span><select id="converterResponsible"><option value="">Não informado</option></select></label>
+          <label class="field conditional-field" id="converterResponsibleOtherField" hidden><span>Outro responsável</span><input id="converterResponsibleOther" type="text" maxlength="120"></label>
+          <label class="field full"><span>Motivo / problema identificado</span><textarea id="converterReason" rows="3" maxlength="500" placeholder="Descreva a causa ou sintoma observado"></textarea></label>
+          <label class="field full"><span>Observações</span><textarea id="converterNotes" rows="3" maxlength="4000" placeholder="Informações complementares"></textarea></label>
+        </div>
+        <div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="converterModal">Cancelar</button><button class="btn-primary" id="saveConverterButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar registro</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-layer" id="converterDetailModal" hidden>
+    <div class="modal-backdrop" data-close-modal="converterDetailModal"></div>
+    <section class="modal-card detail-modal-card" role="dialog" aria-modal="true" aria-labelledby="converterDetailTitle">
+      <div class="modal-head"><div><small id="converterDetailCode">CONVERSOR</small><h2 id="converterDetailTitle">Detalhes do atendimento</h2></div><button class="icon-btn" type="button" data-close-modal="converterDetailModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>
+      <div id="converterDetailContent" class="detail-content"></div>
+      <div class="modal-actions detail-actions"><button class="btn-ghost" type="button" data-close-modal="converterDetailModal">Fechar</button><button class="btn-primary" id="converterDetailEditButton" type="button"><i class="fa-solid fa-pen"></i> Editar</button></div>
+    </section>
+  </div>
+
   <div class="fatal-layer" id="fatalLayer" hidden>
     <section>
       <i class="fa-solid fa-plug-circle-xmark"></i>
@@ -395,6 +519,48 @@
       <a href="index.html">Voltar ao login</a>
     </section>
   </div>
+
+
+  <section class="presentation-shell" id="presentationShell" hidden aria-label="Modo apresentação executiva">
+    <header class="presentation-topbar">
+      <div class="presentation-brand"><img src="assets/img/logo.png" alt="FLUUX"><span><small>VISÃO EXECUTIVA</small><strong>Apresentação de resultados</strong></span></div>
+      <div class="presentation-periods" role="group" aria-label="Período da apresentação">
+        <button class="active" type="button" data-presentation-period="7">7 dias</button>
+        <button type="button" data-presentation-period="week">Semana</button>
+        <button type="button" data-presentation-period="month">Mês</button>
+        <button type="button" data-presentation-period="year">Ano</button>
+        <button type="button" data-presentation-period="custom">Personalizado</button>
+      </div>
+      <div class="presentation-actions">
+        <button class="presentation-auto" id="presentationAutoButton" type="button" aria-pressed="false"><i class="fa-solid fa-play"></i> Automático</button>
+        <button class="btn-primary" id="exitPresentationButton" type="button"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+      </div>
+    </header>
+    <div class="presentation-custom-period" id="presentationCustomPeriod" hidden>
+      <label>De <input id="presentationStartDate" type="date"></label><label>Até <input id="presentationEndDate" type="date"></label><button class="btn-secondary compact" id="applyPresentationPeriod" type="button">Aplicar</button>
+    </div>
+    <main class="presentation-stage">
+      <article class="presentation-slide active" data-presentation-slide="0">
+        <div class="presentation-slide-head"><div><small>RESUMO DO PERÍODO</small><h1>Resultados em uma visão rápida.</h1></div><strong id="presentationPeriodLabel">Últimos 7 dias</strong></div>
+        <div class="presentation-kpis">
+          <div><small>Recebidas</small><strong id="presentationTotal">0</strong></div><div><small>Concluídas</small><strong id="presentationDone">0</strong></div><div><small>Em andamento</small><strong id="presentationProgress">0</strong></div><div><small>Atrasadas</small><strong id="presentationOverdue">0</strong></div><div><small>Conclusão</small><strong id="presentationDoneRate">0%</strong></div><div><small>Utilização de horas</small><strong id="presentationHoursRate">0%</strong></div>
+        </div>
+        <div class="presentation-insight" id="presentationInsight"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Os destaques do período aparecerão aqui.</span></div>
+        <div class="presentation-chart-grid"><div class="presentation-chart-card wide"><h3>Recebidas × concluídas</h3><canvas id="presentationFlowChart"></canvas></div><div class="presentation-chart-card"><h3>Distribuição por status</h3><canvas id="presentationStatusChart"></canvas></div></div>
+      </article>
+      <article class="presentation-slide" data-presentation-slide="1" hidden>
+        <div class="presentation-slide-head"><div><small>GESTÃO E CAPACIDADE</small><h1>Volume e esforço por gestor.</h1></div><strong id="presentationManagerHeadline">Visão consolidada</strong></div>
+        <div class="presentation-chart-grid equal"><div class="presentation-chart-card"><h3>Demandas por gestor</h3><canvas id="presentationManagersChart"></canvas></div><div class="presentation-chart-card"><h3>Horas estimadas × realizadas</h3><canvas id="presentationHoursChart"></canvas></div></div>
+        <div class="presentation-ranking" id="presentationManagerRanking"></div>
+      </article>
+      <article class="presentation-slide" data-presentation-slide="2" hidden>
+        <div class="presentation-slide-head"><div><small>SUSTENTAÇÃO DE CONVERSORES</small><h1>Trocas e locais mais recorrentes.</h1></div><strong id="presentationConverterHeadline">0 trocas no período</strong></div>
+        <div class="presentation-kpis four"><div><small>Atendimentos</small><strong id="presentationConverterRecords">0</strong></div><div><small>Conversores trocados</small><strong id="presentationConverterQuantity">0</strong></div><div><small>Local mais recorrente</small><strong class="text-kpi" id="presentationConverterLocation">—</strong></div><div><small>Concluídos</small><strong id="presentationConverterDoneRate">0%</strong></div></div>
+        <div class="presentation-chart-grid equal"><div class="presentation-chart-card"><h3>Evolução mensal</h3><canvas id="presentationConverterMonthlyChart"></canvas></div><div class="presentation-chart-card"><h3>Ocorrências por local</h3><canvas id="presentationConverterLocationChart"></canvas></div></div>
+      </article>
+    </main>
+    <footer class="presentation-footer"><button id="presentationPrev" type="button" aria-label="Slide anterior"><i class="fa-solid fa-chevron-left"></i></button><div class="presentation-dots"><button class="active" type="button" data-slide-go="0" aria-label="Resumo"></button><button type="button" data-slide-go="1" aria-label="Gestão"></button><button type="button" data-slide-go="2" aria-label="Conversores"></button></div><button id="presentationNext" type="button" aria-label="Próximo slide"><i class="fa-solid fa-chevron-right"></i></button><span><kbd>←</kbd><kbd>→</kbd> navegar · <kbd>Esc</kbd> sair</span></footer>
+  </section>
 
   <div class="toast-region" id="toastRegion" aria-live="polite"></div>
 

@@ -1,5 +1,6 @@
 import { log } from "./logger.js";
 
+const REMEMBER_KEY = "fluux-remember-session";
 let client = null;
 
 export function isConfigured() {
@@ -11,6 +12,20 @@ export function isConfigured() {
   );
 }
 
+export function shouldRememberSession() {
+  return localStorage.getItem(REMEMBER_KEY) === "1";
+}
+
+export function configureAuthPersistence(remember) {
+  if (remember) localStorage.setItem(REMEMBER_KEY, "1");
+  else localStorage.removeItem(REMEMBER_KEY);
+  client = null;
+}
+
+function authStorage() {
+  return shouldRememberSession() ? localStorage : sessionStorage;
+}
+
 export function getSupabase() {
   if (client) return client;
   if (!window.supabase?.createClient) throw new Error("Biblioteca do Supabase não foi carregada.");
@@ -18,10 +33,17 @@ export function getSupabase() {
 
   const env = window.FLUUX_ENV;
   client = window.supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: authStorage(),
+    },
   });
   window.fluuxSupabase = client;
-  log.success("SUPABASE", "Cliente inicializado.");
+  log.success("SUPABASE", "Cliente inicializado.", {
+    persistencia: shouldRememberSession() ? "dispositivo" : "sessão do navegador",
+  });
   return client;
 }
 

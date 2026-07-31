@@ -6,6 +6,8 @@ export const VIEW_LABELS = {
   demandas: "Demandas",
   analises: "Análises",
   relatorios: "Relatórios",
+  conversores: "Conversores",
+  cadastros: "Cadastros",
   configuracoes: "Configurações",
 };
 

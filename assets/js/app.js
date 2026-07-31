@@ -1,8 +1,8 @@
 import { log } from "./logger.js";
 import { getSupabase, requireSession } from "./supabase-client.js";
 import {
-  state, initializeStore, demandCode, effectiveStatus, saveDemand, removeDemand,
-  saveProfile, saveSettings, uploadAvatar,
+  state, initializeStore, demandCode, effectiveStatus, findOrCreateCatalog,
+  saveDemand, removeDemand, saveProfile, saveSettings, uploadAvatar,
 } from "./store.js";
 import {
   VIEW_LABELS, escapeHtml, slug, formatDate, showToast, setActiveView, applyTheme,
@@ -11,6 +11,10 @@ import {
 import { periodDemands, renderDashboardCharts, renderAnalysisCharts, redrawCharts } from "./charts.js";
 import { closeWeather, initializeWeather, openWeather } from "./weather.js";
 import { initReports, renderReport } from "./reports.js";
+import { initCatalogs, populateCatalogSelects, renderCatalogs } from "./catalogs.js";
+import { initConverters, renderConverters } from "./converters.js";
+import { initPresentation, renderPresentation } from "./presentation.js";
+import { bindNumericOnly, bindSmartText, numberValue, smartName, smartSentence } from "./form-utils.js";
 
 let dashboardPeriod = 30;
 let confirmCallback = null;
@@ -67,7 +71,7 @@ function renderDashboard() {
     ["Dentro da estimativa", "ok", "fa-circle-check"];
   hoursStatus.className = `hours-status ${status[1]}`;
   hoursStatus.innerHTML = `<i class="fa-solid ${status[2]}"></i> ${status[0]}`;
-  const recent = state.demands.slice(0, 6);
+  const recent = state.demands.slice(0, 20);
   document.getElementById("recentDemandsBody").innerHTML = recent.length ? recent.map(item => demandRow(item, true)).join("") : emptyRow(5, "Nenhuma demanda cadastrada. Use “Nova demanda” para começar.");
   renderDashboardCharts(dashboardPeriod);
 }
@@ -94,39 +98,30 @@ function renderDemands() {
   document.getElementById("tableCount").textContent = `${demands.length} ${demands.length === 1 ? "demanda exibida" : "demandas exibidas"}`;
 }
 
-function populateDynamicFilters() {
-  const categories = [...new Set(state.demands.map(item => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  const managers = [...new Set(state.demands.map(managerName))].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  ["categoryFilter", "reportCategory"].forEach(id => {
-    const select = document.getElementById(id);
-    const current = select.value;
-    const first = id === "categoryFilter" ? "Todas as categorias" : "Todas";
-    select.innerHTML = `<option value="">${first}</option>${categories.map(item => `<option>${escapeHtml(item)}</option>`).join("")}`;
-    if ([...select.options].some(option => option.value === current)) select.value = current;
-  });
-  ["managerFilter", "reportManager"].forEach(id => {
-    const select = document.getElementById(id);
-    const current = select.value;
-    const first = id === "managerFilter" ? "Todos os gestores" : "Todos";
-    select.innerHTML = `<option value="">${first}</option>${managers.map(item => `<option>${escapeHtml(item)}</option>`).join("")}`;
-    if ([...select.options].some(option => option.value === current)) select.value = current;
-  });
-  document.getElementById("managerOptions").innerHTML = managers
-    .filter(item => item !== "Gestor não informado")
-    .map(item => `<option value="${escapeHtml(item)}"></option>`).join("");
-}
-
 function refreshAll() {
-  populateDynamicFilters();
+  populateCatalogSelects();
   renderDashboard();
   renderDemands();
+  renderConverters();
+  renderCatalogs();
   renderAnalysisCharts();
   renderReport();
+  renderPresentation();
+}
+
+function setConditionalField(selectId, fieldId) {
+  const select = document.getElementById(selectId);
+  const field = document.getElementById(fieldId);
+  if (!select || !field) return;
+  field.hidden = select.value !== "__other__";
+  const input = field.querySelector("input");
+  if (input) input.required = select.required && select.value === "__other__";
 }
 
 function resetDemandForm() {
   const form = document.getElementById("demandForm");
   form.reset();
+  populateCatalogSelects();
   document.getElementById("demandId").value = "";
   document.getElementById("demandFormHeading").textContent = "Nova demanda";
   document.getElementById("saveDemandButton").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salvar demanda`;
@@ -138,21 +133,44 @@ function resetDemandForm() {
   document.getElementById("demandDueDate").value = inputDate(due);
   document.getElementById("demandPriority").value = "Normal";
   document.getElementById("demandStatus").value = "Pendente";
+  [
+    ["demandResponsible", "demandResponsibleOtherField"],
+    ["demandManager", "demandManagerOtherField"],
+    ["demandDepartment", "demandDepartmentOtherField"],
+    ["demandCategory", "demandCategoryOtherField"],
+  ].forEach(([select, field]) => setConditionalField(select, field));
   form.querySelectorAll(".invalid").forEach(item => item.classList.remove("invalid"));
+}
+
+function setCatalogValue(selectId, otherId, type, id, name) {
+  const select = document.getElementById(selectId);
+  const other = document.getElementById(otherId);
+  if (id && [...select.options].some(option => option.value === id)) {
+    select.value = id;
+    other.value = "";
+  } else if (name) {
+    select.value = "__other__";
+    other.value = name;
+  } else {
+    select.value = "";
+    other.value = "";
+  }
+  setConditionalField(selectId, other.closest(".conditional-field").id);
 }
 
 function editDemand(id) {
   const demand = state.demands.find(item => item.id === id);
   if (!demand) return;
   closeModal("demandDetailModal");
+  populateCatalogSelects();
   document.getElementById("demandId").value = demand.id;
   document.getElementById("demandTitle").value = demand.title;
   document.getElementById("demandDescription").value = demand.description;
   document.getElementById("demandRequester").value = demand.requester || "";
-  document.getElementById("demandResponsible").value = demand.responsible;
-  document.getElementById("demandManager").value = demand.manager || "";
-  document.getElementById("demandDepartment").value = demand.department || "";
-  document.getElementById("demandCategory").value = [...document.getElementById("demandCategory").options].some(option => option.value === demand.category) ? demand.category : "Outro";
+  setCatalogValue("demandResponsible", "demandResponsibleOther", "responsibles", demand.responsible_id, demand.responsible);
+  setCatalogValue("demandManager", "demandManagerOther", "managers", demand.manager_id, demand.manager);
+  setCatalogValue("demandDepartment", "demandDepartmentOther", "departments", demand.department_id, demand.department);
+  setCatalogValue("demandCategory", "demandCategoryOther", "categories", demand.category_id, demand.category);
   document.getElementById("demandPriority").value = demand.priority;
   document.getElementById("demandStatus").value = demand.status;
   document.getElementById("demandStartDate").value = demand.start_date;
@@ -166,23 +184,44 @@ function editDemand(id) {
   setActiveView("nova-demanda");
 }
 
-function demandPayload() {
+async function resolveCatalogSelection(selectId, otherId, type, required) {
+  const select = document.getElementById(selectId);
+  if (!select.value) {
+    if (required) throw new Error("Revise os campos obrigatórios da demanda.");
+    return null;
+  }
+  if (select.value !== "__other__") return state.catalogs[type].find(item => item.id === select.value) || null;
+  const other = document.getElementById(otherId);
+  other.value = smartName(other.value);
+  if (!other.value) throw new Error("Preencha a opção “Outro” antes de salvar.");
+  return findOrCreateCatalog(type, other.value);
+}
+
+async function demandPayload() {
+  const responsible = await resolveCatalogSelection("demandResponsible", "demandResponsibleOther", "responsibles", true);
+  const manager = await resolveCatalogSelection("demandManager", "demandManagerOther", "managers", true);
+  const department = await resolveCatalogSelection("demandDepartment", "demandDepartmentOther", "departments", false);
+  const category = await resolveCatalogSelection("demandCategory", "demandCategoryOther", "categories", true);
   return {
-    title: document.getElementById("demandTitle").value.trim(),
-    description: document.getElementById("demandDescription").value.trim(),
-    requester: document.getElementById("demandRequester").value.trim(),
-    responsible: document.getElementById("demandResponsible").value.trim(),
-    manager: document.getElementById("demandManager").value.trim(),
-    department: document.getElementById("demandDepartment").value.trim(),
-    category: document.getElementById("demandCategory").value,
+    title: smartSentence(document.getElementById("demandTitle").value),
+    description: smartSentence(document.getElementById("demandDescription").value),
+    requester: smartName(document.getElementById("demandRequester").value),
+    responsible: responsible?.name || "",
+    responsible_id: responsible?.id || null,
+    manager: manager?.name || "",
+    manager_id: manager?.id || null,
+    department: department?.name || "",
+    department_id: department?.id || null,
+    category: category?.name || "",
+    category_id: category?.id || null,
     priority: document.getElementById("demandPriority").value,
     status: document.getElementById("demandStatus").value,
     start_date: document.getElementById("demandStartDate").value,
     due_date: document.getElementById("demandDueDate").value,
-    estimated_hours: Number(document.getElementById("demandEstimatedHours").value || 0),
-    actual_hours: Number(document.getElementById("demandActualHours").value || 0),
-    tags: document.getElementById("demandTags").value.split(",").map(item => item.trim()).filter(Boolean),
-    notes: document.getElementById("demandNotes").value.trim(),
+    estimated_hours: numberValue(document.getElementById("demandEstimatedHours").value),
+    actual_hours: numberValue(document.getElementById("demandActualHours").value),
+    tags: document.getElementById("demandTags").value.split(",").map(item => smartSentence(item)).filter(Boolean),
+    notes: smartSentence(document.getElementById("demandNotes").value),
   };
 }
 
@@ -204,6 +243,13 @@ function validateDemand(payload) {
   if (payload.start_date && payload.due_date && payload.due_date < payload.start_date) {
     document.getElementById("demandDueDate").closest(".field").classList.add("invalid");
     showToast("O prazo não pode ser anterior à data de entrada.", "error");
+    valid = false;
+  }
+  const editingId = document.getElementById("demandId").value;
+  const duplicate = state.demands.some(item => item.id !== editingId && item.title.localeCompare(payload.title, "pt-BR", { sensitivity: "accent" }) === 0 && managerName(item) === payload.manager);
+  if (duplicate) {
+    document.getElementById("demandTitle").closest(".field").classList.add("invalid");
+    showToast("Já existe uma demanda com o mesmo título para este gestor.", "error");
     valid = false;
   }
   return valid;
@@ -270,8 +316,28 @@ function bindNavigation() {
   document.getElementById("sidebarBackdrop").addEventListener("click", closeMobile);
 }
 
+function bindDemandFormBehavior() {
+  [
+    ["demandResponsible", "demandResponsibleOtherField"],
+    ["demandManager", "demandManagerOtherField"],
+    ["demandDepartment", "demandDepartmentOtherField"],
+    ["demandCategory", "demandCategoryOtherField"],
+  ].forEach(([selectId, fieldId]) => document.getElementById(selectId).addEventListener("change", () => setConditionalField(selectId, fieldId)));
+  bindSmartText(document.getElementById("demandTitle"), "sentence");
+  bindSmartText(document.getElementById("demandDescription"), "sentence");
+  bindSmartText(document.getElementById("demandRequester"), "name");
+  bindSmartText(document.getElementById("demandResponsibleOther"), "name");
+  bindSmartText(document.getElementById("demandManagerOther"), "name");
+  bindSmartText(document.getElementById("demandDepartmentOther"), "name");
+  bindSmartText(document.getElementById("demandCategoryOther"), "name");
+  bindSmartText(document.getElementById("demandNotes"), "sentence");
+  bindNumericOnly(document.getElementById("demandEstimatedHours"));
+  bindNumericOnly(document.getElementById("demandActualHours"));
+}
+
 function bindEvents() {
   bindNavigation();
+  bindDemandFormBehavior();
   document.querySelectorAll("[data-close-modal]").forEach(button => button.addEventListener("click", () => closeModal(button.dataset.closeModal)));
   document.querySelectorAll("[data-period]").forEach(button => button.addEventListener("click", () => {
     dashboardPeriod = Number(button.dataset.period);
@@ -313,11 +379,13 @@ function bindEvents() {
   });
   document.getElementById("demandForm").addEventListener("submit", async event => {
     event.preventDefault();
-    const payload = demandPayload();
-    if (!validateDemand(payload)) return showToast("Revise os campos obrigatórios destacados.", "error");
     const button = document.getElementById("saveDemandButton");
     try {
       button.disabled = true;
+      const payload = await demandPayload();
+      document.getElementById("demandTitle").value = payload.title;
+      document.getElementById("demandDescription").value = payload.description;
+      if (!validateDemand(payload)) return;
       const id = document.getElementById("demandId").value || null;
       await saveDemand(payload, id);
       resetDemandForm();
@@ -326,13 +394,8 @@ function bindEvents() {
       showToast(id ? "Demanda atualizada com sucesso." : "Demanda cadastrada com sucesso.", "success");
     } catch (error) {
       log.error("DEMANDAS", "Falha ao salvar.", error);
-      const migrationPending = /manager/i.test(error.message || "") && /column|schema cache|could not find/i.test(error.message || "");
-      showToast(
-        migrationPending
-          ? "Execute supabase-migration-v1.1.sql no Supabase antes de salvar demandas com gestor."
-          : `Não foi possível salvar: ${error.message}`,
-        "error",
-      );
+      const migrationPending = /manager_id|responsible_id|demand_categories|schema cache|could not find/i.test(error.message || "");
+      showToast(migrationPending ? "A migração v1.2.0 não foi encontrada no Supabase. Atualize o schema e tente novamente." : `Não foi possível salvar: ${error.message}`, "error");
     } finally {
       button.disabled = false;
     }
@@ -365,39 +428,24 @@ function bindEvents() {
     applyTheme(theme);
     try { await saveProfile({ theme }); } catch (error) { log.warn("PERFIL", "Tema aplicado, mas não salvo.", error); }
   });
-  const startPresentation = () => {
-    document.body.classList.add("presentation-mode");
-    document.getElementById("presentationExit").hidden = false;
-    document.getElementById("presentationButton").innerHTML = `<i class="fa-solid fa-arrow-left"></i> Voltar`;
-    document.documentElement.requestFullscreen?.().catch(() => {});
-  };
-  const stopPresentation = () => {
-    document.body.classList.remove("presentation-mode");
-    document.getElementById("presentationExit").hidden = true;
-    document.getElementById("presentationButton").innerHTML = `<i class="fa-solid fa-display"></i> Apresentar`;
-    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-  };
-  document.getElementById("presentationButton").addEventListener("click", () => {
-    document.body.classList.contains("presentation-mode") ? stopPresentation() : startPresentation();
-  });
-  document.getElementById("exitPresentationButton").addEventListener("click", stopPresentation);
   document.addEventListener("keydown", event => {
-    if (event.key !== "Escape") return;
+    if (event.key !== "Escape" || !document.getElementById("presentationShell").hidden) return;
     document.querySelectorAll(".modal-layer:not([hidden])").forEach(modal => closeModal(modal.id));
-    if (document.body.classList.contains("presentation-mode")) stopPresentation();
-  });
-  document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement && document.body.classList.contains("presentation-mode")) stopPresentation();
   });
   addEventListener("fluux:viewchange", event => {
     if (event.detail.view === "analises") setTimeout(renderAnalysisCharts, 20);
     if (event.detail.view === "relatorios") renderReport();
+    if (event.detail.view === "conversores") renderConverters();
+    if (event.detail.view === "cadastros") renderCatalogs();
     if (event.detail.view === "configuracoes") {
       fillSettings();
       setSettingsEditing(false);
     }
   });
-  addEventListener("fluux:themechange", () => setTimeout(() => redrawCharts(dashboardPeriod), 25));
+  addEventListener("fluux:themechange", () => setTimeout(() => {
+    redrawCharts(dashboardPeriod);
+    renderPresentation();
+  }, 25));
 }
 
 function bindSettings() {
@@ -424,13 +472,13 @@ function bindSettings() {
       if (file) avatarUrl = await uploadAvatar(file);
       await Promise.all([
         saveProfile({
-          full_name: document.getElementById("settingsFullName").value.trim(),
-          role: document.getElementById("settingsRole").value.trim(),
+          full_name: smartName(document.getElementById("settingsFullName").value),
+          role: smartName(document.getElementById("settingsRole").value),
           avatar_url: avatarUrl,
         }),
         saveSettings({
           app_name: document.getElementById("settingsAppName").value.trim(),
-          app_subtitle: document.getElementById("settingsAppSubtitle").value.trim(),
+          app_subtitle: smartName(document.getElementById("settingsAppSubtitle").value),
         }),
       ]);
       document.getElementById("avatarFile").value = "";
@@ -451,9 +499,7 @@ function bindSettings() {
 function showFatal(error) {
   document.getElementById("bootScreen").hidden = true;
   document.getElementById("appShell").hidden = true;
-  document.getElementById("fatalMessage").textContent =
-    error.message?.includes("configurado") ? error.message :
-    "Verifique se o SQL de instalação foi executado e se a URL/chave do Supabase estão corretas.";
+  document.getElementById("fatalMessage").textContent = error.message?.includes("configurado") ? error.message : "Verifique se as migrações foram executadas e se a URL/chave do Supabase estão corretas.";
   document.getElementById("fatalLayer").hidden = false;
 }
 
@@ -468,11 +514,13 @@ async function boot() {
     fillSettings();
     setSettingsEditing(false);
     initClock();
-    resetDemandForm();
-    populateDynamicFilters();
     bindEvents();
     bindSettings();
+    initCatalogs({ askConfirmation, afterChange: refreshAll });
+    initConverters({ askConfirmation, afterChange: refreshAll });
+    initPresentation();
     initReports();
+    resetDemandForm();
     refreshAll();
     document.getElementById("bootScreen").hidden = true;
     document.getElementById("appShell").hidden = false;
@@ -483,7 +531,7 @@ async function boot() {
     getSupabase().auth.onAuthStateChange((event, nextSession) => {
       if (event === "SIGNED_OUT" || !nextSession) location.replace("index.html");
     });
-    log.success("APP", "Sistema pronto. Nenhum erro de inicialização.");
+    log.success("APP", "FLUUX v1.2.0 pronto. Nenhum erro de inicialização.");
   } catch (error) {
     log.error("APP", "Falha crítica na inicialização.", error);
     showFatal(error);

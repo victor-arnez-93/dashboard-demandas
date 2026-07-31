@@ -149,3 +149,35 @@
   .login-brand { height: 72px; margin-bottom: 18px; }
   .login-heading h1 { font-size: 27px; }
 }
+
+.remember-session {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -2px 0 15px;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 11px;
+  user-select: none;
+}
+.remember-session input { position: absolute; opacity: 0; pointer-events: none; }
+.remember-session > span {
+  display: grid;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: transparent;
+  transition: all var(--transition);
+}
+.remember-session input:checked + span {
+  border-color: var(--accent);
+  background: var(--gradient);
+  color: #fff;
+  box-shadow: 0 5px 15px color-mix(in srgb,var(--accent) 24%,transparent);
+}
+.remember-session input:focus-visible + span { outline: 3px solid color-mix(in srgb,var(--accent) 28%,transparent); }
+.remember-session strong { font-weight: 600; }

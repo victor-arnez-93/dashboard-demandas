@@ -20,7 +20,7 @@ A entrada do sistema é `index.html`. O arquivo `dashboard.html` foi mantido som
 
 ## Estrutura
 
-### Globais
+## Globais
 
 - `assets/css/theme.css`: variáveis dos temas claro e escuro;
 - `assets/css/main.css`: reset, estrutura comum, sidebar, topbar, clima, botões, formulários, tabelas-base, modais, toasts e responsividade global;

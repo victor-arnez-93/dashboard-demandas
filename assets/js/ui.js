@@ -1,27 +1,35 @@
-import { state, effectiveStatus, demandCode } from "./store.js";
-
-export const VIEW_LABELS = {
-  dashboard: "Início",
-  "nova-demanda": "Nova demanda",
-  demandas: "Demandas",
-  analises: "Análises",
-  relatorios: "Relatórios",
-  conversores: "Conversores",
-  cadastros: "Cadastros",
-  configuracoes: "Configurações",
-};
+import { state, effectiveStatus, demandCode, converterCode } from "./store.js";
 
 export function escapeHtml(value = "") {
-  return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 export function slug(value = "") {
-  return String(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return String(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
-export function formatDate(value, options = {}) {
+export function formatDate(value, { year = false, long = false } = {}) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: options.year ? "numeric" : undefined }).format(new Date(`${value}T12:00:00`)).replaceAll(".", "");
+  const options = long
+    ? { day: "2-digit", month: "long", year: "numeric" }
+    : { day: "2-digit", month: "short", year: year ? "numeric" : undefined };
+  return new Intl.DateTimeFormat("pt-BR", options)
+    .format(new Date(`${value}T12:00:00`))
+    .replaceAll(".", "");
+}
+
+export function formatHours(value) {
+  return `${Number(value || 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}h`;
 }
 
 export function initials(name = "") {
@@ -41,29 +49,6 @@ export function showToast(message, type = "info") {
   setTimeout(close, 4200);
 }
 
-export function setActiveView(view, focus = true) {
-  if (!VIEW_LABELS[view]) view = "dashboard";
-  document.querySelectorAll("[data-view-panel]").forEach(panel => {
-    const active = panel.dataset.viewPanel === view;
-    panel.hidden = !active;
-    panel.classList.toggle("active", active);
-  });
-  document.querySelectorAll("[data-view]").forEach(button => {
-    const active = button.dataset.view === view;
-    button.classList.toggle("active", active);
-    active ? button.setAttribute("aria-current", "page") : button.removeAttribute("aria-current");
-  });
-  document.getElementById("currentViewLabel").textContent = VIEW_LABELS[view];
-  document.getElementById("appShell").classList.remove("sidebar-mobile-open");
-  document.getElementById("sidebarBackdrop").hidden = true;
-  history.replaceState(null, "", view === "dashboard" ? "#inicio" : `#${view}`);
-  if (focus) {
-    document.getElementById("mainContent")?.focus({ preventScroll: true });
-    scrollTo({ top: 0, behavior: "smooth" });
-  }
-  dispatchEvent(new CustomEvent("fluux:viewchange", { detail: { view } }));
-}
-
 export function applyTheme(theme) {
   const selected = theme === "light" ? "light" : "dark";
   document.documentElement.dataset.theme = selected;
@@ -76,18 +61,22 @@ export function applyTheme(theme) {
 export function applyIdentity() {
   const profile = state.profile;
   const settings = state.settings;
-  document.querySelectorAll("[data-app-name]").forEach(el => el.textContent = settings.app_name);
-  document.querySelectorAll("[data-app-subtitle]").forEach(el => el.textContent = settings.app_subtitle);
-  document.title = `${settings.app_name} — ${settings.app_subtitle}`;
-  ["headerUserName", "menuUserName", "welcomeName"].forEach(id => document.getElementById(id).textContent = profile.full_name);
-  document.getElementById("headerUserRole").textContent = profile.role || "Gestão de Demandas";
-  document.getElementById("menuUserEmail").textContent = state.user.email || "—";
+  document.querySelectorAll("[data-app-name]").forEach(el => { el.textContent = settings.app_name; });
+  document.querySelectorAll("[data-app-subtitle]").forEach(el => { el.textContent = settings.app_subtitle; });
+  document.title = `${settings.app_name} — ${document.body.dataset.pageLabel || settings.app_subtitle}`;
+  ["headerUserName", "menuUserName", "welcomeName"].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = profile.full_name;
+  });
+  const role = document.getElementById("headerUserRole");
+  if (role) role.textContent = profile.role || "Gestão de Demandas";
+  const email = document.getElementById("menuUserEmail");
+  if (email) email.textContent = state.user.email || "—";
   applyAvatar(profile.avatar_url, profile.full_name);
 }
 
 export function applyAvatar(url, name) {
-  const ids = ["headerAvatar", "menuAvatar", "settingsAvatar"];
-  ids.forEach(id => {
+  ["headerAvatar", "menuAvatar", "settingsAvatar"].forEach(id => {
     const current = document.getElementById(id);
     if (!current) return;
     if (url) {
@@ -103,7 +92,9 @@ export function applyAvatar(url, name) {
       span.className = current.className;
       span.textContent = initials(name);
       current.replaceWith(span);
-    } else current.textContent = initials(name);
+    } else {
+      current.textContent = initials(name);
+    }
   });
 }
 
@@ -119,12 +110,40 @@ export function closeModal(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
   modal.hidden = true;
-  if (![...document.querySelectorAll(".modal-layer")].some(item => !item.hidden)) document.body.classList.remove("modal-open");
+  if (![...document.querySelectorAll(".modal-layer")].some(item => !item.hidden)) {
+    document.body.classList.remove("modal-open");
+  }
+}
+
+export function statusClass(status) {
+  const map = {
+    "Pendente": "status-pendente",
+    "Em andamento": "status-andamento",
+    "Aguardando retorno": "status-retorno",
+    "Concluída": "status-concluida",
+    "Concluído": "status-concluida",
+    "Atrasada": "status-atrasada",
+    "Cancelada": "status-cancelada",
+    "Cancelado": "status-cancelada",
+  };
+  return map[status] || "status-pendente";
+}
+
+export function priorityClass(priority) {
+  return `priority-${slug(priority)}`;
+}
+
+export function demandCell(demand) {
+  return `<div class="demand-cell"><i class="fa-regular fa-file-lines"></i><span><strong>${escapeHtml(demand.title)}</strong><small>${demandCode(demand)} · Entrada em ${formatDate(demand.start_date)}</small></span></div>`;
 }
 
 export function renderDemandDetail(demand) {
-  document.getElementById("detailCode").textContent = demandCode(demand);
-  document.getElementById("detailTitle").textContent = demand.title;
+  const code = document.getElementById("detailCode");
+  const title = document.getElementById("detailTitle");
+  const content = document.getElementById("demandDetailContent");
+  if (!code || !title || !content) return;
+  code.textContent = demandCode(demand);
+  title.textContent = demand.title;
   const cells = [
     ["Status", effectiveStatus(demand)],
     ["Prioridade", demand.priority],
@@ -135,28 +154,83 @@ export function renderDemandDetail(demand) {
     ["Departamento", demand.department || "—"],
     ["Entrada", formatDate(demand.start_date, { year: true })],
     ["Prazo", formatDate(demand.due_date, { year: true })],
-    ["Horas estimadas", `${Number(demand.estimated_hours || 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}h`],
-    ["Horas realizadas", `${Number(demand.actual_hours || 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}h`],
+    ["Horas estimadas", formatHours(demand.estimated_hours)],
+    ["Horas realizadas", formatHours(demand.actual_hours)],
     ["Descrição", demand.description, true],
     ["Observações", demand.notes || "—", true],
     ["Tags", (demand.tags || []).join(", ") || "—", true],
   ];
-  document.getElementById("demandDetailContent").innerHTML = cells.map(([label, value, full]) =>
+  content.innerHTML = cells.map(([label, value, full]) =>
     `<div class="detail-block ${full ? "full" : ""}"><small>${escapeHtml(label)}</small>${full ? `<p>${escapeHtml(value)}</p>` : `<strong>${escapeHtml(value)}</strong>`}</div>`
   ).join("");
-  document.getElementById("detailEditButton").dataset.id = demand.id;
+  const edit = document.getElementById("detailEditButton");
+  if (edit) edit.dataset.id = demand.id;
   openModal("demandDetailModal");
+}
+
+export function renderConverterDetail(record) {
+  const code = document.getElementById("converterDetailCode");
+  const content = document.getElementById("converterDetailContent");
+  if (!code || !content) return;
+  code.textContent = converterCode(record);
+  const cells = [
+    ["Data", formatDate(record.service_date, { year: true })],
+    ["Local", record.location_name],
+    ["Ponto / referência", record.point_reference || "—"],
+    ["Atendimento", record.service_type],
+    ["Conversão", record.conversion_direction || "—"],
+    ["Quantidade", String(record.quantity_replaced || 0)],
+    ["Status", record.status],
+    ["Responsável", record.responsible_name || "—"],
+    ["Motivo", record.issue_reason || "—", true],
+    ["Observações", record.notes || "—", true],
+  ];
+  content.innerHTML = cells.map(([label, value, full]) =>
+    `<div class="detail-block ${full ? "full" : ""}"><small>${escapeHtml(label)}</small>${full ? `<p>${escapeHtml(value)}</p>` : `<strong>${escapeHtml(value)}</strong>`}</div>`
+  ).join("");
+  const edit = document.getElementById("converterDetailEditButton");
+  if (edit) edit.dataset.id = record.id;
+  openModal("converterDetailModal");
 }
 
 export function initClock() {
   const update = () => {
     const now = new Date();
-    document.getElementById("currentTime").textContent = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", hour12: false }).format(now);
-    document.getElementById("currentDate").textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "short", day: "2-digit", month: "short" }).format(now).replaceAll(".", "");
+    const time = document.getElementById("currentTime");
+    const date = document.getElementById("currentDate");
+    if (time) time.textContent = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", hour12: false }).format(now);
+    if (date) date.textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "short", day: "2-digit", month: "short" }).format(now).replaceAll(".", "");
     const hour = now.getHours();
-    document.getElementById("greeting").textContent = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
-    document.getElementById("welcomeDate").textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "2-digit", month: "long" }).format(now);
+    const greeting = document.getElementById("greeting");
+    const welcomeDate = document.getElementById("welcomeDate");
+    if (greeting) greeting.textContent = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+    if (welcomeDate) welcomeDate.textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "2-digit", month: "long" }).format(now);
   };
   update();
   setInterval(update, 30000);
+}
+
+export function confirmAction({ title, text, confirmLabel = "Confirmar", danger = true }) {
+  return new Promise(resolve => {
+    const modal = document.getElementById("confirmModal");
+    if (!modal) return resolve(false);
+    document.getElementById("confirmTitle").textContent = title;
+    document.getElementById("confirmText").textContent = text;
+    const button = document.getElementById("confirmActionButton");
+    button.textContent = confirmLabel;
+    button.className = danger ? "btn-danger" : "btn-primary";
+    const cleanup = result => {
+      closeModal("confirmModal");
+      button.removeEventListener("click", onConfirm);
+      modal.removeEventListener("click", onCancel);
+      resolve(result);
+    };
+    const onConfirm = () => cleanup(true);
+    const onCancel = event => {
+      if (event.target.closest("[data-close-modal='confirmModal']")) cleanup(false);
+    };
+    button.addEventListener("click", onConfirm);
+    modal.addEventListener("click", onCancel);
+    openModal("confirmModal");
+  });
 }

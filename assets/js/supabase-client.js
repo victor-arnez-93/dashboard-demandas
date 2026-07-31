@@ -16,9 +16,36 @@ export function shouldRememberSession() {
   return localStorage.getItem(REMEMBER_KEY) === "1";
 }
 
+function projectAuthPrefix() {
+  try {
+    const projectRef = new URL(window.FLUUX_ENV?.SUPABASE_URL || "").hostname.split(".")[0];
+    return projectRef ? `sb-${projectRef}-auth-token` : "sb-";
+  } catch {
+    return "sb-";
+  }
+}
+
+function clearAuthFrom(storage) {
+  const prefix = projectAuthPrefix();
+  for (let index = storage.length - 1; index >= 0; index -= 1) {
+    const key = storage.key(index);
+    if (key && (key === prefix || key.startsWith(`${prefix}-`))) storage.removeItem(key);
+  }
+}
+
+export function clearStoredAuthSessions() {
+  clearAuthFrom(localStorage);
+  clearAuthFrom(sessionStorage);
+}
+
 export function configureAuthPersistence(remember) {
-  if (remember) localStorage.setItem(REMEMBER_KEY, "1");
-  else localStorage.removeItem(REMEMBER_KEY);
+  if (remember) {
+    localStorage.setItem(REMEMBER_KEY, "1");
+    clearAuthFrom(sessionStorage);
+  } else {
+    localStorage.removeItem(REMEMBER_KEY);
+    clearAuthFrom(localStorage);
+  }
   client = null;
 }
 

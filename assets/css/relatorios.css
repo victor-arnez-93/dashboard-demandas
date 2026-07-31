@@ -1,0 +1,23 @@
+.report-filter-panel { margin-bottom: 18px; overflow: hidden; }
+.report-periods { display: flex; flex-wrap: wrap; gap: 7px; padding: 16px 18px 0; }
+.report-periods button { min-height: 38px; padding: 7px 13px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-raised); color: var(--text-muted); font-size: 9px; font-weight: 700; }
+.report-periods button.active { border-color: transparent; background: var(--gradient); color: #fff; }
+.report-filter-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; padding: 16px 18px 18px; }
+.report-filter-grid .custom-date { display: none; }
+.report-filter-grid.custom .custom-date { display: grid; }
+.report-cards { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 12px; margin-bottom: 18px; }
+.report-card { min-height: 116px; padding: 15px; border: 1px solid var(--border); border-radius: 15px; background: var(--surface); box-shadow: var(--shadow-soft); }
+.report-card small { color: var(--text-muted); font-size: 8px; }
+.report-card strong { display: block; margin-top: 5px; font: 700 26px var(--font-title); }
+.report-card p { margin: 0; color: var(--text-muted); font-size: 7px; }
+.report-section { margin-bottom: 18px; overflow: hidden; }
+.report-table-scroll { max-height: 372px; overflow: auto; }
+.report-table-scroll tbody tr { height: 66px; }
+.converter-summary-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; padding: 18px; border-bottom: 1px solid var(--border); }
+.converter-summary-item { min-height: 84px; padding: 14px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-raised); }
+.converter-summary-item small { display: block; color: var(--text-muted); font-size: 8px; }
+.converter-summary-item strong { display: block; margin-top: 4px; overflow: hidden; font: 700 22px var(--font-title); text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 1260px) { .report-cards { grid-template-columns: repeat(3,1fr); } .report-filter-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 720px) { .report-cards, .converter-summary-grid, .report-filter-grid { grid-template-columns: 1fr; } }
+.report-demands-table { min-width: 1180px; }
+.report-converters-table { min-width: 1040px; }

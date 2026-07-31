@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FLUUX — Cadastros.">
+  <meta name="theme-color" content="#090d10">
+  <title>FLUUX — Cadastros</title>
+  <script>document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";</script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/cadastros.css">
+  
+</head>
+<body data-page="cadastros" data-page-label="Cadastros">
+  <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
+  <div class="boot-screen" id="bootScreen"><div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div><span class="spinner"></span><p>Conectando ao sistema...</p></div>
+  <div class="app-shell" id="appShell" hidden>
+    <main class="main-content" id="mainContent" tabindex="-1">
+      <div class="page-heading"><div><span class="eyebrow">BASES REUTILIZÁVEIS</span><h1>Cadastros</h1><p>Mantenha gestores, responsáveis, departamentos, categorias e locais padronizados.</p></div><div class="header-actions"><button class="btn-primary" id="newCatalogButton" type="button"><i class="fa-solid fa-plus"></i> Novo cadastro</button></div></div>
+      <section class="table-shell catalog-panel"><div class="catalog-toolbar"><div class="catalog-tabs" role="tablist"><button class="catalog-tab active" data-catalog-type="managers"><i class="fa-solid fa-user-tie"></i> Gestores</button><button class="catalog-tab" data-catalog-type="responsibles"><i class="fa-solid fa-user-check"></i> Responsáveis</button><button class="catalog-tab" data-catalog-type="departments"><i class="fa-solid fa-building"></i> Departamentos</button><button class="catalog-tab" data-catalog-type="categories"><i class="fa-solid fa-tags"></i> Categorias</button><button class="catalog-tab" data-catalog-type="locations"><i class="fa-solid fa-location-dot"></i> Locais</button></div><label class="input-shell catalog-search"><i class="fa-solid fa-magnifying-glass"></i><input id="catalogSearch" type="search" placeholder="Buscar neste cadastro..."></label></div><div class="catalog-table-scroll"><table><thead><tr><th>Nome</th><th>Descrição</th><th>Status</th><th>Atualizado em</th><th>Ações</th></tr></thead><tbody id="catalogBody"><tr><td colspan="5" class="empty-table">Carregando cadastros...</td></tr></tbody></table></div><footer class="table-footer"><span id="catalogCount">0 itens</span><span>Itens inativos não aparecem em novos registros</span></footer></section><p class="catalog-hint"><i class="fa-solid fa-circle-info"></i> Para preservar relatórios e registros antigos, opções utilizadas devem ser inativadas em vez de apagadas.</p>
+      <div class="modal-layer" id="catalogModal" hidden><div class="modal-backdrop" data-close-modal="catalogModal"></div><section class="modal-card catalog-modal" role="dialog" aria-modal="true"><div class="modal-head"><div><small id="catalogModalType">CADASTRO</small><h2 id="catalogModalTitle">Novo cadastro</h2></div><button class="icon-btn" type="button" data-close-modal="catalogModal"><i class="fa-solid fa-xmark"></i></button></div><form id="catalogForm"><input id="catalogId" type="hidden"><input id="catalogType" type="hidden"><div class="catalog-modal-form"><label class="field"><span>Nome *</span><input id="catalogName" type="text" minlength="2" maxlength="160" required></label><label class="field" id="catalogDescriptionField" hidden><span>Descrição</span><textarea id="catalogDescription" maxlength="500" placeholder="Informação complementar do local"></textarea></label><div class="switch-row"><span><strong>Ativo</strong><small>Disponível em novos registros</small></span><label class="switch"><input id="catalogActive" type="checkbox" checked><span></span></label></div></div><div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="catalogModal">Cancelar</button><button class="btn-primary" id="saveCatalogButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar cadastro</button></div></form></section></div>
+    </main>
+  </div>
+  <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script src="assets/js/env.js"></script>
+  <script type="module" src="assets/js/cadastros.js"></script>
+</body>
+</html>

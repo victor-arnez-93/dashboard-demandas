@@ -1,10 +1,5 @@
 import { log } from "./logger.js";
-import {
-  configureAuthPersistence,
-  getSupabase,
-  isConfigured,
-  shouldRememberSession,
-} from "./supabase-client.js";
+import { configureAuthPersistence, getSupabase, isConfigured, shouldRememberSession } from "./supabase-client.js";
 
 const root = document.documentElement;
 const form = document.getElementById("loginForm");
@@ -17,14 +12,14 @@ function setMessage(text = "") {
   message.textContent = text;
 }
 
-function applyTheme(theme) {
+function applyLoginTheme(theme) {
   root.dataset.theme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f5f2e9" : "#090d10");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f4f1e8" : "#090d10");
   document.querySelector("#loginThemeButton i").className = `fa-solid ${theme === "light" ? "fa-moon" : "fa-sun"}`;
 }
 
 document.getElementById("loginThemeButton")?.addEventListener("click", () => {
-  applyTheme(root.dataset.theme === "light" ? "dark" : "light");
+  applyLoginTheme(root.dataset.theme === "light" ? "dark" : "light");
 });
 
 document.getElementById("togglePassword")?.addEventListener("click", event => {
@@ -41,23 +36,17 @@ form?.addEventListener("submit", async event => {
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
   if (!email || !password) return setMessage("Informe o e-mail e a senha.");
-
   try {
     submit.disabled = true;
     submit.querySelector("span").textContent = "Entrando...";
     configureAuthPersistence(remember.checked);
-    const sb = getSupabase();
-    const { error } = await sb.auth.signInWithPassword({ email, password });
+    const { error } = await getSupabase().auth.signInWithPassword({ email, password });
     if (error) throw error;
-    log.success("AUTH", "Login concluído.", {
-      email,
-      manterConectado: remember.checked,
-    });
-    location.replace("dashboard.html");
+    log.success("AUTH", "Login concluído.", { email, manterConectado: remember.checked });
+    location.replace("inicio.html");
   } catch (error) {
     log.error("AUTH", "Falha no login.", error);
-    const configError = error.message?.includes("configurado");
-    setMessage(configError ? error.message : "E-mail ou senha inválidos. Confira os dados e tente novamente.");
+    setMessage(error.message?.includes("configurado") ? error.message : "E-mail ou senha inválidos. Confira os dados e tente novamente.");
   } finally {
     submit.disabled = false;
     submit.querySelector("span").textContent = "Entrar no sistema";
@@ -66,23 +55,18 @@ form?.addEventListener("submit", async event => {
 
 async function boot() {
   log.boot();
-  applyTheme(root.dataset.theme);
+  applyLoginTheme(root.dataset.theme);
   remember.checked = shouldRememberSession();
   if (!isConfigured()) {
     setMessage("Conecte este projeto ao Supabase preenchendo assets/js/env.js.");
-    log.warn("CONFIG", "Credenciais públicas do Supabase pendentes.");
     return;
   }
-
-  // Só restaura automaticamente quando o usuário escolheu manter a sessão.
   if (!shouldRememberSession()) return;
-
   try {
     const { data } = await getSupabase().auth.getSession();
-    if (data.session) location.replace("dashboard.html");
+    if (data.session) location.replace("inicio.html");
   } catch (error) {
     log.error("AUTH", "Não foi possível verificar a sessão.", error);
   }
 }
-
 boot();

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FLUUX — Nova demanda.">
+  <meta name="theme-color" content="#090d10">
+  <title>FLUUX — Nova demanda</title>
+  <script>document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";</script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/nova_demanda.css">
+  
+</head>
+<body data-page="nova_demanda" data-page-label="Nova demanda">
+  <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
+  <div class="boot-screen" id="bootScreen"><div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div><span class="spinner"></span><p>Conectando ao sistema...</p></div>
+  <div class="app-shell" id="appShell" hidden>
+    <main class="main-content" id="mainContent" tabindex="-1">
+      <div class="page-heading"><div><span class="eyebrow">ORGANIZAÇÃO</span><h1 id="demandFormHeading">Nova demanda</h1><p>Cadastre informações completas para gerar acompanhamento e relatórios úteis.</p></div><div class="header-actions"><a class="btn-secondary" href="demandas.html"><i class="fa-solid fa-arrow-left"></i> Voltar às demandas</a></div></div>
+      <form class="panel demand-form-shell" id="demandForm" novalidate>
+        <input id="demandId" type="hidden">
+        <div class="form-intro"><i class="fa-regular fa-file-lines"></i><div><h2>Registro da demanda</h2><p>Os campos com asterisco são obrigatórios.</p></div></div>
+        <section class="form-section"><div class="form-section-head"><i class="fa-regular fa-file-lines"></i><div><h3>Informações principais</h3><p>Identifique claramente o que precisa ser feito.</p></div></div><div class="form-grid">
+          <label class="field full"><span>Título *</span><input id="demandTitle" type="text" minlength="4" maxlength="160" placeholder="Ex.: Revisar documentação do processo" required><small class="field-error">Informe um título com pelo menos 4 caracteres.</small></label>
+          <label class="field full"><span>Descrição *</span><textarea id="demandDescription" minlength="5" maxlength="4000" placeholder="Contexto, objetivo e resultado esperado..." required></textarea><small class="field-error">Descreva a demanda com pelo menos 5 caracteres.</small></label>
+          <label class="field"><span>Solicitante</span><input id="demandRequester" type="text" maxlength="120" placeholder="Nome ou área solicitante"></label>
+          <label class="field"><span>Responsável *</span><select id="demandResponsible" required><option value="">Selecione</option></select><small class="field-error">Selecione ou informe um responsável.</small></label>
+          <label class="field conditional-field" id="demandResponsibleOtherField" hidden><span>Outro responsável *</span><input id="demandResponsibleOther" type="text" maxlength="120" placeholder="Digite o nome"></label>
+          <label class="field"><span>Gestor *</span><select id="demandManager" required><option value="">Selecione</option></select><small class="field-error">Selecione ou informe um gestor.</small></label>
+          <label class="field conditional-field" id="demandManagerOtherField" hidden><span>Outro gestor *</span><input id="demandManagerOther" type="text" maxlength="120" placeholder="Digite o nome"></label>
+          <label class="field"><span>Departamento</span><select id="demandDepartment"><option value="">Não informado</option></select></label>
+          <label class="field conditional-field" id="demandDepartmentOtherField" hidden><span>Outro departamento</span><input id="demandDepartmentOther" type="text" maxlength="120" placeholder="Digite o departamento"></label>
+          <label class="field"><span>Categoria *</span><select id="demandCategory" required><option value="">Selecione</option></select><small class="field-error">Selecione ou informe uma categoria.</small></label>
+          <label class="field conditional-field" id="demandCategoryOtherField" hidden><span>Outra categoria *</span><input id="demandCategoryOther" type="text" maxlength="120" placeholder="Digite a categoria"></label>
+        </div></section>
+        <section class="form-section"><div class="form-section-head"><i class="fa-regular fa-calendar"></i><div><h3>Planejamento e controle</h3><p>Defina prioridade, situação, prazo e esforço.</p></div></div><div class="form-grid four">
+          <label class="field"><span>Prioridade *</span><select id="demandPriority" required><option>Baixa</option><option selected>Normal</option><option>Alta</option><option>Urgente</option></select></label>
+          <label class="field"><span>Status *</span><select id="demandStatus" required><option selected>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Cancelada</option></select></label>
+          <label class="field"><span>Data de entrada *</span><input id="demandStartDate" type="date" required><small class="field-error">Informe a data de entrada.</small></label>
+          <label class="field"><span>Prazo *</span><input id="demandDueDate" type="date" required><small class="field-error">Informe um prazo válido.</small></label>
+          <label class="field"><span>Horas estimadas</span><input id="demandEstimatedHours" type="text" inputmode="decimal" placeholder="0"></label>
+          <label class="field"><span>Horas realizadas</span><input id="demandActualHours" type="text" inputmode="decimal" placeholder="0"></label>
+          <label class="field wide"><span>Tags</span><input id="demandTags" type="text" maxlength="400" placeholder="Separe por vírgulas"></label>
+          <label class="field full"><span>Observações</span><textarea id="demandNotes" maxlength="4000" placeholder="Informações complementares"></textarea></label>
+        </div><div class="form-note"><i class="fa-solid fa-circle-info"></i><span>Gestores, responsáveis, departamentos e categorias podem ser mantidos previamente na página Cadastros. A opção “Outro” cria uma nova opção somente depois que o formulário inteiro estiver válido.</span></div></section>
+        <div class="form-actions"><button class="btn-ghost" id="resetDemandButton" type="button">Limpar</button><button class="btn-primary" id="saveDemandButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar demanda</button></div>
+      </form>
+    </main>
+  </div>
+  <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script src="assets/js/env.js"></script>
+  <script type="module" src="assets/js/nova_demanda.js"></script>
+</body>
+</html>

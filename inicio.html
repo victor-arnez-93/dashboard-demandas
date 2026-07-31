@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FLUUX — Início.">
+  <meta name="theme-color" content="#090d10">
+  <title>FLUUX — Início</title>
+  <script>document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";</script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/inicio.css">
+  
+</head>
+<body data-page="inicio" data-page-label="Início">
+  <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
+  <div class="boot-screen" id="bootScreen"><div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div><span class="spinner"></span><p>Conectando ao sistema...</p></div>
+  <div class="app-shell" id="appShell" hidden>
+    <main class="main-content" id="mainContent" tabindex="-1">
+      <div class="welcome-line">
+        <div><small id="greeting">Boa tarde</small><h2>Bem-vindo, <strong id="welcomeName">Usuário</strong>.</h2></div>
+        <p id="welcomeDate">Acompanhe o que precisa da sua atenção hoje.</p>
+      </div>
+      <section class="hero">
+        <div class="hero-copy"><span class="eyebrow"><i class="fa-solid fa-bolt"></i> VISÃO EXECUTIVA</span><h1>Organize prioridades.<br><em>Acompanhe resultados.</em></h1><p>Demandas, prazos e andamento em uma visão clara para facilitar decisões e apresentações.</p></div>
+        <div class="hero-actions"><a class="btn-primary" href="nova_demanda.html"><i class="fa-solid fa-plus"></i> Nova demanda</a><a class="btn-secondary" href="demandas.html"><i class="fa-solid fa-list-check"></i> Ver demandas</a><a class="btn-secondary" href="apresentar.html"><i class="fa-solid fa-display"></i> Apresentar</a></div>
+      </section>
+      <div class="section-heading"><div><h2>Resumo do período</h2><p>Indicadores calculados a partir das demandas registradas.</p></div><div class="period-selector" role="group" aria-label="Selecionar período"><button type="button" data-period="7">7 dias</button><button class="active" type="button" data-period="30">30 dias</button><button type="button" data-period="90">90 dias</button></div></div>
+      <section class="kpi-grid">
+        <article class="kpi-card blue"><span class="kpi-top"><i class="fa-solid fa-layer-group"></i><b>PERÍODO</b></span><small>Total de demandas</small><strong id="kpiTotal">0</strong><p>registros criados</p></article>
+        <article class="kpi-card orange"><span class="kpi-top"><i class="fa-solid fa-spinner"></i><b>ATIVAS</b></span><small>Em andamento</small><strong id="kpiProgress">0</strong><p id="kpiProgressText">0% do total</p></article>
+        <article class="kpi-card green"><span class="kpi-top"><i class="fa-solid fa-circle-check"></i><b>CONCLUÍDAS</b></span><small>Finalizadas</small><strong id="kpiDone">0</strong><p id="kpiDoneText">0% do total</p></article>
+        <article class="kpi-card sand"><span class="kpi-top"><i class="fa-solid fa-calendar-xmark"></i><b>ATENÇÃO</b></span><small>Atrasadas</small><strong id="kpiOverdue">0</strong><p>prazo vencido</p></article>
+      </section>
+      <article class="panel hours-overview"><div class="hours-heading"><div><small>CONTROLE DE ESFORÇO</small><h3>Horas estimadas × realizadas</h3><p>Comparativo das demandas do período selecionado.</p></div><span class="hours-status" id="hoursStatus"><i class="fa-solid fa-gauge-high"></i> Sem horas registradas</span></div><div class="hours-summary"><div><small>Estimadas</small><strong id="dashboardEstimatedHours">0h</strong></div><div><small>Realizadas</small><strong id="dashboardActualHours">0h</strong></div><div><small>Diferença</small><strong id="dashboardHoursDifference">0h</strong></div><div><small>Utilização</small><strong id="dashboardHoursRate">0%</strong></div></div><div class="hours-progress"><span id="dashboardHoursProgress"></span></div></article>
+      <section class="charts-grid"><article class="panel panel-chart"><div class="chart-title"><small>FLUXO DE TRABALHO</small><h3>Recebidas × concluídas</h3></div><div class="chart-wrap"><canvas id="flowChart"></canvas></div></article><article class="panel panel-chart"><div class="chart-title"><small>DISTRIBUIÇÃO</small><h3>Demandas por status</h3></div><div class="chart-wrap"><canvas id="statusChart"></canvas></div></article></section>
+      <section class="panel recent-panel"><div class="panel-head"><div><small>ACOMPANHAMENTO</small><h2>Demandas recentes</h2></div><a href="demandas.html">Ver todas <i class="fa-solid fa-arrow-right"></i></a></div><div class="recent-table-scroll"><table><thead><tr><th>Demanda</th><th>Gestor</th><th>Prioridade</th><th>Prazo</th><th>Status</th></tr></thead><tbody id="recentDemandsBody"><tr><td colspan="5" class="empty-table">Carregando demandas...</td></tr></tbody></table></div></section>
+    </main>
+  </div>
+  <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+  <script src="assets/js/env.js"></script>
+  <script type="module" src="assets/js/inicio.js"></script>
+</body>
+</html>

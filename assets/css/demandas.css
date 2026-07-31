@@ -1,0 +1,11 @@
+.filter-bar { display: grid; grid-template-columns: minmax(280px,1.6fr) repeat(4,minmax(150px,.7fr)) auto; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); }
+.filter-bar .input-shell, .filter-bar select { min-height: 46px; }
+.filter-clear { min-width: 98px; }
+.demands-table-scroll { max-height: 392px; overflow: auto; }
+.demands-table-scroll tbody tr { height: 70px; }
+.demands-table td:first-child { white-space: nowrap; }
+.demands-table .demand-cell { min-width: 300px; }
+.manager-missing { color: var(--text-muted); font-style: italic; }
+@media (max-width: 1350px) { .filter-bar { grid-template-columns: repeat(3,1fr); } .filter-bar .search-filter { grid-column: 1 / -1; } }
+@media (max-width: 760px) { .filter-bar { grid-template-columns: 1fr; } .filter-bar .search-filter { grid-column: auto; } }
+.demands-table-scroll table { min-width: 1180px; }

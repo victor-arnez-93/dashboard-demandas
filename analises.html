@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FLUUX — Análises.">
+  <meta name="theme-color" content="#090d10">
+  <title>FLUUX — Análises</title>
+  <script>document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";</script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/analises.css">
+  
+</head>
+<body data-page="analises" data-page-label="Análises">
+  <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
+  <div class="boot-screen" id="bootScreen"><div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div><span class="spinner"></span><p>Conectando ao sistema...</p></div>
+  <div class="app-shell" id="appShell" hidden>
+    <main class="main-content" id="mainContent" tabindex="-1">
+      <div class="page-heading"><div><span class="eyebrow">INDICADORES</span><h1>Análises</h1><p>Distribuições calculadas sobre os registros reais do sistema.</p></div></div>
+      <section class="panel analysis-toolbar"><p>Selecione o período para atualizar todos os gráficos.</p><div class="period-selector" role="group"><button data-analysis-period="30" class="active">30 dias</button><button data-analysis-period="90">90 dias</button><button data-analysis-period="365">Ano</button><button data-analysis-period="all">Tudo</button></div></section>
+      <section class="analysis-grid">
+        <article class="panel analysis-card"><div class="card-heading"><small>GESTÃO</small><h2>Demandas por gestor</h2></div><div class="analysis-chart"><canvas id="managerChart"></canvas></div></article>
+        <article class="panel analysis-card"><div class="card-heading"><small>CATEGORIAS</small><h2>Distribuição por assunto</h2></div><div class="analysis-chart"><canvas id="categoryChart"></canvas></div></article>
+        <article class="panel analysis-card full"><div class="card-heading"><small>CAPACIDADE</small><h2>Horas estimadas × realizadas por gestor</h2></div><div class="analysis-chart"><canvas id="managerHoursChart"></canvas></div></article>
+        <article class="panel analysis-card full"><div class="card-heading"><small>PRIORIDADE</small><h2>Volume por prioridade e status</h2></div><div class="analysis-chart"><canvas id="priorityChart"></canvas></div></article>
+        <div class="converter-analysis-title"><i class="fa-solid fa-network-wired"></i><div><h2>Sustentação de conversores</h2><p>Trocas, recorrência e locais com maior volume no período.</p></div></div>
+        <article class="panel analysis-card"><div class="card-heading"><small>EVOLUÇÃO</small><h2>Conversores trocados</h2></div><div class="analysis-chart"><canvas id="converterTrendChart"></canvas></div></article>
+        <article class="panel analysis-card"><div class="card-heading"><small>LOCAIS</small><h2>Ocorrências por local</h2></div><div class="analysis-chart"><canvas id="converterLocationChart"></canvas></div></article>
+      </section>
+    </main>
+  </div>
+  <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+  <script src="assets/js/env.js"></script>
+  <script type="module" src="assets/js/analises.js"></script>
+</body>
+</html>

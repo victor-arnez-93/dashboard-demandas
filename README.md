@@ -1,48 +1,65 @@
-# Dashboard — Organização de Demandas
+# FLUUX — Organização de Demandas
 
-Base visual da Fase 1 para organizar, acompanhar e apresentar demandas.
+Versão reestruturada **v1.2.0**, mantendo a identidade visual aprovada e separando cada página em seu próprio HTML, CSS e JavaScript.
 
-## Executar
+## Execução local
 
-Abra o terminal nesta pasta e use:
+Na pasta do projeto:
 
-```bash
+```powershell
 python -m http.server 5500
 ```
 
-Depois, acesse `http://localhost:5500`.
+Acesse:
 
-Não é necessário instalar dependências nesta fase.
+```text
+http://localhost:5500
+```
+
+A entrada do sistema é `index.html`. O arquivo `dashboard.html` foi mantido somente como redirecionamento de compatibilidade para `inicio.html`.
 
 ## Estrutura
 
-- `index.html`: estrutura semântica e telas navegáveis;
-- `assets/css/theme.css`: variáveis e temas claro/escuro;
-- `assets/css/main.css`: estilos globais;
-- `assets/css/layout.css`: header, sidebar e organização;
-- `assets/css/components.css`: botões, cards, tabelas, modal e toast;
-- `assets/css/responsive.css`: desktop, tablet e celular;
-- `assets/js/config.js`: nome provisório, subtítulo e versão;
-- `assets/js/data.js`: dados fictícios;
-- `assets/js/theme.js`: tema e persistência local;
-- `assets/js/clock.js`: data e hora;
-- `assets/js/ui.js`: navegação, menu, modal, toast e apresentação;
-- `assets/js/demands.js`: tabela, filtros e cadastro demonstrativo;
-- `assets/js/dashboard.js`: KPIs e períodos;
-- `assets/js/charts.js`: gráficos Chart.js;
-- `assets/js/main.js`: inicialização.
+### Globais
 
-## Fase 1 funcional
+- `assets/css/theme.css`: variáveis dos temas claro e escuro;
+- `assets/css/main.css`: reset, estrutura comum, sidebar, topbar, clima, botões, formulários, tabelas-base, modais, toasts e responsividade global;
+- `assets/js/shell.js`: estrutura compartilhada, navegação, sessão, tema, perfil e inicialização;
+- `assets/js/store.js`: acesso e estado dos dados reais do Supabase;
+- `assets/js/ui.js`: utilidades visuais compartilhadas;
+- `assets/js/weather.js`: clima compacto no padrão solicitado;
+- `assets/js/form-utils.js`: capitalização e validações reutilizáveis.
 
-- tema claro e escuro;
-- sidebar recolhível e menu mobile;
-- Home com botões cápsula em gradiente animado;
-- KPIs, gráficos e tabela fictícia;
-- busca e filtros;
-- cadastro demonstrativo em memória;
-- modal e toast personalizados;
-- modo apresentação;
-- responsividade e suporte a teclado;
-- redução de animações quando configurada no dispositivo.
+### Páginas
 
-IndexedDB, CRUD definitivo, Excel, PDF, backup, clima por API, login e backend permanecem para as próximas fases.
+Cada página possui seu próprio trio de arquivos:
+
+- `inicio.html` + `assets/css/inicio.css` + `assets/js/inicio.js`;
+- `nova_demanda.html` + `assets/css/nova_demanda.css` + `assets/js/nova_demanda.js`;
+- `demandas.html` + `assets/css/demandas.css` + `assets/js/demandas.js`;
+- `analises.html` + `assets/css/analises.css` + `assets/js/analises.js`;
+- `relatorios.html` + `assets/css/relatorios.css` + `assets/js/relatorios.js`;
+- `cadastros.html` + `assets/css/cadastros.css` + `assets/js/cadastros.js`;
+- `conversores.html` + `assets/css/conversores.css` + `assets/js/conversores.js`;
+- `configuracoes.html` + `assets/css/configuracoes.css` + `assets/js/configuracoes.js`;
+- `apresentar.html` + `assets/css/apresentar.css` + `assets/js/apresentar.js`.
+
+## Banco de dados
+
+A migração v1.2.0 já foi executada no Supabase. **Não execute novamente o SQL** durante a substituição dos arquivos.
+
+A aplicação usa:
+
+- Supabase Auth;
+- RLS;
+- `profiles` e `app_settings`;
+- `demands` com gestor separado de responsável;
+- cadastros de gestores, responsáveis, departamentos, categorias e locais;
+- registros de sustentação de conversores de mídia;
+- Storage `avatars`.
+
+## Substituição do projeto
+
+O ZIP completo não contém `.git` nem `.idea`. Preserve essas pastas na pasta oficial, remova os demais arquivos antigos e copie o conteúdo novo.
+
+O arquivo `assets/js/env.js` incluído é uma cópia exata do projeto recebido e deve permanecer protegido. Nunca coloque nele `service_role`, `sb_secret`, senha do banco ou outro segredo privado.

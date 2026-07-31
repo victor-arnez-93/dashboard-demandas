@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FLUUX — Configurações.">
+  <meta name="theme-color" content="#090d10">
+  <title>FLUUX — Configurações</title>
+  <script>document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";</script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/configuracoes.css">
+  
+</head>
+<body data-page="configuracoes" data-page-label="Configurações">
+  <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
+  <div class="boot-screen" id="bootScreen"><div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div><span class="spinner"></span><p>Conectando ao sistema...</p></div>
+  <div class="app-shell" id="appShell" hidden>
+    <main class="main-content" id="mainContent" tabindex="-1">
+      <div class="page-heading"><div><span class="eyebrow">PREFERÊNCIAS</span><h1>Configurações</h1><p>Atualize seu perfil e a identidade do sistema quando necessário.</p></div><div class="header-actions"><button class="btn-secondary" id="editSettingsButton" type="button"><i class="fa-solid fa-pen"></i> Editar</button></div></div>
+      <div class="settings-lock" id="settingsLock"><i class="fa-solid fa-lock"></i><span>Configurações protegidas contra alterações acidentais.</span></div>
+      <form id="settingsForm"><section class="panel settings-section"><div class="settings-section-head"><i class="fa-solid fa-user"></i><div><h2>Perfil</h2><p>Estas informações aparecem na saudação e no menu do usuário.</p></div></div><div class="profile-settings"><div class="avatar-settings"><span class="avatar" id="settingsAvatar">FG</span><label class="btn-secondary btn-compact" for="avatarInput"><i class="fa-solid fa-camera"></i> Escolher foto</label><input id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp" hidden disabled><small>PNG, JPG ou WebP · até 2 MB</small></div><div class="settings-fields"><label class="field"><span>Nome de exibição</span><input id="settingsName" type="text" maxlength="120" disabled></label><label class="field"><span>Cargo / área</span><input id="settingsRole" type="text" maxlength="120" disabled></label><label class="field full"><span>E-mail de acesso</span><input id="settingsEmail" type="email" disabled></label></div></div></section>
+      <section class="panel settings-section"><div class="settings-section-head"><i class="fa-solid fa-desktop"></i><div><h2>Sistema</h2><p>O nome salvo é aplicado no título, menu e identidade do painel.</p></div></div><div class="system-settings"><label class="field"><span>Nome do sistema</span><input id="settingsAppName" type="text" maxlength="60" disabled></label><label class="field"><span>Subtítulo</span><input id="settingsAppSubtitle" type="text" maxlength="120" disabled></label></div><div class="settings-actions"><button class="btn-primary" id="saveSettingsButton" type="submit" disabled><i class="fa-solid fa-floppy-disk"></i> Salvar configurações</button></div></section></form>
+    </main>
+  </div>
+  <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script src="assets/js/env.js"></script>
+  <script type="module" src="assets/js/configuracoes.js"></script>
+</body>
+</html>

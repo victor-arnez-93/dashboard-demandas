@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071015">
+  <title>FLUUX — Apresentação executiva</title>
+  <script>document.documentElement.dataset.theme=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";</script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/apresentar.css">
+</head>
+<body class="presentation-page">
+  <div class="boot-screen" id="bootScreen"><div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div><span class="spinner"></span><p>Preparando apresentação...</p></div>
+  <section class="presentation-shell" id="presentationShell" hidden>
+    <header class="presentation-topbar">
+      <div class="presentation-brand"><img src="assets/img/logo.png" alt="FLUUX"><span><small>VISÃO EXECUTIVA</small><strong>Apresentação de resultados</strong></span></div>
+      <div class="presentation-periods" role="group" aria-label="Período da apresentação">
+        <button class="active" type="button" data-presentation-period="7">7 dias</button>
+        <button type="button" data-presentation-period="week">Semana</button>
+        <button type="button" data-presentation-period="month">Mês</button>
+        <button type="button" data-presentation-period="year">Ano</button>
+        <button type="button" data-presentation-period="custom">Personalizado</button>
+      </div>
+      <div class="presentation-actions"><button class="btn-secondary btn-compact" id="fullscreenButton" type="button"><i class="fa-solid fa-expand"></i> Tela cheia</button><button class="btn-secondary btn-compact" id="autoButton" type="button" aria-pressed="false"><i class="fa-solid fa-play"></i> Automático</button><a class="btn-primary btn-compact" href="inicio.html"><i class="fa-solid fa-arrow-left"></i> Voltar</a></div>
+    </header>
+    <div class="presentation-custom" id="presentationCustom" hidden><label>De <input id="presentationStartDate" type="date"></label><label>Até <input id="presentationEndDate" type="date"></label><button class="btn-secondary btn-compact" id="applyCustomPeriod" type="button">Aplicar período</button></div>
+    <main class="presentation-stage">
+      <article class="presentation-slide" data-slide="0">
+        <div class="presentation-slide-head"><div><small>RESUMO DO PERÍODO</small><h1>Resultados em uma visão rápida.</h1></div><strong id="periodLabel">Últimos 7 dias</strong></div>
+        <div class="presentation-kpis"><article class="presentation-kpi"><small>Recebidas</small><strong id="pReceived">0</strong></article><article class="presentation-kpi"><small>Concluídas</small><strong id="pCompleted">0</strong></article><article class="presentation-kpi"><small>Em andamento</small><strong id="pProgress">0</strong></article><article class="presentation-kpi"><small>Atrasadas</small><strong id="pOverdue">0</strong></article><article class="presentation-kpi"><small>Taxa de entrega</small><strong id="pDoneRate">0%</strong></article><article class="presentation-kpi"><small>Utilização de horas</small><strong id="pHoursRate">0%</strong></article></div>
+        <div class="presentation-insight"><i class="fa-solid fa-wand-magic-sparkles"></i><span id="pInsight">Calculando os destaques do período...</span></div>
+        <div class="presentation-chart-grid"><article class="presentation-chart-card"><h3>Recebidas × concluídas</h3><div class="presentation-chart"><canvas id="pFlowChart"></canvas></div></article><article class="presentation-chart-card"><h3>Distribuição por status</h3><div class="presentation-chart"><canvas id="pStatusChart"></canvas></div></article></div>
+      </article>
+      <article class="presentation-slide" data-slide="1" hidden>
+        <div class="presentation-slide-head"><div><small>GESTÃO E CAPACIDADE</small><h1>Volume e esforço por gestor.</h1></div><strong id="pManagerHeadline">Visão consolidada</strong></div>
+        <div class="presentation-chart-grid equal"><article class="presentation-chart-card"><h3>Demandas por gestor</h3><div class="presentation-chart"><canvas id="pManagersChart"></canvas></div></article><article class="presentation-chart-card"><h3>Horas estimadas × realizadas</h3><div class="presentation-chart"><canvas id="pHoursChart"></canvas></div></article></div>
+        <div class="presentation-ranking" id="pManagerRanking"></div>
+      </article>
+      <article class="presentation-slide" data-slide="2" hidden>
+        <div class="presentation-slide-head"><div><small>SUSTENTAÇÃO DE CONVERSORES</small><h1>Trocas e locais mais recorrentes.</h1></div><strong id="pConverterHeadline">0 trocas no período</strong></div>
+        <div class="presentation-kpis four"><article class="presentation-kpi"><small>Atendimentos</small><strong id="pConverterRecords">0</strong></article><article class="presentation-kpi"><small>Conversores trocados</small><strong id="pConverterQuantity">0</strong></article><article class="presentation-kpi"><small>Local mais recorrente</small><strong class="text" id="pConverterLocation">—</strong></article><article class="presentation-kpi"><small>Concluídos</small><strong id="pConverterDoneRate">0%</strong></article></div>
+        <div class="presentation-chart-grid equal"><article class="presentation-chart-card"><h3>Evolução no período</h3><div class="presentation-chart"><canvas id="pConverterTrendChart"></canvas></div></article><article class="presentation-chart-card"><h3>Ocorrências por local</h3><div class="presentation-chart"><canvas id="pConverterLocationChart"></canvas></div></article></div>
+      </article>
+    </main>
+    <footer class="presentation-footer"><button id="prevSlide" type="button" aria-label="Slide anterior"><i class="fa-solid fa-chevron-left"></i></button><div class="presentation-dots"><button class="active" data-go-slide="0" aria-label="Resumo"></button><button data-go-slide="1" aria-label="Gestão"></button><button data-go-slide="2" aria-label="Conversores"></button></div><button id="nextSlide" type="button" aria-label="Próximo slide"><i class="fa-solid fa-chevron-right"></i></button><span><kbd>←</kbd><kbd>→</kbd> navegar · <kbd>Esc</kbd> voltar</span></footer>
+  </section>
+  <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar a apresentação</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><a class="btn-primary" href="inicio.html">Voltar ao painel</a></section></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+  <script src="assets/js/env.js"></script>
+  <script type="module" src="assets/js/apresentar.js"></script>
+</body>
+</html>

@@ -1,342 +1,226 @@
-import { state, effectiveStatus } from "./store.js";
+import { effectiveStatus } from "./store.js";
 
-const charts = new Map();
-const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const STATUS_COLORS = {
-  Pendente: "#D4CDAB",
-  "Em andamento": "#F96900",
-  "Aguardando retorno": "#8aa6b8",
-  Concluída: "#2bbf88",
-  Atrasada: "#ee5b68",
-  Cancelada: "#7d8589",
-};
+const instances = new Map();
 
-function create(id, config) {
-  charts.get(id)?.destroy();
-  const canvas = document.getElementById(id);
-  if (!canvas || !window.Chart) return;
-  charts.set(id, new window.Chart(canvas, config));
+export function css(variable) {
+  return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 }
 
-function tooltipOptions() {
+export function destroyChart(id) {
+  const instance = instances.get(id);
+  if (instance) instance.destroy();
+  instances.delete(id);
+}
+
+export function createChart(id, config) {
+  const canvas = document.getElementById(id);
+  if (!canvas || !window.Chart) return null;
+  destroyChart(id);
+  const instance = new Chart(canvas, config);
+  instances.set(id, instance);
+  return instance;
+}
+
+export function chartColors() {
   return {
-    padding: 12,
-    backgroundColor: css("--surface"),
-    borderColor: css("--border-strong"),
-    borderWidth: 1,
-    titleColor: css("--text"),
-    bodyColor: css("--text-soft"),
-    cornerRadius: 12,
-    displayColors: true,
-    usePointStyle: true,
+    primary: css("--primary"),
+    accent: css("--accent"),
+    success: css("--success"),
+    danger: css("--danger"),
+    sand: css("--sand"),
+    info: css("--info"),
+    text: css("--text"),
+    muted: css("--text-muted"),
+    border: css("--border"),
+    surface: css("--surface-raised"),
   };
 }
 
-function baseOptions() {
+export function baseOptions({ horizontal = false, legend = true, stacked = false, percent = false } = {}) {
+  const colors = chartColors();
+  const indexAxis = horizontal ? "y" : "x";
+  const axis = {
+    stacked,
+    beginAtZero: true,
+    grid: { color: colors.border, drawBorder: false },
+    border: { display: false },
+    ticks: {
+      color: colors.muted,
+      font: { family: "Inter", size: 10 },
+      precision: percent ? undefined : 0,
+      callback: percent ? value => `${value}%` : undefined,
+    },
+  };
   return {
     responsive: true,
     maintainAspectRatio: false,
-    interaction: { intersect: false, mode: "index" },
+    indexAxis,
+    interaction: { mode: "index", intersect: false },
     animation: { duration: 520, easing: "easeOutQuart" },
     plugins: {
-      legend: { display: false },
-      tooltip: tooltipOptions(),
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        border: { display: false },
-        ticks: { color: css("--text-muted"), font: { family: "Inter", size: 10 }, maxRotation: 0 },
-      },
-      y: {
-        beginAtZero: true,
-        ticks: { precision: 0, color: css("--text-muted"), font: { family: "Inter", size: 10 } },
-        grid: { color: css("--border") },
-        border: { display: false },
-      },
-    },
-  };
-}
-
-function withLegend(options = baseOptions()) {
-  return {
-    ...options,
-    plugins: {
-      ...options.plugins,
       legend: {
-        display: true,
-        labels: {
-          color: css("--text-soft"),
-          boxWidth: 9,
-          boxHeight: 9,
-          usePointStyle: true,
-          pointStyle: "rectRounded",
-          padding: 18,
-          font: { family: "Inter", size: 10 },
-        },
+        display: legend,
+        labels: { color: colors.muted, usePointStyle: true, pointStyle: "rectRounded", boxWidth: 10, boxHeight: 10, font: { family: "Inter", size: 10 } },
+      },
+      tooltip: {
+        backgroundColor: colors.surface,
+        titleColor: colors.text,
+        bodyColor: colors.text,
+        borderColor: colors.border,
+        borderWidth: 1,
+        padding: 11,
+        cornerRadius: 10,
+      },
+    },
+    scales: horizontal ? { x: axis, y: { ...axis, grid: { display: false } } } : { x: { ...axis, grid: { display: false } }, y: axis },
+  };
+}
+
+export function doughnutOptions() {
+  const colors = chartColors();
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: "68%",
+    animation: { duration: 520, easing: "easeOutQuart" },
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: { color: colors.muted, usePointStyle: true, pointStyle: "circle", padding: 16, font: { family: "Inter", size: 10 } },
+      },
+      tooltip: {
+        backgroundColor: colors.surface,
+        titleColor: colors.text,
+        bodyColor: colors.text,
+        borderColor: colors.border,
+        borderWidth: 1,
+        padding: 11,
+        cornerRadius: 10,
       },
     },
   };
 }
 
-function dateKey(date) {
+export function startOfDay(value) {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+export function endOfDay(value) {
+  const date = new Date(value);
+  date.setHours(23, 59, 59, 999);
+  return date;
+}
+
+export function inputDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-export function periodDemands(days = 30) {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - Number(days) + 1);
-  return state.demands.filter(item => new Date(`${item.start_date}T12:00:00`) >= start);
-}
-
-export function renderDashboardCharts(days = 30) {
-  const demands = periodDemands(days);
-  const points = Number(days) === 7 ? 7 : 6;
-  const bucketDays = Math.ceil(Number(days) / points);
-  const labels = [];
-  const received = Array(points).fill(0);
-  const completed = Array(points).fill(0);
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - Number(days) + 1);
-
-  for (let index = 0; index < points; index++) {
-    const bucketStart = new Date(start);
-    bucketStart.setDate(start.getDate() + index * bucketDays);
-    const bucketEnd = new Date(bucketStart);
-    bucketEnd.setDate(bucketStart.getDate() + bucketDays - 1);
-    labels.push(Number(days) === 7
-      ? new Intl.DateTimeFormat("pt-BR", { weekday: "short" }).format(bucketStart).replace(".", "")
-      : `${bucketStart.getDate()}/${bucketStart.getMonth() + 1}`);
-    demands.forEach(item => {
-      const opened = new Date(`${item.start_date}T12:00:00`);
-      if (opened >= bucketStart && opened <= new Date(`${dateKey(bucketEnd)}T23:59:59`)) received[index]++;
-      if (item.completed_at) {
-        const done = new Date(item.completed_at);
-        if (done >= bucketStart && done <= new Date(`${dateKey(bucketEnd)}T23:59:59`)) completed[index]++;
-      }
-    });
+export function intervalFor(period, customStart = "", customEnd = "") {
+  const today = new Date();
+  const end = endOfDay(today);
+  let start;
+  if (period === "custom") {
+    start = startOfDay(new Date(`${customStart || inputDate(today)}T12:00:00`));
+    return { start, end: endOfDay(new Date(`${customEnd || inputDate(today)}T12:00:00`)) };
   }
-
-  create("flowChart", {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Recebidas",
-          data: received,
-          borderColor: css("--primary"),
-          backgroundColor: `${css("--primary")}26`,
-          fill: true,
-          tension: .42,
-          pointRadius: 3,
-          pointHoverRadius: 5,
-          borderWidth: 2.5,
-        },
-        {
-          label: "Concluídas",
-          data: completed,
-          borderColor: "#2bbf88",
-          backgroundColor: "transparent",
-          tension: .42,
-          pointRadius: 3,
-          pointHoverRadius: 5,
-          borderWidth: 2.5,
-          borderDash: [6, 5],
-        },
-      ],
-    },
-    options: withLegend(baseOptions()),
-  });
-
-  const statuses = Object.keys(STATUS_COLORS);
-  const values = statuses.map(status => demands.filter(item => effectiveStatus(item) === status).length);
-  create("statusChart", {
-    type: "doughnut",
-    data: {
-      labels: statuses,
-      datasets: [{
-        data: values,
-        backgroundColor: statuses.map(item => STATUS_COLORS[item]),
-        borderColor: css("--surface"),
-        borderWidth: 5,
-        hoverOffset: 7,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: "70%",
-      animation: { duration: 520 },
-      plugins: { legend: { display: false }, tooltip: tooltipOptions() },
-    },
-  });
-  document.getElementById("donutTotal").textContent = demands.length;
-  document.getElementById("statusLegend").innerHTML = statuses.map((status, index) => `<span><i style="background:${STATUS_COLORS[status]}"></i>${status} · ${values[index]}</span>`).join("");
-}
-
-function managerName(item) {
-  return item.manager?.trim() || "Gestor não informado";
-}
-
-function renderDemandAnalysis() {
-  const demands = state.demands;
-  const managers = [...new Set(demands.map(managerName))]
-    .sort((a, b) => demands.filter(item => managerName(item) === b).length - demands.filter(item => managerName(item) === a).length)
-    .slice(0, 12);
-  const categories = [...new Set(demands.map(item => item.category).filter(Boolean))]
-    .sort((a, b) => demands.filter(item => item.category === b).length - demands.filter(item => item.category === a).length)
-    .slice(0, 12);
-
-  create("managerChart", {
-    type: "bar",
-    data: {
-      labels: managers,
-      datasets: [{
-        label: "Demandas",
-        data: managers.map(name => demands.filter(item => managerName(item) === name).length),
-        backgroundColor: css("--primary"),
-        borderColor: css("--primary-hover"),
-        borderWidth: 1,
-        borderRadius: 12,
-        borderSkipped: false,
-        maxBarThickness: 62,
-      }],
-    },
-    options: baseOptions(),
-  });
-
-  create("categoryChart", {
-    type: "bar",
-    data: {
-      labels: categories,
-      datasets: [{
-        label: "Demandas",
-        data: categories.map(name => demands.filter(item => item.category === name).length),
-        backgroundColor: css("--accent"),
-        borderColor: css("--accent-hover"),
-        borderWidth: 1,
-        borderRadius: 10,
-        borderSkipped: false,
-        maxBarThickness: 46,
-      }],
-    },
-    options: { ...baseOptions(), indexAxis: "y" },
-  });
-
-  create("hoursChart", {
-    type: "bar",
-    data: {
-      labels: managers,
-      datasets: [
-        {
-          label: "Estimadas",
-          data: managers.map(name => demands.filter(item => managerName(item) === name).reduce((total, item) => total + Number(item.estimated_hours || 0), 0)),
-          backgroundColor: css("--primary"),
-          borderRadius: 10,
-          borderSkipped: false,
-          maxBarThickness: 48,
-        },
-        {
-          label: "Realizadas",
-          data: managers.map(name => demands.filter(item => managerName(item) === name).reduce((total, item) => total + Number(item.actual_hours || 0), 0)),
-          backgroundColor: css("--accent"),
-          borderRadius: 10,
-          borderSkipped: false,
-          maxBarThickness: 48,
-        },
-      ],
-    },
-    options: withLegend(baseOptions()),
-  });
-
-  const priorities = ["Baixa", "Normal", "Alta", "Urgente"];
-  create("priorityChart", {
-    type: "bar",
-    data: {
-      labels: priorities,
-      datasets: [
-        {
-          label: "Abertas",
-          data: priorities.map(priority => demands.filter(item => item.priority === priority && !["Concluída", "Cancelada"].includes(effectiveStatus(item))).length),
-          backgroundColor: css("--accent"),
-          borderRadius: 10,
-          borderSkipped: false,
-          maxBarThickness: 60,
-        },
-        {
-          label: "Concluídas",
-          data: priorities.map(priority => demands.filter(item => item.priority === priority && effectiveStatus(item) === "Concluída").length),
-          backgroundColor: "#2bbf88",
-          borderRadius: 10,
-          borderSkipped: false,
-          maxBarThickness: 60,
-        },
-      ],
-    },
-    options: withLegend(baseOptions()),
-  });
-}
-
-function renderConverterAnalysis() {
-  const records = state.converters;
-  const months = [];
-  const now = new Date();
-  for (let offset = 5; offset >= 0; offset--) {
-    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
-    months.push({
-      key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`,
-      label: new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(date).replace(".", ""),
-    });
+  if (period === "week") {
+    start = startOfDay(today);
+    const day = start.getDay() || 7;
+    start.setDate(start.getDate() - day + 1);
+    return { start, end };
   }
-  create("converterMonthlyChart", {
-    type: "line",
-    data: {
-      labels: months.map(item => item.label),
-      datasets: [{
-        label: "Conversores trocados",
-        data: months.map(month => records.filter(item => item.service_date?.startsWith(month.key)).reduce((total, item) => total + Number(item.quantity_replaced || 0), 0)),
-        borderColor: css("--accent"),
-        backgroundColor: `${css("--accent")}24`,
-        fill: true,
-        tension: .42,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        borderWidth: 2.5,
-      }],
-    },
-    options: baseOptions(),
-  });
+  if (period === "month") return { start: new Date(today.getFullYear(), today.getMonth(), 1), end };
+  if (period === "year") return { start: new Date(today.getFullYear(), 0, 1), end };
+  if (period === "all") return { start: new Date(2000, 0, 1), end };
+  const days = Math.max(1, Number(period || 30));
+  start = startOfDay(today);
+  start.setDate(start.getDate() - days + 1);
+  return { start, end };
+}
 
-  const locations = Object.entries(records.reduce((map, item) => {
-    map[item.location_name] = (map[item.location_name] || 0) + 1;
+export function dateInInterval(value, interval) {
+  if (!value) return false;
+  const date = new Date(value.includes("T") ? value : `${value}T12:00:00`);
+  return date >= interval.start && date <= interval.end;
+}
+
+export function filterDemandsByStart(demands, interval) {
+  return demands.filter(item => dateInInterval(item.start_date, interval));
+}
+
+export function countBy(items, getter) {
+  return items.reduce((map, item) => {
+    const key = getter(item) || "Não informado";
+    map[key] = (map[key] || 0) + 1;
     return map;
-  }, {})).sort((a, b) => b[1] - a[1]).slice(0, 10);
-  create("converterLocationChart", {
-    type: "bar",
-    data: {
-      labels: locations.map(item => item[0]),
-      datasets: [{
-        label: "Ocorrências",
-        data: locations.map(item => item[1]),
-        backgroundColor: css("--primary"),
-        borderRadius: 10,
-        borderSkipped: false,
-        maxBarThickness: 46,
-      }],
-    },
-    options: { ...baseOptions(), indexAxis: "y" },
+  }, {});
+}
+
+export function statusDistribution(demands) {
+  const order = ["Pendente", "Em andamento", "Aguardando retorno", "Concluída", "Atrasada", "Cancelada"];
+  const counts = countBy(demands, effectiveStatus);
+  return { labels: order, values: order.map(label => counts[label] || 0) };
+}
+
+export function managerSeries(demands) {
+  const map = {};
+  demands.forEach(item => {
+    const manager = item.manager?.trim() || "Gestor não informado";
+    if (!map[manager]) map[manager] = { count: 0, estimated: 0, actual: 0, done: 0 };
+    map[manager].count += 1;
+    map[manager].estimated += Number(item.estimated_hours || 0);
+    map[manager].actual += Number(item.actual_hours || 0);
+    if (effectiveStatus(item) === "Concluída") map[manager].done += 1;
   });
+  const labels = Object.keys(map).sort((a, b) => map[b].count - map[a].count || a.localeCompare(b, "pt-BR"));
+  return {
+    labels,
+    counts: labels.map(label => map[label].count),
+    estimated: labels.map(label => Number(map[label].estimated.toFixed(2))),
+    actual: labels.map(label => Number(map[label].actual.toFixed(2))),
+    done: labels.map(label => map[label].done),
+    map,
+  };
 }
 
-export function renderAnalysisCharts() {
-  renderDemandAnalysis();
-  renderConverterAnalysis();
+export function dailyFlow(demands, interval) {
+  const days = [];
+  const cursor = startOfDay(interval.start);
+  while (cursor <= interval.end && days.length < 370) {
+    days.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  const labels = days.map(date => new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: days.length > 14 ? "short" : undefined, weekday: days.length <= 10 ? "short" : undefined }).format(date).replaceAll(".", ""));
+  const received = days.map(day => demands.filter(item => {
+    const date = new Date(`${item.start_date}T12:00:00`);
+    return date.toDateString() === day.toDateString();
+  }).length);
+  const completed = days.map(day => demands.filter(item => {
+    if (!item.completed_at) return false;
+    const date = new Date(item.completed_at);
+    return date.toDateString() === day.toDateString();
+  }).length);
+  return { labels, received, completed };
 }
 
-export function redrawCharts(days = 30) {
-  renderDashboardCharts(days);
-  renderAnalysisCharts();
+export function monthlyConverters(records, interval) {
+  const months = [];
+  const cursor = new Date(interval.start.getFullYear(), interval.start.getMonth(), 1);
+  const end = new Date(interval.end.getFullYear(), interval.end.getMonth(), 1);
+  while (cursor <= end && months.length < 24) {
+    months.push(new Date(cursor));
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  const labels = months.map(date => new Intl.DateTimeFormat("pt-BR", { month: "short", year: months.length > 12 ? "2-digit" : undefined }).format(date).replaceAll(".", ""));
+  const values = months.map(month => records.filter(item => {
+    const date = new Date(`${item.service_date}T12:00:00`);
+    return date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth();
+  }).reduce((total, item) => total + Number(item.quantity_replaced || 0), 0));
+  return { labels, values };
 }
+
+window.addEventListener("fluux:themechange", () => {
+  // Os scripts de página escutam este evento e redesenham seus gráficos.
+});

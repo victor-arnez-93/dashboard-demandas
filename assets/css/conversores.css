@@ -1,15 +1,326 @@
-.converter-kpis { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; margin-bottom: 18px; }
-.converter-kpi { min-height: 132px; padding: 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-soft); }
-.converter-kpi i { display: grid; width: 40px; height: 40px; place-items: center; margin-bottom: 13px; border-radius: 13px; background: var(--primary-soft); color: var(--accent); }
-.converter-kpi small { display: block; color: var(--text-muted); font-size: 8px; }
-.converter-kpi strong { display: block; margin-top: 3px; overflow: hidden; font: 700 28px var(--font-title); text-overflow: ellipsis; white-space: nowrap; }
-.converter-kpi p { margin: 0; color: var(--text-muted); font-size: 7px; }
-.converter-filter-bar { display: grid; grid-template-columns: minmax(260px,1.3fr) minmax(140px,.5fr) minmax(140px,.5fr) minmax(170px,.7fr) auto; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); }
-.converter-table-scroll { max-height: 356px; overflow: auto; }
-.converter-table-scroll tbody tr { height: 70px; }
-.converter-modal { width: min(920px,100%); }
-.converter-form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; padding: 22px; }
-.converter-form-grid .full { grid-column: 1 / -1; }
-@media (max-width: 1100px) { .converter-kpis { grid-template-columns: repeat(2,1fr); } .converter-filter-bar { grid-template-columns: repeat(2,1fr); } .converter-filter-bar .converter-search { grid-column: 1 / -1; } }
-@media (max-width: 720px) { .converter-kpis, .converter-filter-bar, .converter-form-grid { grid-template-columns: 1fr; } .converter-filter-bar .converter-search, .converter-form-grid .full { grid-column: auto; } }
-.converter-table-scroll table { min-width: 1220px; }
+/* ============================================================
+   CONVERSORES.CSS — SUSTENTAÇÃO DE CONVERSORES DE MÍDIA
+   Somente regras específicas desta página.
+============================================================ */
+
+.converter-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.converter-kpi {
+  min-height: 132px;
+  padding: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.converter-kpi i {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  margin-bottom: 13px;
+  border-radius: 13px;
+  background: var(--primary-soft);
+  color: var(--accent);
+}
+
+.converter-kpi small {
+  display: block;
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.converter-kpi strong {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  font: 700 28px var(--font-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.converter-kpi p {
+  margin: 1px 0 0;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+/* ============================================================
+   FILTROS
+============================================================ */
+
+.converter-filter-bar {
+  display: grid;
+  grid-template-columns:
+    minmax(300px, 1.45fr)
+    minmax(145px, .52fr)
+    minmax(145px, .52fr)
+    minmax(190px, .72fr)
+    auto;
+  align-items: end;
+  gap: 12px;
+  padding: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.converter-filter-bar .field {
+  min-width: 0;
+  gap: 8px;
+}
+
+.converter-filter-bar .field > span {
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.converter-filter-bar .input-shell,
+.converter-filter-bar .field input,
+.converter-filter-bar .field select,
+.converter-filter-bar .btn-secondary {
+  min-height: 50px;
+  border-radius: 14px;
+}
+
+.converter-filter-bar .input-shell {
+  padding-inline: 15px;
+}
+
+.converter-filter-bar .input-shell i {
+  flex: 0 0 auto;
+  font-size: 15px;
+}
+
+.converter-filter-bar .input-shell input {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.converter-filter-bar .field input,
+.converter-filter-bar .field select {
+  padding-inline: 14px;
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.converter-filter-bar .field select {
+  border-color: var(--border);
+  background-color: var(--surface-input);
+}
+
+.converter-clear-filter {
+  min-width: 124px;
+  align-self: end;
+  white-space: nowrap;
+}
+
+.converter-filter-bar .input-shell:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* ============================================================
+   TABELA
+============================================================ */
+
+.converter-table-scroll {
+  max-height: 356px;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.converter-table-scroll table {
+  width: 100%;
+  min-width: 1080px;
+  table-layout: fixed;
+}
+
+.converter-table-scroll tbody tr {
+  height: 70px;
+}
+
+.converter-table-scroll th,
+.converter-table-scroll td {
+  overflow-wrap: anywhere;
+}
+
+.converter-table-scroll th:nth-child(1),
+.converter-table-scroll td:nth-child(1) { width: 8%; }
+
+.converter-table-scroll th:nth-child(2),
+.converter-table-scroll td:nth-child(2) { width: 8%; }
+
+.converter-table-scroll th:nth-child(3),
+.converter-table-scroll td:nth-child(3) { width: 13%; }
+
+.converter-table-scroll th:nth-child(4),
+.converter-table-scroll td:nth-child(4) { width: 12%; }
+
+.converter-table-scroll th:nth-child(5),
+.converter-table-scroll td:nth-child(5) { width: 11%; }
+
+.converter-table-scroll th:nth-child(6),
+.converter-table-scroll td:nth-child(6) { width: 11%; }
+
+.converter-table-scroll th:nth-child(7),
+.converter-table-scroll td:nth-child(7) {
+  width: 6%;
+  text-align: center;
+}
+
+.converter-table-scroll th:nth-child(8),
+.converter-table-scroll td:nth-child(8) { width: 14%; }
+
+.converter-table-scroll th:nth-child(9),
+.converter-table-scroll td:nth-child(9) { width: 10%; }
+
+.converter-table-scroll th:nth-child(10),
+.converter-table-scroll td:nth-child(10) { width: 9%; }
+
+/* ============================================================
+   MODAL
+============================================================ */
+
+.converter-modal {
+  width: min(920px, 100%);
+  max-height: min(860px, calc(100vh - 40px));
+}
+
+.converter-modal #converterForm {
+  min-height: 0;
+}
+
+.converter-form-grid {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 17px 18px;
+  overflow-y: auto;
+  padding: 22px 26px 24px 22px;
+  scrollbar-gutter: stable;
+}
+
+.converter-form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.converter-form-grid .field {
+  gap: 8px;
+}
+
+.converter-form-grid .field > span {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.converter-form-grid .field input,
+.converter-form-grid .field select,
+.converter-form-grid .field textarea {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.converter-form-grid .field input,
+.converter-form-grid .field select {
+  min-height: 50px;
+  border-radius: 14px;
+}
+
+.converter-form-grid .field textarea {
+  min-height: 118px;
+  border-radius: 14px;
+  line-height: 1.5;
+}
+
+.converter-modal .modal-actions {
+  box-shadow: 0 -8px 22px color-mix(in srgb, var(--background) 10%, transparent);
+}
+
+.converter-form-grid::-webkit-scrollbar-track {
+  margin-block: 8px;
+}
+
+/* ============================================================
+   CONTRASTE — TEMA CLARO
+============================================================ */
+
+[data-theme="light"] .converter-kpi small,
+[data-theme="light"] .converter-filter-bar .field > span,
+[data-theme="light"] .converter-form-grid .field > span {
+  color: #40545f;
+}
+
+[data-theme="light"] .converter-kpi p {
+  color: #65737a;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+============================================================ */
+
+@media (max-width: 1180px) {
+  .converter-filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .converter-filter-bar .converter-search {
+    grid-column: 1 / -1;
+  }
+
+  .converter-clear-filter {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .converter-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .converter-kpis,
+  .converter-filter-bar,
+  .converter-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .converter-filter-bar .converter-search,
+  .converter-form-grid .full {
+    grid-column: auto;
+  }
+
+  .converter-filter-bar {
+    padding: 15px;
+  }
+
+  .converter-modal {
+    max-height: calc(100vh - 24px);
+  }
+
+  .converter-form-grid {
+    padding: 18px 20px 20px 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .converter-kpis {
+    grid-template-columns: 1fr;
+  }
+}

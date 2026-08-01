@@ -15,6 +15,28 @@ function inputDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
+function defaultPeriod() {
+  const end = new Date();
+  const start = new Date(end);
+  start.setDate(start.getDate() - 29);
+  return { start: inputDate(start), end: inputDate(end) };
+}
+
+function applyDefaultFilters() {
+  const period = defaultPeriod();
+  document.getElementById("converterSearch").value = "";
+  document.getElementById("converterStartDate").value = period.start;
+  document.getElementById("converterEndDate").value = period.end;
+  document.getElementById("converterLocationFilter").value = "";
+}
+
+function showAllRecords() {
+  document.getElementById("converterSearch").value = "";
+  document.getElementById("converterStartDate").value = "";
+  document.getElementById("converterEndDate").value = "";
+  document.getElementById("converterLocationFilter").value = "";
+}
+
 function populateSelects() {
   const locations = activeCatalog("locations");
   const responsibles = activeCatalog("responsibles");
@@ -23,11 +45,13 @@ function populateSelects() {
   const locationFilter = document.getElementById("converterLocationFilter");
   const currentLocation = locationSelect.value;
   const currentResponsible = responsibleSelect.value;
+  const currentLocationFilter = locationFilter.value;
   locationSelect.innerHTML = `<option value="">Selecione</option>${locations.map(item => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join("")}<option value="__other__">Outro</option>`;
   responsibleSelect.innerHTML = `<option value="">Não informado</option>${responsibles.map(item => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join("")}<option value="__other__">Outro</option>`;
   locationFilter.innerHTML = `<option value="">Todos os locais</option>${locations.map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
   if ([...locationSelect.options].some(option => option.value === currentLocation)) locationSelect.value = currentLocation;
   if ([...responsibleSelect.options].some(option => option.value === currentResponsible)) responsibleSelect.value = currentResponsible;
+  if ([...locationFilter.options].some(option => option.value === currentLocationFilter)) locationFilter.value = currentLocationFilter;
 }
 
 function toggleOther(selectId, fieldId, inputId) {
@@ -60,6 +84,7 @@ function valueFromSelect(selectId, otherId, mode = "name") {
 function collectDraft() {
   return {
     id: document.getElementById("converterId").value,
+    ticket_number: document.getElementById("converterTicketNumber").value.trim(),
     service_date: document.getElementById("converterDate").value,
     location: valueFromSelect("converterLocation", "converterLocationOther", "name"),
     point_reference: smartSentence(document.getElementById("converterPoint").value),
@@ -75,6 +100,7 @@ function collectDraft() {
 
 function validateDraft(draft) {
   const checks = [
+    ["converterTicketNumber", Boolean(draft.ticket_number)],
     ["converterDate", Boolean(draft.service_date)],
     ["converterLocation", Boolean(draft.location.name)],
     ["converterServiceType", Boolean(draft.service_type.name)],
@@ -108,6 +134,7 @@ async function payloadFromDraft(draft) {
   let responsible = null;
   if (draft.responsible.name) responsible = draft.responsible.id ? catalogItem("responsibles", draft.responsible.id) : await findOrCreateCatalog("responsibles", draft.responsible.name);
   return {
+    ticket_number: draft.ticket_number,
     service_date: draft.service_date,
     location_id: location?.id || null,
     location_name: location?.name || draft.location.name,
@@ -129,17 +156,12 @@ function filtered() {
   const end = document.getElementById("converterEndDate").value;
   const location = document.getElementById("converterLocationFilter").value;
   return state.converters.filter(item => {
-    const text = `${converterCode(item)} ${item.location_name} ${item.point_reference || ""} ${item.issue_reason || ""} ${item.service_type}`.toLocaleLowerCase("pt-BR");
+    const text = `${item.ticket_number || ""} ${converterCode(item)} ${item.location_name} ${item.point_reference || ""} ${item.issue_reason || ""} ${item.notes || ""} ${item.service_type} ${item.conversion_direction || ""} ${item.responsible_name || ""} ${item.status || ""}`.toLocaleLowerCase("pt-BR");
     return (!search || text.includes(search)) && (!start || item.service_date >= start) && (!end || item.service_date <= end) && (!location || item.location_name === location);
   });
 }
 
-function renderKpis() {
-  const today = new Date();
-  const records = state.converters.filter(item => {
-    const date = new Date(`${item.service_date}T12:00:00`);
-    return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth();
-  });
+function renderKpis(records) {
   const quantity = records.reduce((total, item) => total + Number(item.quantity_replaced || 0), 0);
   const locations = Object.entries(records.reduce((map, item) => {
     map[item.location_name] = (map[item.location_name] || 0) + 1;
@@ -153,18 +175,30 @@ function renderKpis() {
   document.getElementById("converterDoneRate").textContent = `${Math.round(done / Math.max(records.length, 1) * 100)}%`;
 }
 
-function renderTable() {
-  const items = filtered();
+function emptyTableMarkup() {
+  if (!state.converters.length) {
+    return `<tr class="converter-empty-row"><td colspan="10" class="empty-table"><div class="converter-empty-state"><i class="fa-solid fa-network-wired"></i><strong>Nenhum atendimento cadastrado ainda.</strong><span>Use “Novo atendimento” para registrar a primeira ocorrência.</span></div></td></tr>`;
+  }
+
+  const total = state.converters.length;
+  return `<tr class="converter-empty-row"><td colspan="10" class="empty-table"><div class="converter-empty-state"><i class="fa-solid fa-filter-circle-xmark"></i><strong>Nenhum atendimento encontrado neste período.</strong><span>Existem ${total} ${total === 1 ? "registro cadastrado" : "registros cadastrados"} fora dos filtros selecionados. Nenhum dado foi apagado.</span><button class="btn-secondary converter-show-all" type="button" data-action="show-all"><i class="fa-solid fa-list"></i> Exibir todos</button></div></td></tr>`;
+}
+
+function renderTable(items) {
   document.getElementById("converterBody").innerHTML = items.length ? items.map(item => `<tr>
-    <td>${converterCode(item)}</td><td>${formatDate(item.service_date)}</td><td>${escapeHtml(item.location_name)}</td><td>${escapeHtml(item.point_reference || "—")}</td><td>${escapeHtml(item.service_type)}</td><td>${escapeHtml(item.conversion_direction || "—")}</td><td>${Number(item.quantity_replaced || 0)}</td><td>${escapeHtml(item.issue_reason || "—")}</td><td><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></td><td><div class="action-buttons"><button class="action-btn" data-action="view" data-id="${item.id}"><i class="fa-regular fa-eye"></i></button><button class="action-btn" data-action="edit" data-id="${item.id}"><i class="fa-solid fa-pen"></i></button><button class="action-btn danger" data-action="delete" data-id="${item.id}"><i class="fa-regular fa-trash-can"></i></button></div></td>
-  </tr>`).join("") : `<tr><td colspan="10" class="empty-table">Nenhum registro de conversor corresponde aos filtros.</td></tr>`;
-  document.getElementById("converterCount").textContent = `${items.length} ${items.length === 1 ? "registro exibido" : "registros exibidos"}`;
+    <td>${escapeHtml(item.ticket_number || "—")}</td><td>${formatDate(item.service_date)}</td><td>${escapeHtml(item.location_name)}</td><td>${escapeHtml(item.point_reference || "—")}</td><td>${escapeHtml(item.service_type)}</td><td>${escapeHtml(item.conversion_direction || "—")}</td><td>${Number(item.quantity_replaced || 0)}</td><td>${escapeHtml(item.issue_reason || "—")}</td><td><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></td><td><div class="action-buttons"><button class="action-btn" data-action="view" data-id="${item.id}"><i class="fa-regular fa-eye"></i></button><button class="action-btn" data-action="edit" data-id="${item.id}"><i class="fa-solid fa-pen"></i></button><button class="action-btn danger" data-action="delete" data-id="${item.id}"><i class="fa-regular fa-trash-can"></i></button></div></td>
+  </tr>`).join("") : emptyTableMarkup();
+  const total = state.converters.length;
+  document.getElementById("converterCount").textContent = total === 1
+    ? `${items.length} de 1 registro exibido`
+    : `${items.length} de ${total} registros exibidos`;
 }
 
 function renderAll() {
   populateSelects();
-  renderKpis();
-  renderTable();
+  const items = filtered();
+  renderKpis(items);
+  renderTable(items);
 }
 
 function setSelectValue(selectId, otherId, id, name) {
@@ -188,6 +222,7 @@ function editRecord(record) {
   document.getElementById("converterId").value = record.id;
   document.getElementById("converterModalTitle").textContent = `Editar ${converterCode(record)}`;
   document.getElementById("saveConverterButton").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salvar alterações`;
+  document.getElementById("converterTicketNumber").value = record.ticket_number || "";
   document.getElementById("converterDate").value = record.service_date;
   setSelectValue("converterLocation", "converterLocationOther", record.location_id, record.location_name);
   document.getElementById("converterPoint").value = record.point_reference || "";
@@ -206,12 +241,18 @@ function editRecord(record) {
 async function handleTable(event) {
   const button = event.target.closest("[data-action]");
   if (!button) return;
+  if (button.dataset.action === "show-all") {
+    showAllRecords();
+    renderAll();
+    return;
+  }
   const record = state.converters.find(item => item.id === button.dataset.id);
   if (!record) return;
   if (button.dataset.action === "view") renderConverterDetail(record);
   if (button.dataset.action === "edit") editRecord(record);
   if (button.dataset.action === "delete") {
-    const confirmed = await confirmAction({ title: "Excluir atendimento", text: `${converterCode(record)} será removido permanentemente.`, confirmLabel: "Excluir registro" });
+    const identifier = record.ticket_number || converterCode(record);
+    const confirmed = await confirmAction({ title: "Excluir atendimento", text: `O chamado ${identifier} será removido permanentemente.`, confirmLabel: "Excluir registro" });
     if (!confirmed) return;
     try {
       await removeConverter(record.id);
@@ -225,14 +266,11 @@ async function handleTable(event) {
 
 bootPage(() => {
   populateSelects();
-  const today = new Date();
-  const start = new Date(today.getFullYear(), today.getMonth(), 1);
-  document.getElementById("converterStartDate").value = inputDate(start);
-  document.getElementById("converterEndDate").value = inputDate(today);
+  applyDefaultFilters();
   resetForm();
   otherFields.forEach(args => document.getElementById(args[0]).addEventListener("change", () => toggleOther(...args)));
   [
-    ["converterLocationOther", "name"], ["converterPoint", "sentence"], ["converterServiceTypeOther", "sentence"], ["converterDirectionOther", "sentence"], ["converterStatusOther", "sentence"], ["converterResponsibleOther", "name"], ["converterReason", "sentence"], ["converterNotes", "sentence"],
+    ["converterTicketNumber", "sentence"], ["converterLocationOther", "name"], ["converterPoint", "sentence"], ["converterServiceTypeOther", "sentence"], ["converterDirectionOther", "sentence"], ["converterStatusOther", "sentence"], ["converterResponsibleOther", "name"], ["converterReason", "sentence"], ["converterNotes", "sentence"],
   ].forEach(([id, mode]) => bindSmartText(document.getElementById(id), mode));
   bindNumericOnly(document.getElementById("converterQuantity"), { integer: true, min: 1 });
   document.getElementById("newConverterButton").addEventListener("click", () => { resetForm(); openModal("converterModal"); });
@@ -241,13 +279,10 @@ bootPage(() => {
     const record = state.converters.find(item => item.id === event.currentTarget.dataset.id);
     if (record) editRecord(record);
   });
-  ["converterSearch", "converterStartDate", "converterEndDate", "converterLocationFilter"].forEach(id => document.getElementById(id).addEventListener("input", renderTable));
+  ["converterSearch", "converterStartDate", "converterEndDate", "converterLocationFilter"].forEach(id => document.getElementById(id).addEventListener("input", renderAll));
   document.getElementById("clearConverterFilters").addEventListener("click", () => {
-    document.getElementById("converterSearch").value = "";
-    document.getElementById("converterStartDate").value = "";
-    document.getElementById("converterEndDate").value = "";
-    document.getElementById("converterLocationFilter").value = "";
-    renderTable();
+    applyDefaultFilters();
+    renderAll();
   });
   document.getElementById("converterForm").addEventListener("submit", async event => {
     event.preventDefault();

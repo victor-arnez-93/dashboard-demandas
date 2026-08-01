@@ -306,6 +306,7 @@ export async function findOrCreateCatalog(type, name, description = null) {
 export async function saveConverter(payload, id = null) {
   const companyId = requireActiveCompanyId();
   const normalized = {
+    ticket_number: payload.ticket_number?.trim() || null,
     service_date: payload.service_date,
     location_id: payload.location_id || null,
     location_name: payload.location_name,

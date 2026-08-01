@@ -288,17 +288,17 @@ function exportExcel() {
 
   if (reportConverters.length) {
     const converterRows = reportConverters.map(item => ({
-      Código: converterCode(item),
+      "Nº do chamado": item.ticket_number || "Não informado",
       Data: new Date(`${item.service_date}T12:00:00`),
-      Local: item.location_name,
+      Polo: item.location_name,
       Ponto: item.point_reference || "",
       Atendimento: item.service_type,
       Conversão: item.conversion_direction || "",
       Quantidade: Number(item.quantity_replaced || 0),
-      Motivo: item.issue_reason || "",
+      Descrição: item.issue_reason || "",
       Status: item.status,
       Responsável: item.responsible_name || "",
-      Observações: item.notes || "",
+      Resolução: item.notes || "",
     }));
 
     const converterSheet = XLSX.utils.json_to_sheet(converterRows, { cellDates: true });
@@ -736,17 +736,11 @@ function pdfDemandRows(records) {
 }
 
 function pdfConverterRows(records) {
-  const rows = [];
-
-  records.forEach((item, index) => {
+  return records.map((item, index) => {
     const fillColor = index % 2 === 0
       ? [255, 255, 255]
       : [246, 246, 246];
 
-    /*
-     * O caractere de seta não pertence à fonte Helvetica
-     * padrão do jsPDF e pode aparecer quebrado no relatório.
-     */
     const conversion = pdfValue(
       item.conversion_direction,
     ).replace(
@@ -754,120 +748,81 @@ function pdfConverterRows(records) {
       " para ",
     );
 
-    const locationLines = [
-      `Local: ${pdfValue(item.location_name)}`,
+    const ticket = [
+      pdfValue(
+        item.ticket_number,
+        "Não informado",
+      ),
+      `Data: ${pdfStoredDate(item.service_date)}`,
+    ].join("\n");
 
+    const location = [
+      pdfValue(item.location_name),
       String(item.point_reference || "").trim()
         ? `Ponto: ${pdfValue(item.point_reference)}`
         : null,
-    ].filter(Boolean);
+    ].filter(Boolean).join("\n");
 
-    const serviceLines = [
-      `Tipo: ${pdfValue(item.service_type)}`,
-      `Conversão: ${conversion}`,
-      `Quantidade trocada: ${Number(
-        item.quantity_replaced || 0,
-      )}`,
-      `Status: ${pdfValue(item.status)}`,
-    ];
+    const description = [
+      pdfValue(
+        item.issue_reason,
+        "Sem descrição informada.",
+      ),
+      [
+        `Atendimento: ${pdfValue(item.service_type)}`,
+        `Conversão: ${conversion}`,
+        `Quantidade: ${Number(item.quantity_replaced || 0)}`,
+      ].join(" · "),
+    ].join("\n\n");
 
-    const identificationLines = [
-      `Data: ${pdfStoredDate(item.service_date)}`,
+    const resolution = [
+      pdfValue(
+        item.notes,
+        "Sem resolução informada.",
+      ),
+      [
+        `Status: ${pdfValue(item.status)}`,
+        String(item.responsible_name || "").trim()
+          ? `Responsável: ${pdfValue(item.responsible_name)}`
+          : null,
+      ].filter(Boolean).join(" · "),
+    ].join("\n\n");
 
-      String(item.responsible_name || "").trim()
-        ? `Responsável: ${pdfValue(
-          item.responsible_name,
-        )}`
-        : null,
-    ].filter(Boolean);
+    const baseStyles = {
+      fillColor,
+      valign: "top",
+      fontSize: 6.35,
+      cellPadding: 2.2,
+    };
 
-    const detailParts = [
-      String(item.issue_reason || "").trim()
-        ? `Motivo: ${pdfValue(item.issue_reason)}`
-        : null,
-
-      String(item.notes || "").trim()
-        ? `Observações: ${pdfValue(item.notes)}`
-        : null,
-    ].filter(Boolean);
-
-    const detailText = detailParts.length
-      ? detailParts.join(" ")
-      : "Sem detalhamento complementar.";
-
-    /*
-     * Primeira linha:
-     * identificação e informações operacionais.
-     */
-    rows.push([
+    return [
       {
-        content: converterCode(item),
-        rowSpan: 2,
-
+        content: ticket,
         styles: {
-          fillColor,
+          ...baseStyles,
           fontStyle: "bold",
-          valign: "top",
         },
       },
-
       {
-        content: locationLines.join("\n"),
-
-        styles: {
-          fillColor,
-          valign: "top",
-        },
+        content: location,
+        styles: baseStyles,
       },
-
       {
-        content: serviceLines.join("\n"),
-
+        content: description,
         styles: {
-          fillColor,
-          valign: "top",
-        },
-      },
-
-      {
-        content: identificationLines.join("\n"),
-
-        styles: {
-          fillColor,
-          valign: "top",
-        },
-      },
-    ]);
-
-    /*
-     * Segunda linha:
-     * motivo e observações em largura maior,
-     * seguindo o mesmo padrão das demandas.
-     */
-    rows.push([
-      {
-        content: detailText,
-        colSpan: 3,
-
-        styles: {
-          fillColor,
+          ...baseStyles,
           halign: "justify",
-          valign: "top",
-          fontSize: 6.4,
-          textColor: [35, 35, 35],
-
-          cellPadding: {
-            top: 1.2,
-            right: 2.2,
-            bottom: 2.8,
-            left: 2.2,
-          },
         },
       },
-    ]);
+      {
+        content: resolution,
+        styles: {
+          ...baseStyles,
+          halign: "justify",
+        },
+      },
+    ];
   });
-
-  return rows;
 }
 
 async function exportPdf() {
@@ -1320,10 +1275,10 @@ async function exportPdf() {
       startY: y,
 
       head: [[
-        "Código",
-        "Local e ponto",
-        "Atendimento e resultado",
-        "Data e responsável",
+        "Nº do chamado",
+        "Polo",
+        "Descrição",
+        "Resolução",
       ]],
 
       body: pdfConverterRows(
@@ -1333,33 +1288,33 @@ async function exportPdf() {
       styles: {
         ...tableBase.styles,
         fontSize: 6.35,
-        cellPadding: 2.1,
+        cellPadding: 2.2,
         valign: "top",
         overflow: "linebreak",
       },
 
       headStyles: {
         ...tableBase.headStyles,
-        fontSize: 6.5,
+        fontSize: 6.6,
         cellPadding: 2.3,
       },
 
       columnStyles: {
         0: {
-          cellWidth: 18,
+          cellWidth: 29,
           fontStyle: "bold",
         },
 
         1: {
-          cellWidth: 62,
+          cellWidth: 43,
         },
 
         2: {
-          cellWidth: 58,
+          cellWidth: 54,
         },
 
         3: {
-          cellWidth: 42,
+          cellWidth: 54,
         },
       },
 

@@ -189,6 +189,59 @@
 .converter-table-scroll th:nth-child(10),
 .converter-table-scroll td:nth-child(10) { width: 9%; }
 
+.converter-table-scroll tbody tr.converter-empty-row {
+  height: 218px;
+}
+
+.converter-table-scroll tbody tr.converter-empty-row:hover td {
+  background: transparent;
+}
+
+.converter-empty-state {
+  display: flex;
+  max-width: 560px;
+  min-height: 180px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 9px;
+  margin-inline: auto;
+  padding: 24px;
+}
+
+.converter-empty-state > i {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  margin-bottom: 2px;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  color: var(--accent);
+  font-size: 17px;
+}
+
+.converter-empty-state strong {
+  color: var(--text);
+  font: 700 17px var(--font-title);
+}
+
+.converter-empty-state span {
+  max-width: 500px;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.converter-show-all {
+  min-height: 40px;
+  margin-top: 5px;
+  padding-inline: 17px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
 /* ============================================================
    MODAL
 ============================================================ */

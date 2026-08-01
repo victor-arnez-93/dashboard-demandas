@@ -172,18 +172,19 @@ export function renderConverterDetail(record) {
   const code = document.getElementById("converterDetailCode");
   const content = document.getElementById("converterDetailContent");
   if (!code || !content) return;
-  code.textContent = converterCode(record);
+  code.textContent = record.ticket_number || converterCode(record);
   const cells = [
+    ["Nº do chamado", record.ticket_number || "—"],
     ["Data", formatDate(record.service_date, { year: true })],
-    ["Local", record.location_name],
+    ["Polo", record.location_name],
     ["Ponto / referência", record.point_reference || "—"],
     ["Atendimento", record.service_type],
     ["Conversão", record.conversion_direction || "—"],
     ["Quantidade", String(record.quantity_replaced || 0)],
     ["Status", record.status],
     ["Responsável", record.responsible_name || "—"],
-    ["Motivo", record.issue_reason || "—", true],
-    ["Observações", record.notes || "—", true],
+    ["Descrição", record.issue_reason || "—", true],
+    ["Resolução", record.notes || "—", true],
   ];
   content.innerHTML = cells.map(([label, value, full]) =>
     `<div class="detail-block ${full ? "full" : ""}"><small>${escapeHtml(label)}</small>${full ? `<p>${escapeHtml(value)}</p>` : `<strong>${escapeHtml(value)}</strong>`}</div>`

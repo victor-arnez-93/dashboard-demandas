@@ -82,49 +82,39 @@
 }
 
 /* ============================================================
-   BRILHO DESLIZANTE — BOTÕES E VIDRO DA LOGO
-   Passagem: aproximadamente 0,9s
-   Pausa: aproximadamente 3s
+   ANIMAÇÕES — CONTORNO NEON E BRILHO DO VIDRO
 ============================================================ */
 
-@keyframes fluux-neon-sweep {
-  0% {
-    opacity: 0;
-    transform: translateX(-230%) skewX(-22deg);
-  }
+@property --fluux-border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
 
-  3% {
-    opacity: .82;
-  }
-
-  23% {
-    opacity: .82;
-    transform: translateX(430%) skewX(-22deg);
-  }
-
-  24%,
-  100% {
-    opacity: 0;
-    transform: translateX(430%) skewX(-22deg);
+/* Neon girando somente pelo contorno do botão */
+@keyframes fluux-border-rotate {
+  to {
+    --fluux-border-angle: 360deg;
   }
 }
 
+/* Brilho atravessa devagar e aguarda cerca de 3 segundos */
 @keyframes fluux-glass-sweep {
   0% {
     opacity: 0;
     transform: translateX(-230%) skewX(-20deg);
   }
 
-  3% {
-    opacity: .62;
+  4% {
+    opacity: .58;
   }
 
-  23% {
-    opacity: .62;
+  32% {
+    opacity: .58;
     transform: translateX(430%) skewX(-20deg);
   }
 
-  24%,
+  33%,
   100% {
     opacity: 0;
     transform: translateX(430%) skewX(-20deg);

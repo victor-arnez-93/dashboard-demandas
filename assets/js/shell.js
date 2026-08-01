@@ -1,10 +1,10 @@
 import { log } from "./logger.js";
-import { requireSession, getSupabase } from "./supabase-client.js";
-import { initializeStore, state, saveProfile } from "./store.js";
+import { requireSession, getSupabase, clearStoredAuthSessions } from "./supabase-client.js";
+import { initializeStore, resetStore, state, saveProfile } from "./store.js";
 import { applyTheme, applyIdentity, initClock, closeModal, showToast } from "./ui.js";
 import { initializeWeather, openWeather, closeWeather, refreshWeather } from "./weather.js";
 
-const VERSION = "v1.2.0";
+const VERSION = "v1.3.0";
 const COLLAPSED_KEY = "fluux-sidebar-collapsed";
 const WARM_BOOT_KEY = "fluux-warm-navigation";
 
@@ -153,6 +153,7 @@ function bindShell() {
 
   document.getElementById("logoutButton")?.addEventListener("click", async () => {
     try { await getSupabase().auth.signOut(); } catch (error) { log.warn("AUTH", "Falha ao encerrar sessão no servidor.", error); }
+    resetStore();
     clearStoredAuthSessions();
     sessionStorage.clear();
     location.replace("index.html");

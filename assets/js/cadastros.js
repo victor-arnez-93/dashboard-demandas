@@ -1,11 +1,10 @@
 import { bootPage } from "./shell.js";
 import {
-  CATALOG_TABLES,
   state,
   saveCatalog,
   setCatalogActive,
+  removeCatalog,
 } from "./store.js";
-import { getSupabase } from "./supabase-client.js";
 import {
   escapeHtml,
   formatDate,
@@ -206,10 +205,9 @@ async function deleteCatalog() {
   if (!pendingDelete) return;
 
   const { type, id, name } = pendingDelete;
-  const table = CATALOG_TABLES[type];
   const button = document.getElementById("confirmDeleteCatalogButton");
 
-  if (!table) {
+  if (!META[type]) {
     showToast("Tipo de cadastro inválido.", "error");
     return;
   }
@@ -217,15 +215,7 @@ async function deleteCatalog() {
   try {
     button.disabled = true;
 
-    const { error } = await getSupabase()
-      .from(table)
-      .delete()
-      .eq("id", id);
-
-    if (error) throw error;
-
-    state.catalogs[type] = (state.catalogs[type] || [])
-      .filter(item => item.id !== id);
+    await removeCatalog(type, id);
 
     closeModal("deleteCatalogModal");
     clearDeleteConfirmation();

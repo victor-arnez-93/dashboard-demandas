@@ -13,6 +13,8 @@ export const state = {
   session: null,
   user: null,
   profile: null,
+  activeCompanyId: null,
+  company: null,
   settings: null,
   demands: [],
   converters: [],
@@ -25,36 +27,96 @@ export const state = {
   },
 };
 
-const defaultProfile = user => ({
-  id: user.id,
-  full_name: user.user_metadata?.full_name || window.FLUUX_ENV.DEFAULT_USER_NAME,
-  role: user.user_metadata?.role || window.FLUUX_ENV.DEFAULT_ROLE,
-  avatar_url: user.user_metadata?.avatar_url || null,
-  theme: "dark",
-});
-
-const defaultSettings = {
+const defaultSettings = companyId => ({
+  company_id: companyId,
   id: 1,
   app_name: "FLUUX",
   app_subtitle: "Organização de Demandas",
   weather_city: window.FLUUX_ENV.DEFAULT_CITY,
   weather_latitude: window.FLUUX_ENV.DEFAULT_LATITUDE,
   weather_longitude: window.FLUUX_ENV.DEFAULT_LONGITUDE,
-};
+});
+
+function emptyCatalogs() {
+  return {
+    managers: [],
+    responsibles: [],
+    departments: [],
+    categories: [],
+    locations: [],
+  };
+}
+
+export function resetStore() {
+  state.session = null;
+  state.user = null;
+  state.profile = null;
+  state.activeCompanyId = null;
+  state.company = null;
+  state.settings = null;
+  state.demands = [];
+  state.converters = [];
+  state.catalogs = emptyCatalogs();
+}
+
+function requireActiveCompanyId() {
+  const companyId = state.activeCompanyId || state.profile?.active_company_id;
+  if (!companyId) {
+    throw new Error("Seu perfil não possui uma empresa ativa. Verifique o provisionamento do usuário no Supabase.");
+  }
+  return companyId;
+}
 
 function ensureResult(result) {
   if (result.error) throw result.error;
   return result.data || [];
 }
 
+function ensureCompanyRows(result, resource) {
+  const rows = ensureResult(result);
+  const companyId = requireActiveCompanyId();
+  if (rows.some(row => row.company_id !== companyId)) {
+    throw new Error(`O Supabase retornou ${resource} de outra empresa. O carregamento foi interrompido por segurança.`);
+  }
+  return rows;
+}
+
+function ensureCompanyRecord(result, resource) {
+  if (result.error) throw result.error;
+  const record = result.data;
+  if (!record) throw new Error(`O Supabase não retornou ${resource}.`);
+  if (record.company_id !== requireActiveCompanyId()) {
+    throw new Error(`O Supabase retornou ${resource} de outra empresa. A operação foi interrompida por segurança.`);
+  }
+  return record;
+}
+
 export async function initializeStore(session) {
+  resetStore();
   state.session = session;
   state.user = session.user;
   const sb = getSupabase();
-  log.info("DADOS", "Carregando perfil, configurações, demandas, cadastros e conversores...");
+  log.info("DADOS", "Carregando perfil e empresa ativa...");
+
+  const profileResult = await sb
+    .from("profiles")
+    .select("*")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
+  if (profileResult.error) throw profileResult.error;
+  if (!profileResult.data) {
+    throw new Error("Seu perfil empresarial ainda não foi provisionado. Verifique o trigger de criação de usuários no Supabase.");
+  }
+
+  state.profile = profileResult.data;
+  state.activeCompanyId = state.profile.active_company_id;
+  const companyId = requireActiveCompanyId();
+
+  log.info("DADOS", "Carregando dados da empresa ativa...", { companyId });
 
   const [
-    profileResult,
+    companyResult,
     settingsResult,
     demandsResult,
     convertersResult,
@@ -64,45 +126,46 @@ export async function initializeStore(session) {
     categoriesResult,
     locationsResult,
   ] = await Promise.all([
-    sb.from("profiles").select("*").eq("id", session.user.id).maybeSingle(),
-    sb.from("app_settings").select("*").eq("id", 1).maybeSingle(),
-    sb.from("demands").select("*").order("created_at", { ascending: false }),
-    sb.from("media_converter_records").select("*").order("service_date", { ascending: false }).order("created_at", { ascending: false }),
-    sb.from("managers").select("*").order("is_active", { ascending: false }).order("name"),
-    sb.from("responsibles").select("*").order("is_active", { ascending: false }).order("name"),
-    sb.from("departments").select("*").order("is_active", { ascending: false }).order("name"),
-    sb.from("demand_categories").select("*").order("is_active", { ascending: false }).order("name"),
-    sb.from("service_locations").select("*").order("is_active", { ascending: false }).order("name"),
+    sb.from("companies").select("*").eq("id", companyId).maybeSingle(),
+    sb.from("app_settings").select("*").eq("company_id", companyId).eq("id", 1).maybeSingle(),
+    sb.from("demands").select("*").eq("company_id", companyId).order("created_at", { ascending: false }),
+    sb.from("media_converter_records").select("*").eq("company_id", companyId).order("service_date", { ascending: false }).order("created_at", { ascending: false }),
+    sb.from("managers").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
+    sb.from("responsibles").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
+    sb.from("departments").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
+    sb.from("demand_categories").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
+    sb.from("service_locations").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
   ]);
 
-  if (profileResult.error) throw profileResult.error;
+  if (companyResult.error) throw companyResult.error;
+  if (!companyResult.data) {
+    throw new Error("A empresa ativa do perfil não está disponível para este usuário.");
+  }
+  state.company = companyResult.data;
+
   if (settingsResult.error) throw settingsResult.error;
 
-  if (!profileResult.data) {
-    const { data, error } = await sb.from("profiles").upsert(defaultProfile(session.user)).select().single();
-    if (error) throw error;
-    state.profile = data;
-  } else {
-    state.profile = profileResult.data;
-  }
-
   if (!settingsResult.data) {
-    const { data, error } = await sb.from("app_settings").upsert(defaultSettings).select().single();
-    if (error) throw error;
-    state.settings = data;
+    const settingsUpsert = await sb
+      .from("app_settings")
+      .upsert(defaultSettings(companyId), { onConflict: "company_id,id" })
+      .select()
+      .single();
+    state.settings = ensureCompanyRecord(settingsUpsert, "as configurações da empresa");
   } else {
-    state.settings = settingsResult.data;
+    state.settings = ensureCompanyRecord(settingsResult, "as configurações da empresa");
   }
 
-  state.demands = ensureResult(demandsResult);
-  state.converters = ensureResult(convertersResult);
-  state.catalogs.managers = ensureResult(managersResult);
-  state.catalogs.responsibles = ensureResult(responsiblesResult);
-  state.catalogs.departments = ensureResult(departmentsResult);
-  state.catalogs.categories = ensureResult(categoriesResult);
-  state.catalogs.locations = ensureResult(locationsResult);
+  state.demands = ensureCompanyRows(demandsResult, "demandas");
+  state.converters = ensureCompanyRows(convertersResult, "registros de conversores");
+  state.catalogs.managers = ensureCompanyRows(managersResult, "gestores");
+  state.catalogs.responsibles = ensureCompanyRows(responsiblesResult, "responsáveis");
+  state.catalogs.departments = ensureCompanyRows(departmentsResult, "departamentos");
+  state.catalogs.categories = ensureCompanyRows(categoriesResult, "categorias");
+  state.catalogs.locations = ensureCompanyRows(locationsResult, "locais");
 
   log.success("DADOS", "Dados reais carregados.", {
+    empresa: state.company.name,
     demandas: state.demands.length,
     conversores: state.converters.length,
     cadastros: Object.values(state.catalogs).reduce((total, items) => total + items.length, 0),
@@ -134,6 +197,7 @@ export function catalogItem(type, id) {
 
 export async function saveDemand(payload, id = null) {
   const sb = getSupabase();
+  const companyId = requireActiveCompanyId();
   const normalized = {
     title: payload.title,
     description: payload.description,
@@ -160,21 +224,21 @@ export async function saveDemand(payload, id = null) {
 
   let result;
   if (id) {
-    result = await sb.from("demands").update(normalized).eq("id", id).select().single();
+    result = await sb.from("demands").update(normalized).eq("company_id", companyId).eq("id", id).select().single();
   } else {
-    result = await sb.from("demands").insert({ ...normalized, created_by: state.user.id }).select().single();
+    result = await sb.from("demands").insert({ ...normalized, company_id: companyId, created_by: state.user.id }).select().single();
   }
-  if (result.error) throw result.error;
+  const savedDemand = ensureCompanyRecord(result, "a demanda");
 
-  const index = state.demands.findIndex(item => item.id === result.data.id);
-  if (index >= 0) state.demands[index] = result.data;
-  else state.demands.unshift(result.data);
-  log.success("DEMANDAS", id ? "Demanda atualizada." : "Demanda criada.", { id: result.data.id });
-  return result.data;
+  const index = state.demands.findIndex(item => item.id === savedDemand.id);
+  if (index >= 0) state.demands[index] = savedDemand;
+  else state.demands.unshift(savedDemand);
+  log.success("DEMANDAS", id ? "Demanda atualizada." : "Demanda criada.", { id: savedDemand.id });
+  return savedDemand;
 }
 
 export async function removeDemand(id) {
-  const { error } = await getSupabase().from("demands").delete().eq("id", id);
+  const { error } = await getSupabase().from("demands").delete().eq("company_id", requireActiveCompanyId()).eq("id", id);
   if (error) throw error;
   state.demands = state.demands.filter(item => item.id !== id);
   log.success("DEMANDAS", "Demanda excluída.", { id });
@@ -191,18 +255,32 @@ export async function saveCatalog(type, payload, id = null) {
   if (type === "locations") normalized.description = payload.description || null;
 
   const sb = getSupabase();
+  const companyId = requireActiveCompanyId();
   const result = id
-    ? await sb.from(table).update(normalized).eq("id", id).select().single()
-    : await sb.from(table).insert({ ...normalized, created_by: state.user.id }).select().single();
-  if (result.error) throw result.error;
+    ? await sb.from(table).update(normalized).eq("company_id", companyId).eq("id", id).select().single()
+    : await sb.from(table).insert({ ...normalized, company_id: companyId, created_by: state.user.id }).select().single();
+  const savedCatalog = ensureCompanyRecord(result, "o cadastro");
 
   const items = state.catalogs[type];
-  const index = items.findIndex(item => item.id === result.data.id);
-  if (index >= 0) items[index] = result.data;
-  else items.push(result.data);
+  const index = items.findIndex(item => item.id === savedCatalog.id);
+  if (index >= 0) items[index] = savedCatalog;
+  else items.push(savedCatalog);
   items.sort((a, b) => Number(b.is_active) - Number(a.is_active) || a.name.localeCompare(b.name, "pt-BR"));
-  log.success("CADASTROS", id ? "Cadastro atualizado." : "Cadastro criado.", { tipo: type, id: result.data.id });
-  return result.data;
+  log.success("CADASTROS", id ? "Cadastro atualizado." : "Cadastro criado.", { tipo: type, id: savedCatalog.id });
+  return savedCatalog;
+}
+
+export async function removeCatalog(type, id) {
+  const table = CATALOG_TABLES[type];
+  if (!table) throw new Error("Tipo de cadastro inválido.");
+  const { error } = await getSupabase()
+    .from(table)
+    .delete()
+    .eq("company_id", requireActiveCompanyId())
+    .eq("id", id);
+  if (error) throw error;
+  state.catalogs[type] = (state.catalogs[type] || []).filter(item => item.id !== id);
+  log.success("CADASTROS", "Cadastro excluído.", { tipo: type, id });
 }
 
 export async function setCatalogActive(type, id, isActive) {
@@ -226,6 +304,7 @@ export async function findOrCreateCatalog(type, name, description = null) {
 }
 
 export async function saveConverter(payload, id = null) {
+  const companyId = requireActiveCompanyId();
   const normalized = {
     service_date: payload.service_date,
     location_id: payload.location_id || null,
@@ -243,28 +322,31 @@ export async function saveConverter(payload, id = null) {
   };
   const sb = getSupabase();
   const result = id
-    ? await sb.from("media_converter_records").update(normalized).eq("id", id).select().single()
-    : await sb.from("media_converter_records").insert({ ...normalized, created_by: state.user.id }).select().single();
-  if (result.error) throw result.error;
+    ? await sb.from("media_converter_records").update(normalized).eq("company_id", companyId).eq("id", id).select().single()
+    : await sb.from("media_converter_records").insert({ ...normalized, company_id: companyId, created_by: state.user.id }).select().single();
+  const savedConverter = ensureCompanyRecord(result, "o registro de conversor");
 
-  const index = state.converters.findIndex(item => item.id === result.data.id);
-  if (index >= 0) state.converters[index] = result.data;
-  else state.converters.unshift(result.data);
+  const index = state.converters.findIndex(item => item.id === savedConverter.id);
+  if (index >= 0) state.converters[index] = savedConverter;
+  else state.converters.unshift(savedConverter);
   state.converters.sort((a, b) => String(b.service_date).localeCompare(String(a.service_date)) || String(b.created_at).localeCompare(String(a.created_at)));
-  log.success("CONVERSORES", id ? "Registro atualizado." : "Registro criado.", { id: result.data.id });
-  return result.data;
+  log.success("CONVERSORES", id ? "Registro atualizado." : "Registro criado.", { id: savedConverter.id });
+  return savedConverter;
 }
 
 export async function removeConverter(id) {
-  const { error } = await getSupabase().from("media_converter_records").delete().eq("id", id);
+  const { error } = await getSupabase().from("media_converter_records").delete().eq("company_id", requireActiveCompanyId()).eq("id", id);
   if (error) throw error;
   state.converters = state.converters.filter(item => item.id !== id);
   log.success("CONVERSORES", "Registro excluído.", { id });
 }
 
 export async function saveProfile(patch) {
-  const payload = { id: state.user.id, ...patch };
-  const { data, error } = await getSupabase().from("profiles").upsert(payload).select().single();
+  const payload = { ...patch };
+  delete payload.id;
+  delete payload.active_company_id;
+  delete payload.is_super_admin;
+  const { data, error } = await getSupabase().from("profiles").update(payload).eq("id", state.user.id).select().single();
   if (error) throw error;
   state.profile = data;
   log.success("PERFIL", "Perfil salvo.");
@@ -272,11 +354,15 @@ export async function saveProfile(patch) {
 }
 
 export async function saveSettings(patch) {
-  const { data, error } = await getSupabase().from("app_settings").upsert({ id: 1, ...patch }).select().single();
-  if (error) throw error;
-  state.settings = data;
-  log.success("CONFIG", "Configurações globais salvas.");
-  return data;
+  const companyId = requireActiveCompanyId();
+  const result = await getSupabase()
+    .from("app_settings")
+    .upsert({ ...patch, company_id: companyId, id: 1 }, { onConflict: "company_id,id" })
+    .select()
+    .single();
+  state.settings = ensureCompanyRecord(result, "as configurações da empresa");
+  log.success("CONFIG", "Configurações da empresa salvas.");
+  return state.settings;
 }
 
 export async function uploadAvatar(file) {

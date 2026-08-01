@@ -1,5 +1,5 @@
 const PREFIX = "[FLUUX]";
-const VERSION = "1.2.0";
+const VERSION = "1.3.0";
 
 function write(method, area, message, details) {
   const args = [`${PREFIX} [${area}] ${message}`];

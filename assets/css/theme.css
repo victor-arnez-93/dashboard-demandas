@@ -15,7 +15,7 @@
   --info: #55a8d8;
   --background: #090d10;
   --background-image: url("../img/fundoescuro.png");
-  --background-tint: rgba(5, 8, 10, 0.40);
+  --background-tint: rgba(5, 8, 10, 0.30);
   --surface: rgba(16, 25, 31, 0.94);
   --surface-solid: #111a20;
   --surface-raised: #17232b;
@@ -59,7 +59,7 @@
   --info: #2f759d;
   --background: #f4f1e8;
   --background-image: url("../img/fundoclaro.png");
-  --background-tint: rgba(255, 255, 255, 0.28);
+  --background-tint: rgba(255, 255, 255, 0.18);
   --surface: rgba(255, 255, 255, 0.94);
   --surface-solid: #ffffff;
   --surface-raised: #f7f4ec;
@@ -79,4 +79,54 @@
   --shadow: 0 16px 40px rgba(40, 75, 99, 0.12);
   --shadow-soft: 0 8px 22px rgba(40, 75, 99, 0.10);
   --shadow-glow: 0 14px 30px rgba(249, 105, 0, 0.15);
+}
+
+/* ============================================================
+   BRILHO DESLIZANTE — BOTÕES E VIDRO DA LOGO
+   Passagem: aproximadamente 0,9s
+   Pausa: aproximadamente 3s
+============================================================ */
+
+@keyframes fluux-neon-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-230%) skewX(-22deg);
+  }
+
+  3% {
+    opacity: .82;
+  }
+
+  23% {
+    opacity: .82;
+    transform: translateX(430%) skewX(-22deg);
+  }
+
+  24%,
+  100% {
+    opacity: 0;
+    transform: translateX(430%) skewX(-22deg);
+  }
+}
+
+@keyframes fluux-glass-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-230%) skewX(-20deg);
+  }
+
+  3% {
+    opacity: .62;
+  }
+
+  23% {
+    opacity: .62;
+    transform: translateX(430%) skewX(-20deg);
+  }
+
+  24%,
+  100% {
+    opacity: 0;
+    transform: translateX(430%) skewX(-20deg);
+  }
 }

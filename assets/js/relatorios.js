@@ -736,36 +736,138 @@ function pdfDemandRows(records) {
 }
 
 function pdfConverterRows(records) {
-  return records.map(item => [
-    [
-      converterCode(item),
-      `Data: ${pdfStoredDate(item.service_date)}`,
-    ].join("\n"),
+  const rows = [];
 
-    [
+  records.forEach((item, index) => {
+    const fillColor = index % 2 === 0
+      ? [255, 255, 255]
+      : [246, 246, 246];
+
+    /*
+     * O caractere de seta não pertence à fonte Helvetica
+     * padrão do jsPDF e pode aparecer quebrado no relatório.
+     */
+    const conversion = pdfValue(
+      item.conversion_direction,
+    ).replace(
+      /\s*(?:→|->)\s*/g,
+      " para ",
+    );
+
+    const locationLines = [
       `Local: ${pdfValue(item.location_name)}`,
-      `Ponto: ${pdfValue(item.point_reference)}`,
-    ].join("\n"),
 
-    [
-      `Atendimento: ${pdfValue(item.service_type)}`,
-      `Conversão: ${pdfValue(
-        item.conversion_direction,
-      )}`,
-      `Quantidade: ${Number(
+      String(item.point_reference || "").trim()
+        ? `Ponto: ${pdfValue(item.point_reference)}`
+        : null,
+    ].filter(Boolean);
+
+    const serviceLines = [
+      `Tipo: ${pdfValue(item.service_type)}`,
+      `Conversão: ${conversion}`,
+      `Quantidade trocada: ${Number(
         item.quantity_replaced || 0,
       )}`,
       `Status: ${pdfValue(item.status)}`,
-    ].join("\n"),
+    ];
 
-    [
-      `Responsável: ${pdfValue(
-        item.responsible_name,
-      )}`,
-      `Motivo: ${pdfValue(item.issue_reason)}`,
-      `Observações: ${pdfValue(item.notes)}`,
-    ].join("\n"),
-  ]);
+    const identificationLines = [
+      `Data: ${pdfStoredDate(item.service_date)}`,
+
+      String(item.responsible_name || "").trim()
+        ? `Responsável: ${pdfValue(
+          item.responsible_name,
+        )}`
+        : null,
+    ].filter(Boolean);
+
+    const detailParts = [
+      String(item.issue_reason || "").trim()
+        ? `Motivo: ${pdfValue(item.issue_reason)}`
+        : null,
+
+      String(item.notes || "").trim()
+        ? `Observações: ${pdfValue(item.notes)}`
+        : null,
+    ].filter(Boolean);
+
+    const detailText = detailParts.length
+      ? detailParts.join(" ")
+      : "Sem detalhamento complementar.";
+
+    /*
+     * Primeira linha:
+     * identificação e informações operacionais.
+     */
+    rows.push([
+      {
+        content: converterCode(item),
+        rowSpan: 2,
+
+        styles: {
+          fillColor,
+          fontStyle: "bold",
+          valign: "top",
+        },
+      },
+
+      {
+        content: locationLines.join("\n"),
+
+        styles: {
+          fillColor,
+          valign: "top",
+        },
+      },
+
+      {
+        content: serviceLines.join("\n"),
+
+        styles: {
+          fillColor,
+          valign: "top",
+        },
+      },
+
+      {
+        content: identificationLines.join("\n"),
+
+        styles: {
+          fillColor,
+          valign: "top",
+        },
+      },
+    ]);
+
+    /*
+     * Segunda linha:
+     * motivo e observações em largura maior,
+     * seguindo o mesmo padrão das demandas.
+     */
+    rows.push([
+      {
+        content: detailText,
+        colSpan: 3,
+
+        styles: {
+          fillColor,
+          halign: "justify",
+          valign: "top",
+          fontSize: 6.4,
+          textColor: [35, 35, 35],
+
+          cellPadding: {
+            top: 1.2,
+            right: 2.2,
+            bottom: 2.8,
+            left: 2.2,
+          },
+        },
+      },
+    ]);
+  });
+
+  return rows;
 }
 
 async function exportPdf() {
@@ -1218,10 +1320,10 @@ async function exportPdf() {
       startY: y,
 
       head: [[
-        "Código e data",
+        "Código",
         "Local e ponto",
-        "Atendimento",
-        "Resultado e observações",
+        "Atendimento e resultado",
+        "Data e responsável",
       ]],
 
       body: pdfConverterRows(
@@ -1230,29 +1332,42 @@ async function exportPdf() {
 
       styles: {
         ...tableBase.styles,
-        fontSize: 6.2,
+        fontSize: 6.35,
         cellPadding: 2.1,
         valign: "top",
+        overflow: "linebreak",
+      },
+
+      headStyles: {
+        ...tableBase.headStyles,
+        fontSize: 6.5,
+        cellPadding: 2.3,
       },
 
       columnStyles: {
         0: {
-          cellWidth: 26,
+          cellWidth: 18,
           fontStyle: "bold",
         },
 
         1: {
-          cellWidth: 48,
+          cellWidth: 62,
         },
 
         2: {
-          cellWidth: 47,
+          cellWidth: 58,
         },
 
         3: {
-          cellWidth: 59,
+          cellWidth: 42,
         },
       },
+
+      alternateRowStyles: {
+        fillColor: [255, 255, 255],
+      },
+
+      rowPageBreak: "avoid",
     });
   }
 

@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/relatorios.css?v=20260731-1">
+  <link rel="stylesheet" href="assets/css/relatorios.css?v=20260802-1">
   
 </head>
 <body data-page="relatorios" data-page-label="Relatórios">
@@ -23,10 +23,63 @@
   <div class="app-shell" id="appShell" hidden>
     <main class="main-content" id="mainContent" tabindex="-1">
       <div class="page-heading"><div><span class="eyebrow">CONSOLIDAÇÃO</span><h1>Relatórios</h1><p>Filtre, revise e exporte informações para acompanhamento e apresentação.</p></div><div class="header-actions"><button class="btn-secondary" id="exportExcelButton" type="button"><i class="fa-regular fa-file-excel"></i> Exportar Excel</button><button class="btn-primary" id="exportPdfButton" type="button"><i class="fa-regular fa-file-pdf"></i> Gerar PDF</button></div></div>
-      <section class="panel report-filter-panel"><div class="report-periods"><button data-report-period="today">Hoje</button><button data-report-period="7">7 dias</button><button class="active" data-report-period="30">30 dias</button><button data-report-period="month">Mês atual</button><button data-report-period="year">Ano</button><button data-report-period="custom">Personalizado</button></div><div class="report-filter-grid" id="reportFilterGrid"><label class="field custom-date"><span>De</span><input id="reportStartDate" type="date"></label><label class="field custom-date"><span>Até</span><input id="reportEndDate" type="date"></label><label class="field"><span>Status</span><select id="reportStatus"><option value="">Todos</option><option>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Atrasada</option><option>Cancelada</option></select></label><label class="field"><span>Prioridade</span><select id="reportPriority"><option value="">Todas</option><option>Baixa</option><option>Normal</option><option>Alta</option><option>Urgente</option></select></label><label class="field"><span>Gestor</span><select id="reportManager"><option value="">Todos</option></select></label><label class="field"><span>Categoria</span><select id="reportCategory"><option value="">Todas</option></select></label><label class="field"><span>Responsável</span><input id="reportResponsible" type="search" placeholder="Nome do responsável"></label></div></section>
-      <section class="report-cards"><article class="report-card"><small>Total de demandas</small><strong id="reportTotal">0</strong><p id="reportPeriodLabel">Últimos 30 dias</p></article><article class="report-card"><small>Concluídas</small><strong id="reportDone">0</strong><p id="reportDoneRate">0% de conclusão</p></article><article class="report-card"><small>Em andamento</small><strong id="reportProgress">0</strong><p>demandas ativas</p></article><article class="report-card"><small>Atrasadas</small><strong id="reportOverdue">0</strong><p>prazo vencido</p></article><article class="report-card"><small>Horas estimadas</small><strong id="reportEstimatedHours">0h</strong><p>esforço previsto</p></article><article class="report-card"><small>Horas realizadas</small><strong id="reportActualHours">0h</strong><p id="reportHoursRate">0% do estimado</p></article></section>
-      <section class="table-shell report-section"><div class="panel-head"><div><small>DETALHAMENTO</small><h2>Demandas do relatório</h2></div><strong id="reportDemandCount">0 registros</strong></div><div class="report-table-scroll"><table class="report-demands-table"><thead><tr><th>Código</th><th>Demanda</th><th>Gestor</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Entrada</th><th>Prazo</th><th>Est.</th><th>Real.</th></tr></thead><tbody id="reportBody"><tr><td colspan="11" class="empty-table">Carregando relatório...</td></tr></tbody></table></div></section>
-      <section class="table-shell report-section"><div class="panel-head"><div><small>SUSTENTAÇÃO</small><h2>Conversores de mídia no período</h2></div><strong id="reportConverterSummary">0 trocas</strong></div><div class="converter-summary-grid"><article class="converter-summary-item"><small>Atendimentos</small><strong id="reportConverterRecords">0</strong></article><article class="converter-summary-item"><small>Conversores trocados</small><strong id="reportConverterQuantity">0</strong></article><article class="converter-summary-item"><small>Local com mais ocorrências</small><strong id="reportConverterTopLocation">—</strong></article></div><div class="report-table-scroll"><table class="report-converters-table"><thead><tr><th>Código</th><th>Data</th><th>Local</th><th>Ponto</th><th>Atendimento</th><th>Conversão</th><th>Qtd.</th><th>Motivo</th><th>Status</th></tr></thead><tbody id="reportConvertersBody"><tr><td colspan="9" class="empty-table">Carregando conversores...</td></tr></tbody></table></div></section>
+      <section class="panel report-filter-panel" aria-labelledby="reportFiltersTitle">
+        <div class="report-filter-heading">
+          <div>
+            <span class="report-filter-eyebrow"><i class="fa-solid fa-sliders"></i> FILTROS DO RELATÓRIO</span>
+            <h2 id="reportFiltersTitle">Defina o conteúdo antes de exportar</h2>
+            <p>O período vale para demandas e conversores. Os demais filtros atuam apenas no grupo indicado.</p>
+          </div>
+          <button class="report-clear-button" id="clearReportFilters" type="button"><i class="fa-solid fa-rotate-left"></i> Limpar filtros</button>
+        </div>
+
+        <div class="report-filter-group report-filter-group-period">
+          <div class="report-filter-group-title"><span><i class="fa-regular fa-calendar"></i> Período compartilhado</span><small>Demandas e conversores</small></div>
+          <div class="report-periods"><button data-report-period="today" type="button">Hoje</button><button data-report-period="7" type="button">7 dias</button><button class="active" data-report-period="30" type="button">30 dias</button><button data-report-period="month" type="button">Mês atual</button><button data-report-period="year" type="button">Ano</button><button data-report-period="custom" type="button">Personalizado</button></div>
+          <div class="report-custom-dates" id="reportCustomDates"><label class="field"><span>Data inicial</span><input id="reportStartDate" type="date"></label><label class="field"><span>Data final</span><input id="reportEndDate" type="date"></label></div>
+        </div>
+
+        <div class="report-filter-columns">
+          <div class="report-filter-group">
+            <div class="report-filter-group-title"><span><i class="fa-solid fa-list-check"></i> Demandas</span><small>Refine gestão e execução</small></div>
+            <div class="report-filter-grid report-filter-grid-demands">
+              <label class="field"><span>Status</span><select id="reportStatus"><option value="">Todos</option><option>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Atrasada</option><option>Cancelada</option></select></label>
+              <label class="field"><span>Prioridade</span><select id="reportPriority"><option value="">Todas</option><option>Baixa</option><option>Normal</option><option>Alta</option><option>Urgente</option></select></label>
+              <label class="field"><span>Gestor</span><select id="reportManager"><option value="">Todos</option></select></label>
+              <label class="field"><span>Categoria</span><select id="reportCategory"><option value="">Todas</option></select></label>
+              <label class="field report-filter-wide"><span>Responsável</span><input id="reportResponsible" type="search" placeholder="Buscar responsável"></label>
+            </div>
+          </div>
+
+          <div class="report-filter-group report-filter-group-converters">
+            <div class="report-filter-group-title"><span><i class="fa-solid fa-network-wired"></i> Conversores</span><small>Refine os atendimentos</small></div>
+            <div class="report-filter-grid report-filter-grid-converters">
+              <label class="field"><span>Polo</span><select id="reportConverterLocation"><option value="">Todos</option></select></label>
+              <label class="field"><span>Status</span><select id="reportConverterStatus"><option value="">Todos</option></select></label>
+              <label class="field"><span>Tipo de atendimento</span><select id="reportConverterService"><option value="">Todos</option></select></label>
+              <label class="field"><span>Responsável</span><select id="reportConverterResponsible"><option value="">Todos</option></select></label>
+              <label class="field report-filter-wide"><span>Busca no atendimento</span><input id="reportConverterSearch" type="search" placeholder="Nº do chamado, descrição, resolução ou conversão"></label>
+            </div>
+          </div>
+        </div>
+        <div class="report-filter-feedback" id="reportFilterFeedback" aria-live="polite">Exibindo os registros dos últimos 30 dias.</div>
+      </section>
+
+      <div class="report-summary-heading"><div><span>DEMANDAS</span><h2>Resumo operacional</h2></div><small>Os indicadores acompanham os filtros acima.</small></div>
+      <section class="report-cards report-demand-cards"><article class="report-card"><small>Total de demandas</small><strong id="reportTotal">0</strong><p id="reportPeriodLabel">Últimos 30 dias</p></article><article class="report-card"><small>Concluídas</small><strong id="reportDone">0</strong><p id="reportDoneRate">0% de conclusão</p></article><article class="report-card"><small>Em andamento</small><strong id="reportProgress">0</strong><p>demandas ativas</p></article><article class="report-card"><small>Atrasadas</small><strong id="reportOverdue">0</strong><p>prazo vencido</p></article><article class="report-card"><small>Horas estimadas</small><strong id="reportEstimatedHours">0h</strong><p>esforço previsto</p></article><article class="report-card"><small>Horas realizadas</small><strong id="reportActualHours">0h</strong><p id="reportHoursRate">0% do estimado</p></article></section>
+
+      <div class="report-summary-heading report-summary-heading-converters"><div><span>CONVERSORES</span><h2>Resumo de sustentação</h2></div><small>Os indicadores usam o mesmo período e os filtros de conversores.</small></div>
+      <section class="report-cards report-converter-cards"><article class="report-card report-card-converter"><small>Atendimentos</small><strong id="reportConverterRecords">0</strong><p>registros encontrados</p></article><article class="report-card report-card-converter"><small>Conversores trocados</small><strong id="reportConverterQuantity">0</strong><p>quantidade substituída</p></article><article class="report-card report-card-converter"><small>Polos atendidos</small><strong id="reportConverterLocations">0</strong><p>locais com ocorrência</p></article><article class="report-card report-card-converter report-card-location"><small>Polo mais recorrente</small><strong id="reportConverterTopLocation">—</strong><p id="reportConverterTopLocationCount">sem ocorrências</p></article></section>
+
+      <section class="table-shell report-section is-collapsed" id="demandReportSection">
+        <div class="panel-head"><div><small>DETALHAMENTO</small><h2>Demandas do relatório</h2></div><div class="report-section-actions"><strong id="reportDemandCount">0 registros</strong><button class="report-table-toggle" id="toggleDemandTable" type="button" aria-expanded="false" aria-controls="demandTableContent"><span class="report-toggle-icon"><i class="fa-solid fa-chevron-down"></i></span><span class="report-toggle-label">Mostrar tabela</span></button></div></div>
+        <div class="report-collapsible" id="demandTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-demands-table"><thead><tr><th>Código</th><th>Demanda</th><th>Gestor</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Entrada</th><th>Prazo</th><th>Est.</th><th>Real.</th></tr></thead><tbody id="reportBody"><tr><td colspan="11" class="empty-table">Carregando relatório...</td></tr></tbody></table></div></div></div>
+      </section>
+
+      <section class="table-shell report-section is-collapsed" id="converterReportSection">
+        <div class="panel-head"><div><small>SUSTENTAÇÃO</small><h2>Conversores de mídia no período</h2></div><div class="report-section-actions"><strong id="reportConverterSummary">0 trocas</strong><button class="report-table-toggle" id="toggleConverterTable" type="button" aria-expanded="false" aria-controls="converterTableContent"><span class="report-toggle-icon"><i class="fa-solid fa-chevron-down"></i></span><span class="report-toggle-label">Mostrar tabela</span></button></div></div>
+        <div class="report-collapsible" id="converterTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-converters-table"><thead><tr><th>Nº do chamado</th><th>Data</th><th>Polo</th><th>Ponto</th><th>Atendimento</th><th>Conversão</th><th>Qtd.</th><th>Descrição</th><th>Resolução</th><th>Status</th></tr></thead><tbody id="reportConvertersBody"><tr><td colspan="10" class="empty-table">Carregando conversores...</td></tr></tbody></table></div></div></div>
+      </section>
     </main>
   </div>
   <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
@@ -34,6 +87,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="assets/js/env.js"></script>
-  <script type="module" src="assets/js/relatorios.js?v=20260731-1"></script>
+  <script type="module" src="assets/js/relatorios.js?v=20260802-1"></script>
 </body>
 </html>

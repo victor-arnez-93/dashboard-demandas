@@ -1,5 +1,5 @@
 import { bootPage } from "./shell.js";
-import { state, effectiveStatus, demandCode, converterCode, activeCatalog } from "./store.js";
+import { state, effectiveStatus, demandCode, activeCatalog } from "./store.js";
 import { escapeHtml, formatDate, formatHours, showToast } from "./ui.js";
 import { intervalFor, dateInInterval } from "./charts.js";
 
@@ -27,6 +27,27 @@ function periodLabel() {
 function populateFilters() {
   document.getElementById("reportManager").innerHTML = `<option value="">Todos</option>${activeCatalog("managers").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}<option>Gestor não informado</option>`;
   document.getElementById("reportCategory").innerHTML = `<option value="">Todas</option>${activeCatalog("categories").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
+
+  const uniqueValues = field => [...new Set(state.converters
+    .map(item => String(item[field] || "").trim())
+    .filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+  const fillConverterSelect = (id, values) => {
+    document.getElementById(id).innerHTML = `<option value="">Todos</option>${values.map(value => `<option>${escapeHtml(value)}</option>`).join("")}`;
+  };
+
+  fillConverterSelect("reportConverterLocation", uniqueValues("location_name"));
+  fillConverterSelect("reportConverterStatus", uniqueValues("status"));
+  fillConverterSelect("reportConverterService", uniqueValues("service_type"));
+  fillConverterSelect("reportConverterResponsible", uniqueValues("responsible_name"));
+}
+
+function normalizedText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
 }
 
 function getDemands() {
@@ -49,22 +70,78 @@ function getDemands() {
 
 function getConverters() {
   const interval = currentInterval();
-  return state.converters.filter(item => dateInInterval(item.service_date, interval));
+  const location = document.getElementById("reportConverterLocation").value;
+  const status = document.getElementById("reportConverterStatus").value;
+  const service = document.getElementById("reportConverterService").value;
+  const responsible = document.getElementById("reportConverterResponsible").value;
+  const search = normalizedText(document.getElementById("reportConverterSearch").value.trim());
+
+  return state.converters.filter(item => {
+    const searchableContent = normalizedText([
+      item.ticket_number,
+      item.location_name,
+      item.point_reference,
+      item.service_type,
+      item.conversion_direction,
+      item.issue_reason,
+      item.notes,
+      item.status,
+      item.responsible_name,
+    ].filter(Boolean).join(" "));
+
+    return dateInInterval(item.service_date, interval) &&
+      (!location || item.location_name === location) &&
+      (!status || item.status === status) &&
+      (!service || item.service_type === service) &&
+      (!responsible || item.responsible_name === responsible) &&
+      (!search || searchableContent.includes(search));
+  });
 }
 
 function converterSummary(records) {
   const quantity = records.reduce((total, item) => total + Number(item.quantity_replaced || 0), 0);
   const locations = Object.entries(records.reduce((map, item) => {
-    const location = item.location_name?.trim() || "Local não informado";
+    const location = item.location_name?.trim() || "Polo não informado";
     map[location] = (map[location] || 0) + 1;
     return map;
-  }, {})).sort((a, b) => b[1] - a[1]);
+  }, {})).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR"));
+
+  const topCount = locations[0]?.[1] || 0;
+  const topLocations = locations.filter(([, count]) => count === topCount).map(([location]) => location);
+  const topLocation = topLocations.length > 2
+    ? `${topLocations.length} polos empatados`
+    : topLocations.join(" e ") || "—";
 
   return {
     quantity,
-    topLocation: locations[0]?.[0] || "—",
-    topCount: locations[0]?.[1] || 0,
+    locationCount: locations.length,
+    topLocation,
+    topCount,
+    topLocationCount: topCount
+      ? `${topCount} ${topCount === 1 ? "atendimento" : "atendimentos"}${topLocations.length > 1 ? " em cada polo" : ""}`
+      : "sem ocorrências",
   };
+}
+
+function activeSpecificFilterCount() {
+  return [
+    "reportStatus",
+    "reportPriority",
+    "reportManager",
+    "reportCategory",
+    "reportResponsible",
+    "reportConverterLocation",
+    "reportConverterStatus",
+    "reportConverterService",
+    "reportConverterResponsible",
+    "reportConverterSearch",
+  ].filter(id => document.getElementById(id).value.trim()).length;
+}
+
+function updateFilterFeedback() {
+  const filters = activeSpecificFilterCount();
+  const feedback = document.getElementById("reportFilterFeedback");
+  feedback.innerHTML = `<i class="fa-solid fa-circle-info"></i>${periodLabel()}: ${reportDemands.length} ${reportDemands.length === 1 ? "demanda" : "demandas"} e ${reportConverters.length} ${reportConverters.length === 1 ? "atendimento de conversor" : "atendimentos de conversores"}${filters ? `, com ${filters} ${filters === 1 ? "filtro específico ativo" : "filtros específicos ativos"}` : ""}.`;
 }
 
 function demandMetrics(records) {
@@ -138,17 +215,22 @@ function render() {
   const converters = converterSummary(reportConverters);
   document.getElementById("reportConverterRecords").textContent = reportConverters.length;
   document.getElementById("reportConverterQuantity").textContent = converters.quantity;
+  document.getElementById("reportConverterLocations").textContent = converters.locationCount;
   document.getElementById("reportConverterTopLocation").textContent = converters.topLocation;
+  document.getElementById("reportConverterTopLocation").title = converters.topLocation;
+  document.getElementById("reportConverterTopLocationCount").textContent = converters.topLocationCount;
   document.getElementById("reportConverterSummary").textContent = `${converters.quantity} ${converters.quantity === 1 ? "troca" : "trocas"}`;
   document.getElementById("reportConvertersBody").innerHTML = reportConverters.length ? reportConverters.map(item => `<tr>
-    <td>${converterCode(item)}</td><td>${formatDate(item.service_date, { year: true })}</td><td>${escapeHtml(item.location_name)}</td><td>${escapeHtml(item.point_reference || "—")}</td><td>${escapeHtml(item.service_type)}</td><td>${escapeHtml(item.conversion_direction || "—")}</td><td>${Number(item.quantity_replaced || 0)}</td><td>${escapeHtml(item.issue_reason || "—")}</td><td>${escapeHtml(item.status)}</td>
-  </tr>`).join("") : `<tr><td colspan="9" class="empty-table">Nenhum atendimento de conversor no período.</td></tr>`;
+    <td>${escapeHtml(item.ticket_number || "Não informado")}</td><td>${formatDate(item.service_date, { year: true })}</td><td>${escapeHtml(item.location_name || "—")}</td><td>${escapeHtml(item.point_reference || "—")}</td><td>${escapeHtml(item.service_type || "—")}</td><td>${escapeHtml(item.conversion_direction || "—")}</td><td>${Number(item.quantity_replaced || 0)}</td><td>${escapeHtml(item.issue_reason || "—")}</td><td>${escapeHtml(item.notes || "—")}</td><td>${escapeHtml(item.status || "—")}</td>
+  </tr>`).join("") : `<tr><td colspan="10" class="empty-table">Nenhum atendimento de conversor encontrado para os filtros.</td></tr>`;
+
+  updateFilterFeedback();
 }
 
 function setPeriod(value) {
   activePeriod = value;
   document.querySelectorAll("[data-report-period]").forEach(button => button.classList.toggle("active", button.dataset.reportPeriod === value));
-  document.getElementById("reportFilterGrid").classList.toggle("custom", value === "custom");
+  document.getElementById("reportCustomDates").classList.toggle("is-visible", value === "custom");
   if (value !== "custom") {
     const interval = currentInterval();
     const toInput = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -156,6 +238,39 @@ function setPeriod(value) {
     document.getElementById("reportEndDate").value = toInput(interval.end);
   }
   render();
+}
+
+function clearFilters() {
+  [
+    "reportStatus",
+    "reportPriority",
+    "reportManager",
+    "reportCategory",
+    "reportResponsible",
+    "reportConverterLocation",
+    "reportConverterStatus",
+    "reportConverterService",
+    "reportConverterResponsible",
+    "reportConverterSearch",
+  ].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+
+  setPeriod("30");
+  showToast("Filtros restaurados para os últimos 30 dias.", "success");
+}
+
+function setupTableToggle(sectionId, buttonId) {
+  const section = document.getElementById(sectionId);
+  const button = document.getElementById(buttonId);
+  const label = button.querySelector(".report-toggle-label");
+
+  button.addEventListener("click", () => {
+    const willOpen = section.classList.contains("is-collapsed");
+    section.classList.toggle("is-collapsed", !willOpen);
+    button.setAttribute("aria-expanded", String(willOpen));
+    label.textContent = willOpen ? "Ocultar tabela" : "Mostrar tabela";
+  });
 }
 
 function fileDate(value = new Date()) {
@@ -214,7 +329,8 @@ function exportExcel() {
       ["Sustentação de conversores", "Valor"],
       ["Atendimentos", reportConverters.length],
       ["Conversores trocados", converters.quantity],
-      ["Local mais recorrente", converters.topLocation],
+      ["Polos atendidos", converters.locationCount],
+      ["Polo mais recorrente", converters.topLocation],
     );
   }
 
@@ -371,7 +487,8 @@ function pdfIntervalLabel() {
 }
 
 function pdfFilterSummary() {
-  const labels = [];
+  const demandLabels = [];
+  const converterLabels = [];
   const status = document.getElementById("reportStatus").value;
   const priority = document.getElementById("reportPriority").value;
   const manager = document.getElementById("reportManager").value;
@@ -380,16 +497,27 @@ function pdfFilterSummary() {
     .getElementById("reportResponsible")
     .value
     .trim();
+  const converterLocation = document.getElementById("reportConverterLocation").value;
+  const converterStatus = document.getElementById("reportConverterStatus").value;
+  const converterService = document.getElementById("reportConverterService").value;
+  const converterResponsible = document.getElementById("reportConverterResponsible").value;
+  const converterSearch = document.getElementById("reportConverterSearch").value.trim();
 
-  if (status) labels.push(`Status: ${status}`);
-  if (priority) labels.push(`Prioridade: ${priority}`);
-  if (manager) labels.push(`Gestor: ${manager}`);
-  if (category) labels.push(`Categoria: ${category}`);
-  if (responsible) labels.push(`Responsável: ${responsible}`);
+  if (status) demandLabels.push(`status ${status}`);
+  if (priority) demandLabels.push(`prioridade ${priority}`);
+  if (manager) demandLabels.push(`gestor ${manager}`);
+  if (category) demandLabels.push(`categoria ${category}`);
+  if (responsible) demandLabels.push(`responsável ${responsible}`);
+  if (converterLocation) converterLabels.push(`polo ${converterLocation}`);
+  if (converterStatus) converterLabels.push(`status ${converterStatus}`);
+  if (converterService) converterLabels.push(`atendimento ${converterService}`);
+  if (converterResponsible) converterLabels.push(`responsável ${converterResponsible}`);
+  if (converterSearch) converterLabels.push(`busca “${converterSearch}”`);
 
-  return labels.length
-    ? labels.join(" · ")
-    : "Todos os registros do período selecionado";
+  return [
+    `Demandas: ${demandLabels.length ? demandLabels.join(", ") : "sem filtros específicos"}`,
+    `Conversores: ${converterLabels.length ? converterLabels.join(", ") : "sem filtros específicos"}`,
+  ].join(" | ");
 }
 
 function pdfPercentage(value) {
@@ -1252,7 +1380,7 @@ async function exportPdf() {
           ? ""
           : "s"
       } · ` +
-      `Local mais recorrente: ` +
+      `Polo mais recorrente: ` +
       `${converters.topLocation}`;
 
     const converterLines =
@@ -1342,7 +1470,23 @@ async function exportPdf() {
 bootPage(() => {
   populateFilters();
   document.querySelectorAll("[data-report-period]").forEach(button => button.addEventListener("click", () => setPeriod(button.dataset.reportPeriod)));
-  ["reportStartDate", "reportEndDate", "reportStatus", "reportPriority", "reportManager", "reportCategory", "reportResponsible"].forEach(id => document.getElementById(id).addEventListener("input", render));
+  [
+    "reportStartDate",
+    "reportEndDate",
+    "reportStatus",
+    "reportPriority",
+    "reportManager",
+    "reportCategory",
+    "reportResponsible",
+    "reportConverterLocation",
+    "reportConverterStatus",
+    "reportConverterService",
+    "reportConverterResponsible",
+    "reportConverterSearch",
+  ].forEach(id => document.getElementById(id).addEventListener("input", render));
+  document.getElementById("clearReportFilters").addEventListener("click", clearFilters);
+  setupTableToggle("demandReportSection", "toggleDemandTable");
+  setupTableToggle("converterReportSection", "toggleConverterTable");
   document.getElementById("exportExcelButton").addEventListener("click", exportExcel);
   document.getElementById("exportPdfButton").addEventListener("click", exportPdf);
   setPeriod("30");

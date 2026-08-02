@@ -63,7 +63,11 @@ function populateFilters() {
   fillConverterSelect("reportConverterLocation", uniqueValues("location_name"));
   fillConverterSelect("reportConverterStatus", uniqueValues("status"));
   fillConverterSelect("reportConverterService", uniqueValues("service_type"));
-  fillConverterSelect("reportConverterResponsible", uniqueValues("responsible_name"));
+    document.getElementById("reportConverterResponsible").innerHTML =
+    `<option value="">Todos</option>` +
+    activeCatalog("responsibles")
+      .map(item => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`)
+      .join("");
 }
 
 function normalizedText(value) {

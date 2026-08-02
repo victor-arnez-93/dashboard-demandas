@@ -43,7 +43,7 @@ body[data-page="relatorios"] .page-heading {
 
 .report-module-heading span {
   display: block;
-  color: var(--primary);
+  color: #f96900;
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -86,7 +86,7 @@ body[data-page="relatorios"] .page-heading {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--primary);
+  color: #f96900;
   font-size: 0.67rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -144,7 +144,7 @@ body[data-page="relatorios"] .page-heading {
 }
 
 .report-filter-label i {
-  color: var(--primary);
+  color: #f96900;
 }
 
 .report-filter-label small {
@@ -261,7 +261,7 @@ body[data-page="relatorios"] .page-heading {
 
 .report-filter-feedback i {
   margin-right: 7px;
-  color: var(--primary);
+  color: #f96900;
 }
 
 /* ============================================================
@@ -278,7 +278,7 @@ body[data-page="relatorios"] .page-heading {
 
 .report-summary-heading span {
   display: block;
-  color: var(--primary);
+  color: #f96900;
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -430,19 +430,19 @@ body[data-page="relatorios"] .page-heading {
   width: 39px;
   height: 39px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--primary) 44%, var(--border));
+  border: 1px solid color-mix(in srgb, #f96900 52%, var(--border));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--primary) 9%, var(--surface-raised));
-  color: var(--primary);
+  background: color-mix(in srgb, #f96900 10%, var(--surface-raised));
+  color: #f96900;
   cursor: pointer;
-  box-shadow: 0 6px 15px color-mix(in srgb, var(--primary) 9%, transparent);
+  box-shadow: 0 6px 15px color-mix(in srgb, #f96900 10%, transparent);
   transition: transform 210ms ease, border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
 }
 
 .report-table-toggle:hover {
-  border-color: color-mix(in srgb, var(--primary) 76%, var(--border));
-  background: color-mix(in srgb, var(--primary) 15%, var(--surface-raised));
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 15%, transparent);
+  border-color: color-mix(in srgb, #f96900 82%, var(--border));
+  background: color-mix(in srgb, #f96900 16%, var(--surface-raised));
+  box-shadow: 0 8px 20px color-mix(in srgb, #f96900 18%, transparent);
   transform: translateY(-1px);
 }
 
@@ -511,6 +511,7 @@ body[data-page="relatorios"] .page-heading {
   position: sticky;
   top: 0;
   z-index: 2;
+  color: #f96900;
 }
 
 .report-table-scroll tbody tr {

@@ -4,6 +4,7 @@ import { escapeHtml, formatDate, formatHours, showToast } from "./ui.js";
 import { intervalFor, dateInInterval } from "./charts.js";
 
 let activePeriod = "30";
+let converterActivePeriod = "30";
 let reportDemands = [];
 let reportConverters = [];
 
@@ -22,6 +23,27 @@ function periodLabel() {
     custom: "Período personalizado",
   };
   return labels[activePeriod] || "Período selecionado";
+}
+
+function converterCurrentInterval() {
+  const period = converterActivePeriod === "today" ? "1" : converterActivePeriod;
+  return intervalFor(
+    period,
+    document.getElementById("reportConverterStartDate").value,
+    document.getElementById("reportConverterEndDate").value,
+  );
+}
+
+function converterPeriodLabel() {
+  const labels = {
+    today: "Hoje",
+    "7": "Últimos 7 dias",
+    "30": "Últimos 30 dias",
+    month: "Mês atual",
+    year: `Ano de ${new Date().getFullYear()}`,
+    custom: "Período personalizado",
+  };
+  return labels[converterActivePeriod] || "Período selecionado";
 }
 
 function populateFilters() {
@@ -69,7 +91,7 @@ function getDemands() {
 }
 
 function getConverters() {
-  const interval = currentInterval();
+  const interval = converterCurrentInterval();
   const location = document.getElementById("reportConverterLocation").value;
   const status = document.getElementById("reportConverterStatus").value;
   const service = document.getElementById("reportConverterService").value;
@@ -123,25 +145,28 @@ function converterSummary(records) {
   };
 }
 
-function activeSpecificFilterCount() {
-  return [
+function activeFilterCount(ids) {
+  return ids.filter(id => document.getElementById(id).value.trim()).length;
+}
+
+function updateFilterFeedback() {
+  const demandFilters = activeFilterCount([
     "reportStatus",
     "reportPriority",
     "reportManager",
     "reportCategory",
     "reportResponsible",
+  ]);
+  const converterFilters = activeFilterCount([
     "reportConverterLocation",
     "reportConverterStatus",
     "reportConverterService",
     "reportConverterResponsible",
     "reportConverterSearch",
-  ].filter(id => document.getElementById(id).value.trim()).length;
-}
+  ]);
 
-function updateFilterFeedback() {
-  const filters = activeSpecificFilterCount();
-  const feedback = document.getElementById("reportFilterFeedback");
-  feedback.innerHTML = `<i class="fa-solid fa-circle-info"></i>${periodLabel()}: ${reportDemands.length} ${reportDemands.length === 1 ? "demanda" : "demandas"} e ${reportConverters.length} ${reportConverters.length === 1 ? "atendimento de conversor" : "atendimentos de conversores"}${filters ? `, com ${filters} ${filters === 1 ? "filtro específico ativo" : "filtros específicos ativos"}` : ""}.`;
+  document.getElementById("demandFilterFeedback").innerHTML = `<i class="fa-solid fa-circle-info"></i>${periodLabel()}: ${reportDemands.length} ${reportDemands.length === 1 ? "demanda encontrada" : "demandas encontradas"}${demandFilters ? ` com ${demandFilters} ${demandFilters === 1 ? "filtro ativo" : "filtros ativos"}` : ""}.`;
+  document.getElementById("converterFilterFeedback").innerHTML = `<i class="fa-solid fa-circle-info"></i>${converterPeriodLabel()}: ${reportConverters.length} ${reportConverters.length === 1 ? "atendimento encontrado" : "atendimentos encontrados"}${converterFilters ? ` com ${converterFilters} ${converterFilters === 1 ? "filtro ativo" : "filtros ativos"}` : ""}.`;
 }
 
 function demandMetrics(records) {
@@ -214,6 +239,7 @@ function render() {
 
   const converters = converterSummary(reportConverters);
   document.getElementById("reportConverterRecords").textContent = reportConverters.length;
+  document.getElementById("reportConverterPeriodLabel").textContent = converterPeriodLabel();
   document.getElementById("reportConverterQuantity").textContent = converters.quantity;
   document.getElementById("reportConverterLocations").textContent = converters.locationCount;
   document.getElementById("reportConverterTopLocation").textContent = converters.topLocation;
@@ -227,26 +253,44 @@ function render() {
   updateFilterFeedback();
 }
 
-function setPeriod(value) {
-  activePeriod = value;
-  document.querySelectorAll("[data-report-period]").forEach(button => button.classList.toggle("active", button.dataset.reportPeriod === value));
-  document.getElementById("reportCustomDates").classList.toggle("is-visible", value === "custom");
+function setPeriod(scope, value) {
+  const isConverter = scope === "converters";
+  if (isConverter) converterActivePeriod = value;
+  else activePeriod = value;
+
+  document.querySelectorAll(`[data-report-scope="${scope}"]`).forEach(button => {
+    button.classList.toggle("active", button.dataset.reportPeriod === value);
+  });
+
+  const customDates = document.getElementById(isConverter ? "reportConverterCustomDates" : "reportCustomDates");
+  customDates.classList.toggle("is-visible", value === "custom");
+
   if (value !== "custom") {
-    const interval = currentInterval();
+    const interval = isConverter ? converterCurrentInterval() : currentInterval();
     const toInput = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-    document.getElementById("reportStartDate").value = toInput(interval.start);
-    document.getElementById("reportEndDate").value = toInput(interval.end);
+    document.getElementById(isConverter ? "reportConverterStartDate" : "reportStartDate").value = toInput(interval.start);
+    document.getElementById(isConverter ? "reportConverterEndDate" : "reportEndDate").value = toInput(interval.end);
   }
   render();
 }
 
-function clearFilters() {
+function clearDemandFilters() {
   [
     "reportStatus",
     "reportPriority",
     "reportManager",
     "reportCategory",
     "reportResponsible",
+  ].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+
+  setPeriod("demands", "30");
+  showToast("Filtros de demandas restaurados para os últimos 30 dias.", "success");
+}
+
+function clearConverterFilters() {
+  [
     "reportConverterLocation",
     "reportConverterStatus",
     "reportConverterService",
@@ -256,8 +300,8 @@ function clearFilters() {
     document.getElementById(id).value = "";
   });
 
-  setPeriod("30");
-  showToast("Filtros restaurados para os últimos 30 dias.", "success");
+  setPeriod("converters", "30");
+  showToast("Filtros de conversores restaurados para os últimos 30 dias.", "success");
 }
 
 function setupTableToggle(sectionId, buttonId) {
@@ -270,6 +314,8 @@ function setupTableToggle(sectionId, buttonId) {
     section.classList.toggle("is-collapsed", !willOpen);
     button.setAttribute("aria-expanded", String(willOpen));
     label.textContent = willOpen ? "Ocultar tabela" : "Mostrar tabela";
+    button.title = willOpen ? "Ocultar tabela" : "Mostrar tabela";
+    button.setAttribute("aria-label", `${willOpen ? "Ocultar" : "Mostrar"} ${sectionId === "demandReportSection" ? "tabela de demandas" : "tabela de conversores"}`);
   });
 }
 
@@ -1469,7 +1515,7 @@ async function exportPdf() {
 
 bootPage(() => {
   populateFilters();
-  document.querySelectorAll("[data-report-period]").forEach(button => button.addEventListener("click", () => setPeriod(button.dataset.reportPeriod)));
+  document.querySelectorAll("[data-report-period]").forEach(button => button.addEventListener("click", () => setPeriod(button.dataset.reportScope, button.dataset.reportPeriod)));
   [
     "reportStartDate",
     "reportEndDate",
@@ -1484,10 +1530,14 @@ bootPage(() => {
     "reportConverterResponsible",
     "reportConverterSearch",
   ].forEach(id => document.getElementById(id).addEventListener("input", render));
-  document.getElementById("clearReportFilters").addEventListener("click", clearFilters);
+  document.getElementById("reportConverterStartDate").addEventListener("input", render);
+  document.getElementById("reportConverterEndDate").addEventListener("input", render);
+  document.getElementById("clearDemandFilters").addEventListener("click", clearDemandFilters);
+  document.getElementById("clearConverterFilters").addEventListener("click", clearConverterFilters);
   setupTableToggle("demandReportSection", "toggleDemandTable");
   setupTableToggle("converterReportSection", "toggleConverterTable");
   document.getElementById("exportExcelButton").addEventListener("click", exportExcel);
   document.getElementById("exportPdfButton").addEventListener("click", exportPdf);
-  setPeriod("30");
+  setPeriod("demands", "30");
+  setPeriod("converters", "30");
 });

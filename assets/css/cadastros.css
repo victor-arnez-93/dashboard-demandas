@@ -482,7 +482,7 @@ body[data-page="cadastros"] .page-heading p {
   color: #40545f;
 }
 
-[data-theme="light"] body[data-page="cadastros"] .catalog-tab {
+[data-theme="light"] body[data-page="cadastros"] .catalog-tab:not(.active) {
   background: rgba(255, 255, 255, 0.74);
 }
 

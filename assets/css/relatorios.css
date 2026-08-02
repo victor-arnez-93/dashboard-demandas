@@ -289,6 +289,10 @@ body[data-page="relatorios"] .page-heading::after {
   gap: 13px;
 }
 
+.report-filter-grid-demands {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .report-filter-panel .field {
   min-width: 0;
 }

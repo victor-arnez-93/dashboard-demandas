@@ -49,6 +49,7 @@ function converterPeriodLabel() {
 function populateFilters() {
   document.getElementById("reportManager").innerHTML = `<option value="">Todos</option>${activeCatalog("managers").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}<option>Gestor não informado</option>`;
   document.getElementById("reportCategory").innerHTML = `<option value="">Todas</option>${activeCatalog("categories").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
+  document.getElementById("reportResponsible").innerHTML = `<option value="">Todos</option>${activeCatalog("responsibles").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}<option>Responsável não informado</option>`;
 
   const uniqueValues = field => [...new Set(state.converters
     .map(item => String(item[field] || "").trim())
@@ -78,15 +79,34 @@ function getDemands() {
   const priority = document.getElementById("reportPriority").value;
   const manager = document.getElementById("reportManager").value;
   const category = document.getElementById("reportCategory").value;
-  const responsible = document.getElementById("reportResponsible").value.trim().toLocaleLowerCase("pt-BR");
+  const responsible = document.getElementById("reportResponsible").value;
+  const search = normalizedText(document.getElementById("reportDemandSearch").value.trim());
   return state.demands.filter(item => {
     const managerName = item.manager?.trim() || "Gestor não informado";
+    const responsibleName = item.responsible?.trim() || "Responsável não informado";
+    const searchableContent = normalizedText([
+      demandCode(item),
+      item.demand_number,
+      item.title,
+      item.description,
+      item.requester,
+      item.manager,
+      item.responsible,
+      item.department,
+      item.category,
+      item.priority,
+      effectiveStatus(item),
+      Array.isArray(item.tags) ? item.tags.join(" ") : item.tags,
+      item.notes,
+    ].filter(Boolean).join(" "));
+
     return dateInInterval(item.start_date, interval) &&
       (!status || effectiveStatus(item) === status) &&
       (!priority || item.priority === priority) &&
       (!manager || managerName === manager) &&
       (!category || item.category === category) &&
-      (!responsible || (item.responsible || "").toLocaleLowerCase("pt-BR").includes(responsible));
+      (!responsible || responsibleName === responsible) &&
+      (!search || searchableContent.includes(search));
   });
 }
 
@@ -156,6 +176,7 @@ function updateFilterFeedback() {
     "reportManager",
     "reportCategory",
     "reportResponsible",
+    "reportDemandSearch",
   ]);
   const converterFilters = activeFilterCount([
     "reportConverterLocation",
@@ -281,6 +302,7 @@ function clearDemandFilters() {
     "reportManager",
     "reportCategory",
     "reportResponsible",
+    "reportDemandSearch",
   ].forEach(id => {
     document.getElementById(id).value = "";
   });
@@ -543,6 +565,7 @@ function pdfFilterSummary() {
     .getElementById("reportResponsible")
     .value
     .trim();
+  const demandSearch = document.getElementById("reportDemandSearch").value.trim();
   const converterLocation = document.getElementById("reportConverterLocation").value;
   const converterStatus = document.getElementById("reportConverterStatus").value;
   const converterService = document.getElementById("reportConverterService").value;
@@ -554,6 +577,7 @@ function pdfFilterSummary() {
   if (manager) demandLabels.push(`gestor ${manager}`);
   if (category) demandLabels.push(`categoria ${category}`);
   if (responsible) demandLabels.push(`responsável ${responsible}`);
+  if (demandSearch) demandLabels.push(`busca “${demandSearch}”`);
   if (converterLocation) converterLabels.push(`polo ${converterLocation}`);
   if (converterStatus) converterLabels.push(`status ${converterStatus}`);
   if (converterService) converterLabels.push(`atendimento ${converterService}`);
@@ -1524,6 +1548,7 @@ bootPage(() => {
     "reportManager",
     "reportCategory",
     "reportResponsible",
+    "reportDemandSearch",
     "reportConverterLocation",
     "reportConverterStatus",
     "reportConverterService",

@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/relatorios.css?v=20260802-2">
+  <link rel="stylesheet" href="assets/css/relatorios.css?v=20260802-3">
   
 </head>
 <body data-page="relatorios" data-page-label="Relatórios">
@@ -46,7 +46,8 @@
               <label class="field"><span>Prioridade</span><select id="reportPriority"><option value="">Todas</option><option>Baixa</option><option>Normal</option><option>Alta</option><option>Urgente</option></select></label>
               <label class="field"><span>Gestor</span><select id="reportManager"><option value="">Todos</option></select></label>
               <label class="field"><span>Categoria</span><select id="reportCategory"><option value="">Todas</option></select></label>
-              <label class="field"><span>Responsável</span><input id="reportResponsible" type="search" placeholder="Buscar responsável"></label>
+              <label class="field"><span>Responsável</span><select id="reportResponsible"><option value="">Todos</option></select></label>
+              <label class="field"><span>Busca geral na demanda</span><input id="reportDemandSearch" type="search" placeholder="Chamado, título, descrição ou solicitante"></label>
             </div>
           </div>
           <div class="report-filter-feedback" id="demandFilterFeedback" aria-live="polite">Exibindo as demandas dos últimos 30 dias.</div>
@@ -105,6 +106,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="assets/js/env.js"></script>
-  <script type="module" src="assets/js/relatorios.js?v=20260802-2"></script>
+  <script type="module" src="assets/js/relatorios.js?v=20260802-3"></script>
 </body>
 </html>

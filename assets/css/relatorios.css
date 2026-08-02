@@ -3,8 +3,49 @@
    Cada módulo possui filtros, resumo e detalhamento próprios.
 ============================================================ */
 
+body[data-page="relatorios"] {
+  --report-divider-neon: #f96900;
+}
+
+html[data-theme="light"] body[data-page="relatorios"] {
+  --report-divider-neon: #003887;
+}
+
 body[data-page="relatorios"] .page-heading {
+  position: relative;
   margin-bottom: 30px;
+}
+
+body[data-page="relatorios"] .page-heading::after {
+  position: absolute;
+  right: 0;
+  bottom: -16px;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--report-divider-neon) 30%, transparent) 9%,
+    var(--report-divider-neon) 48%,
+    var(--report-divider-neon) 52%,
+    color-mix(in srgb, var(--report-divider-neon) 30%, transparent) 91%,
+    transparent 100%
+  );
+  clip-path: polygon(
+    0 50%,
+    16% 36%,
+    50% 0,
+    84% 36%,
+    100% 50%,
+    84% 64%,
+    50% 100%,
+    16% 64%
+  );
+  filter:
+    drop-shadow(0 0 4px color-mix(in srgb, var(--report-divider-neon) 65%, transparent))
+    drop-shadow(0 0 10px color-mix(in srgb, var(--report-divider-neon) 28%, transparent));
+  content: "";
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -16,9 +57,42 @@ body[data-page="relatorios"] .page-heading {
 }
 
 .report-module + .report-module {
+  position: relative;
   margin-top: 48px;
   padding-top: 42px;
-  border-top: 1px solid var(--border);
+  border-top: 0;
+}
+
+.report-module + .report-module::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--report-divider-neon) 30%, transparent) 9%,
+    var(--report-divider-neon) 48%,
+    var(--report-divider-neon) 52%,
+    color-mix(in srgb, var(--report-divider-neon) 30%, transparent) 91%,
+    transparent 100%
+  );
+  clip-path: polygon(
+    0 50%,
+    16% 36%,
+    50% 0,
+    84% 36%,
+    100% 50%,
+    84% 64%,
+    50% 100%,
+    16% 64%
+  );
+  filter:
+    drop-shadow(0 0 4px color-mix(in srgb, var(--report-divider-neon) 65%, transparent))
+    drop-shadow(0 0 10px color-mix(in srgb, var(--report-divider-neon) 28%, transparent));
+  content: "";
+  pointer-events: none;
 }
 
 .report-module-heading {

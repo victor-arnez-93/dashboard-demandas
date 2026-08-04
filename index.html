@@ -1,2 +1,268 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Acesso privado ao FLUUX — Organização de Demandas."><meta name="theme-color" content="#090d10"><title>Entrar — FLUUX</title><script>document.documentElement.dataset.theme=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";</script><link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><link rel="stylesheet" href="assets/css/theme.css"><link rel="stylesheet" href="assets/css/main.css"><link rel="stylesheet" href="assets/css/login.css"></head><body class="login-page"><main class="login-shell"><section class="login-card"><button class="login-theme" id="loginThemeButton" type="button" aria-label="Alternar tema"><i class="fa-solid fa-sun"></i></button><div class="login-brand"><img src="assets/img/logo.png" alt="FLUUX"></div><div class="login-heading"><span>AMBIENTE PRIVADO</span><h1><i class="fa-solid fa-lock"></i> Acesso ao painel</h1><p>Entre com suas credenciais para organizar e acompanhar as demandas.</p></div><form id="loginForm" novalidate><label class="login-field"><span>E-mail</span><span class="login-input"><i class="fa-regular fa-envelope"></i><input id="loginEmail" type="email" autocomplete="username" placeholder="seu@email.com" required></span></label><div class="login-field"><label for="loginPassword">Senha</label><span class="login-input"><i class="fa-solid fa-key"></i><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Sua senha" required><button id="togglePassword" type="button" aria-label="Mostrar senha"><i class="fa-regular fa-eye"></i></button></span></div><label class="remember-session"><input id="rememberSession" type="checkbox"><span><i class="fa-solid fa-check"></i></span><strong>Manter conectado neste dispositivo</strong></label><p class="login-message" id="loginMessage" role="alert" hidden></p><button class="login-submit" id="loginSubmit" type="submit"><i class="fa-solid fa-right-to-bracket"></i><span>Entrar no sistema</span></button></form><div class="login-security"><i class="fa-solid fa-shield-halved"></i><span><strong>Acesso protegido</strong><small>Seus dados permanecem vinculados à conta autenticada.</small></span></div><footer>FLUUX · Organização de Demandas</footer></section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/env.js"></script><script type="module" src="assets/js/login.js"></script></body></html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FLUUX — organização, acompanhamento e análise de demandas em um ambiente web moderno, responsivo e multiusuário.">
+  <meta name="theme-color" content="#090d10">
+  <title>FLUUX — Organização de Demandas</title>
+  <script>
+    (() => {
+      const saved = localStorage.getItem("fluux-landing-theme");
+      document.documentElement.dataset.theme = saved || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    })();
+  </script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/landing.css">
+</head>
+<body class="landing-page">
+  <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="landing-header" id="landingHeader">
+    <div class="landing-container header-inner">
+      <a class="landing-brand" href="#inicio" aria-label="FLUUX — página inicial">
+        <span class="brand-mark"><img src="assets/img/logo.png" alt=""></span>
+        <span class="brand-text"><strong>FLUUX</strong><small>Organização de Demandas</small></span>
+      </a>
+
+      <nav class="landing-nav" id="landingNav" aria-label="Navegação principal">
+        <a href="#recursos">Recursos</a>
+        <a href="#fluxo">Como funciona</a>
+        <a href="#gestao">Gestão integrada</a>
+        <a href="#duvidas">Dúvidas</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="theme-toggle" id="landingThemeButton" type="button" aria-label="Alternar tema">
+          <i class="fa-solid fa-sun"></i>
+        </button>
+        <button class="btn-access" type="button" data-open-access>
+          <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          <span>Entrar</span>
+        </button>
+        <button class="menu-toggle" id="landingMenuButton" type="button" aria-label="Abrir menu" aria-controls="landingNav" aria-expanded="false">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="hero" id="inicio">
+      <div class="hero-grid"></div>
+      <div class="hero-orb hero-orb-one"></div>
+      <div class="hero-orb hero-orb-two"></div>
+
+      <div class="landing-container hero-layout">
+        <div class="hero-copy reveal">
+          <span class="eyebrow"><i class="fa-solid fa-wave-square"></i> Gestão centralizada para equipes</span>
+          <h1>Demandas organizadas.<br><span>Decisões mais claras.</span></h1>
+          <p>Centralize solicitações, responsáveis, prazos, horas, conversores, análises e relatórios em um sistema web preparado para acompanhar a operação de ponta a ponta.</p>
+          <div class="hero-actions">
+            <button class="btn-primary-landing" type="button" data-open-access>
+              <span>Acessar o sistema</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <a class="btn-secondary-landing" href="#recursos">
+              <i class="fa-solid fa-grid-2"></i>
+              <span>Conhecer recursos</span>
+            </a>
+          </div>
+          <div class="hero-tags" aria-label="Características do sistema">
+            <span><i class="fa-solid fa-globe"></i> 100% web</span>
+            <span><i class="fa-solid fa-building"></i> Multiempresa</span>
+            <span><i class="fa-solid fa-users"></i> Multiusuário</span>
+            <span><i class="fa-solid fa-mobile-screen"></i> Responsivo</span>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal" aria-label="Prévia visual do painel FLUUX">
+          <div class="dashboard-window">
+            <div class="window-topbar">
+              <span class="window-brand"><i class="fa-solid fa-wave-square"></i> FLUUX</span>
+              <div class="window-controls"><span></span><span></span><span></span></div>
+            </div>
+            <div class="dashboard-body">
+              <aside class="mock-sidebar">
+                <div class="mock-logo"><i class="fa-solid fa-layer-group"></i></div>
+                <span class="active"><i class="fa-solid fa-table-cells-large"></i></span>
+                <span><i class="fa-solid fa-plus"></i></span>
+                <span><i class="fa-solid fa-list-check"></i></span>
+                <span><i class="fa-solid fa-chart-column"></i></span>
+                <span><i class="fa-solid fa-file-lines"></i></span>
+              </aside>
+              <div class="mock-content">
+                <div class="mock-heading">
+                  <div><small>VISÃO EXECUTIVA</small><strong>Resumo da operação</strong></div>
+                  <span class="mock-avatar">FG</span>
+                </div>
+                <div class="mock-metrics">
+                  <article><i class="fa-solid fa-list-check"></i><span><small>Demandas</small><strong>24</strong></span><em>+12%</em></article>
+                  <article><i class="fa-solid fa-clock"></i><span><small>Em andamento</small><strong>08</strong></span><em>33%</em></article>
+                  <article><i class="fa-solid fa-circle-check"></i><span><small>Concluídas</small><strong>16</strong></span><em>67%</em></article>
+                </div>
+                <div class="mock-panels">
+                  <article class="mock-chart-card">
+                    <header><strong>Demandas por período</strong><span>Últimos 30 dias</span></header>
+                    <div class="mock-chart">
+                      <i style="--h: 38%"></i><i style="--h: 55%"></i><i style="--h: 45%"></i><i style="--h: 72%"></i><i style="--h: 60%"></i><i style="--h: 88%"></i><i style="--h: 76%"></i>
+                    </div>
+                  </article>
+                  <article class="mock-list-card">
+                    <header><strong>Status</strong><i class="fa-solid fa-ellipsis"></i></header>
+                    <div><span><b class="dot orange"></b>Em andamento</span><strong>08</strong></div>
+                    <div><span><b class="dot blue"></b>Aguardando</span><strong>05</strong></div>
+                    <div><span><b class="dot green"></b>Concluídas</span><strong>16</strong></div>
+                  </article>
+                </div>
+                <div class="mock-table">
+                  <div class="mock-table-head"><span>Chamado</span><span>Responsável</span><span>Status</span></div>
+                  <div><span>#FLX-024</span><span>Fernando</span><em class="status-progress">Em andamento</em></div>
+                  <div><span>#FLX-023</span><span>Equipe TI</span><em class="status-done">Concluída</em></div>
+                  <div><span>#FLX-022</span><span>Operações</span><em class="status-wait">Aguardando</em></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="floating-card floating-card-one"><i class="fa-solid fa-bolt"></i><span><strong>Visão imediata</strong><small>Indicadores atualizados</small></span></div>
+          <div class="floating-card floating-card-two"><i class="fa-solid fa-shield-halved"></i><span><strong>Acesso controlado</strong><small>Dados por empresa</small></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="proof-strip" aria-label="Benefícios principais">
+      <div class="landing-container proof-grid">
+        <article><i class="fa-solid fa-diagram-project"></i><span><strong>Fluxo centralizado</strong><small>Informações no mesmo ambiente</small></span></article>
+        <article><i class="fa-solid fa-user-check"></i><span><strong>Responsáveis definidos</strong><small>Distribuição clara das atividades</small></span></article>
+        <article><i class="fa-solid fa-chart-line"></i><span><strong>Indicadores objetivos</strong><small>Leitura rápida da operação</small></span></article>
+        <article><i class="fa-solid fa-file-export"></i><span><strong>Relatórios profissionais</strong><small>Apresentação e acompanhamento</small></span></article>
+      </div>
+    </section>
+
+    <section class="landing-section" id="recursos">
+      <div class="landing-container">
+        <div class="section-heading reveal">
+          <span class="eyebrow">DISPONÍVEL NO SISTEMA</span>
+          <h2>Uma base completa para organizar a rotina</h2>
+          <p>Os principais pontos da operação trabalham juntos para reduzir retrabalho, facilitar o acompanhamento e transformar registros em informação útil.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card reveal"><span class="feature-icon"><i class="fa-solid fa-plus"></i></span><h3>Registro de demandas</h3><p>Cadastre solicitações com chamado, polo, descrição, prioridade, prazo, responsável e informações essenciais.</p><a href="#fluxo">Ver funcionamento <i class="fa-solid fa-arrow-right"></i></a></article>
+          <article class="feature-card reveal"><span class="feature-icon"><i class="fa-solid fa-list-check"></i></span><h3>Acompanhamento central</h3><p>Consulte, filtre e atualize demandas em uma visão organizada para toda a equipe autorizada.</p><a href="#gestao">Conhecer a gestão <i class="fa-solid fa-arrow-right"></i></a></article>
+          <article class="feature-card reveal"><span class="feature-icon"><i class="fa-solid fa-users-gear"></i></span><h3>Responsáveis e cadastros</h3><p>Mantenha gestores, responsáveis, polos e dados recorrentes prontos para uso em novos registros.</p><a href="#gestao">Ver integração <i class="fa-solid fa-arrow-right"></i></a></article>
+          <article class="feature-card reveal"><span class="feature-icon"><i class="fa-solid fa-chart-simple"></i></span><h3>Análises e indicadores</h3><p>Acompanhe volumes, status, prioridades, recorrências e desempenho por diferentes períodos.</p><a href="#gestao">Explorar indicadores <i class="fa-solid fa-arrow-right"></i></a></article>
+          <article class="feature-card reveal"><span class="feature-icon"><i class="fa-solid fa-network-wired"></i></span><h3>Gestão de conversores</h3><p>Registre trocas, polos, tipos de atendimento, resoluções e soluções realizadas em um módulo dedicado.</p><a href="#gestao">Conhecer o módulo <i class="fa-solid fa-arrow-right"></i></a></article>
+          <article class="feature-card reveal"><span class="feature-icon"><i class="fa-solid fa-file-pdf"></i></span><h3>Relatórios e apresentação</h3><p>Gere materiais claros para reuniões, acompanhamento executivo e prestação de informações.</p><a href="#duvidas">Entender o acesso <i class="fa-solid fa-arrow-right"></i></a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section workflow-section" id="fluxo">
+      <div class="landing-container workflow-layout">
+        <div class="workflow-copy reveal">
+          <span class="eyebrow">FLUXO OBJETIVO</span>
+          <h2>Da solicitação ao resultado, sem perder contexto</h2>
+          <p>O FLUUX organiza cada etapa para que a equipe saiba o que precisa ser feito, quem está responsável e como a demanda evoluiu.</p>
+          <div class="workflow-points">
+            <article><span>01</span><div><h3>Registre</h3><p>Cadastre a demanda com os dados necessários para iniciar o atendimento.</p></div></article>
+            <article><span>02</span><div><h3>Distribua e acompanhe</h3><p>Defina responsáveis, prioridades, prazos e mantenha o histórico atualizado.</p></div></article>
+            <article><span>03</span><div><h3>Analise e apresente</h3><p>Use indicadores e relatórios para demonstrar resultados e orientar decisões.</p></div></article>
+          </div>
+        </div>
+
+        <div class="workflow-board reveal">
+          <div class="board-header"><div><small>FLUXO DE DEMANDAS</small><strong>Acompanhamento por status</strong></div><span><i class="fa-solid fa-calendar-days"></i> Este mês</span></div>
+          <div class="kanban-grid">
+            <section><header><span><i class="fa-solid fa-inbox"></i> Novas</span><b>3</b></header><article><small>FLX-031</small><strong>Atualização de infraestrutura</strong><span><em>Alta</em><i class="fa-solid fa-user"></i></span></article><article><small>FLX-030</small><strong>Validação de acesso</strong><span><em>Média</em><i class="fa-solid fa-user"></i></span></article></section>
+            <section><header><span><i class="fa-solid fa-spinner"></i> Em andamento</span><b>5</b></header><article><small>FLX-029</small><strong>Revisão de conectividade</strong><span><em>Alta</em><i class="fa-solid fa-user"></i></span></article><article><small>FLX-028</small><strong>Troca de conversor</strong><span><em>Normal</em><i class="fa-solid fa-user"></i></span></article></section>
+            <section><header><span><i class="fa-solid fa-circle-check"></i> Concluídas</span><b>12</b></header><article><small>FLX-027</small><strong>Ajuste de equipamento</strong><span><em>Finalizada</em><i class="fa-solid fa-check"></i></span></article><article><small>FLX-026</small><strong>Documentação do polo</strong><span><em>Finalizada</em><i class="fa-solid fa-check"></i></span></article></section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section management-section" id="gestao">
+      <div class="landing-container">
+        <div class="section-heading reveal">
+          <span class="eyebrow">GESTÃO INTEGRADA</span>
+          <h2>Informação operacional pronta para virar decisão</h2>
+          <p>Uma única estrutura conecta execução, acompanhamento, indicadores e apresentação, respeitando os acessos de cada empresa e usuário.</p>
+        </div>
+
+        <div class="management-grid">
+          <article class="management-main reveal">
+            <div class="management-copy"><span class="mini-label">VISÃO EXECUTIVA</span><h3>Entenda rapidamente o cenário atual</h3><p>Cards, gráficos, filtros e listas destacam o que exige atenção sem esconder os detalhes da operação.</p><ul><li><i class="fa-solid fa-check"></i> Indicadores por status e prioridade</li><li><i class="fa-solid fa-check"></i> Filtros por período e responsável</li><li><i class="fa-solid fa-check"></i> Dados acumulados e recorrências</li></ul></div>
+            <div class="donut-visual"><div class="donut"><span><strong>67%</strong><small>concluídas</small></span></div><div class="donut-legend"><span><i></i>Concluídas <b>16</b></span><span><i></i>Em andamento <b>08</b></span><span><i></i>Aguardando <b>05</b></span></div></div>
+          </article>
+          <article class="management-card reveal"><span><i class="fa-solid fa-clock-rotate-left"></i></span><h3>Histórico preservado</h3><p>Mantenha os principais registros e resoluções disponíveis para consultas futuras.</p></article>
+          <article class="management-card reveal"><span><i class="fa-solid fa-user-shield"></i></span><h3>Acesso por empresa</h3><p>Estrutura preparada para separar dados, perfis e ambientes de trabalho.</p></article>
+          <article class="management-card reveal"><span><i class="fa-solid fa-display"></i></span><h3>Modo apresentação</h3><p>Exiba os indicadores mais importantes em reuniões e acompanhamentos executivos.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section access-section">
+      <div class="landing-container access-banner reveal">
+        <div><span class="eyebrow">AMBIENTE WEB</span><h2>Organize a operação em um painel único</h2><p>Acesse o FLUUX pelo navegador e mantenha demandas, responsáveis, análises e relatórios conectados.</p></div>
+        <button class="btn-primary-landing" type="button" data-open-access><span>Entrar no FLUUX</span><i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </section>
+
+    <section class="landing-section faq-section" id="duvidas">
+      <div class="landing-container faq-layout">
+        <div class="faq-copy reveal"><span class="eyebrow">DÚVIDAS FREQUENTES</span><h2>O que você precisa saber</h2><p>Informações essenciais sobre acesso, funcionamento e uso do sistema.</p></div>
+        <div class="faq-list reveal">
+          <details open><summary>Preciso instalar o FLUUX?<i class="fa-solid fa-plus"></i></summary><p>Não. O sistema funciona pela web e pode ser acessado em dispositivos compatíveis com navegador e conexão à internet.</p></details>
+          <details><summary>Mais de uma pessoa pode utilizar o sistema?<i class="fa-solid fa-plus"></i></summary><p>Sim. A estrutura foi preparada para múltiplos usuários, responsáveis e empresas, respeitando os acessos configurados.</p></details>
+          <details><summary>O sistema gera relatórios?<i class="fa-solid fa-plus"></i></summary><p>Sim. Demandas e conversores possuem relatórios organizados para acompanhamento, reuniões e apresentação dos resultados.</p></details>
+          <details><summary>Os dados ficam separados por empresa?<i class="fa-solid fa-plus"></i></summary><p>Sim. O ambiente utiliza uma estrutura multiempresa para manter usuários e registros vinculados à organização correta.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="landing-container final-cta-inner reveal">
+        <span class="cta-icon"><i class="fa-solid fa-wave-square"></i></span>
+        <div><small>FLUUX</small><h2>Pronto para organizar suas demandas?</h2><p>Entre no ambiente e acompanhe a operação com mais clareza.</p></div>
+        <button class="btn-primary-landing" type="button" data-open-access><span>Acessar agora</span><i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="landing-container footer-inner">
+      <div class="footer-brand"><span class="brand-mark small"><img src="assets/img/logo.png" alt=""></span><span><strong>FLUUX</strong><small>Organização de Demandas</small></span></div>
+      <p>© 2026 FLUUX. Sistema web para organização e acompanhamento de demandas.</p>
+      <button type="button" data-open-access><i class="fa-solid fa-lock"></i> Área restrita</button>
+    </div>
+  </footer>
+
+  <div class="access-modal" id="accessModal" hidden>
+    <div class="modal-backdrop" data-close-access></div>
+    <section class="access-dialog" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
+      <button class="modal-close" type="button" data-close-access aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+      <div class="access-logo"><img src="assets/img/logo.png" alt="FLUUX"></div>
+      <div class="access-heading">
+        <span>ACESSO RESTRITO</span>
+        <h2 id="accessTitle"><i class="fa-solid fa-shield-halved"></i> Validação de acesso</h2>
+        <p>Informe a credencial de entrada para continuar ao login oficial do sistema.</p>
+      </div>
+      <form id="preLoginForm" novalidate>
+        <label class="access-field"><span>E-mail</span><span class="access-input"><i class="fa-regular fa-envelope"></i><input id="preLoginEmail" type="email" autocomplete="username" value="admin@sistema.com" required></span></label>
+        <label class="access-field"><span>Senha</span><span class="access-input"><i class="fa-solid fa-key"></i><input id="preLoginPassword" type="password" autocomplete="current-password" placeholder="Digite a senha" required><button id="preLoginTogglePassword" type="button" aria-label="Mostrar senha"><i class="fa-regular fa-eye"></i></button></span></label>
+        <p class="access-message" id="preLoginMessage" role="alert" hidden></p>
+        <button class="access-submit" id="preLoginSubmit" type="submit"><i class="fa-solid fa-arrow-right-to-bracket"></i><span>Continuar para o login</span></button>
+      </form>
+      <div class="access-security"><i class="fa-solid fa-lock"></i><span><strong>Etapa de validação</strong><small>Após esta confirmação, o login oficial será solicitado.</small></span></div>
+    </section>
+  </div>
+
+  <script src="assets/js/landing.js"></script>
+</body>
+</html>

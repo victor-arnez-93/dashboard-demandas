@@ -1,6 +1,14 @@
 import { log } from "./logger.js";
 import { configureAuthPersistence, getSupabase, isConfigured, shouldRememberSession } from "./supabase-client.js";
 
+const PRELOGIN_KEY = "fluux-prelogin-authorized";
+const preLoginAuthorized = sessionStorage.getItem(PRELOGIN_KEY) === "1";
+
+if (!preLoginAuthorized) {
+  location.replace("index.html#entrar");
+}
+
+if (preLoginAuthorized) {
 const root = document.documentElement;
 const form = document.getElementById("loginForm");
 const submit = document.getElementById("loginSubmit");
@@ -70,3 +78,4 @@ async function boot() {
   }
 }
 boot();
+}

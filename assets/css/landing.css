@@ -336,17 +336,17 @@ img {
   box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
-82%, 100% {
-  left: 125%;
-}
-
-}
-
 .hero {
-  position: relative;
-  min-height: 820px;
-  overflow: hidden;
-  padding: 190px 0 88px;
+    position: relative;
+    min-height: 820px;
+    overflow: hidden;
+
+    margin-top: 104px;
+
+    padding-top: 110px;
+    padding-bottom: 88px;
+
+    scroll-margin-top: 104px;
 }
 
 .hero-grid {
@@ -1584,18 +1584,54 @@ img {
 
 .footer-inner > button,
 .footer-inner > a {
-  justify-self: end;
-  border: 0;
-  background: transparent;
-  color: var(--text-soft);
-  font-size: 10px;
-  font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 42px;
+    padding: 0 16px;
+
+    justify-self: end;
+
+    border: 1px solid var(--border);
+    border-radius: 13px;
+
+    background: color-mix(
+        in srgb,
+        var(--surface-raised) 72%,
+        transparent
+    );
+
+    color: var(--text-soft);
+    text-decoration: none;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    transition:
+        border-color var(--transition),
+        background var(--transition),
+        transform var(--transition),
+        color var(--transition);
 }
 
-.footer-inner > button i,
 .footer-inner > a i {
-  margin-right: 6px;
-  color: var(--accent);
+    color: var(--accent);
+}
+
+.footer-inner > a:hover {
+    transform: translateY(-2px);
+
+    color: var(--text);
+
+    border-color: color-mix(
+        in srgb,
+        var(--accent) 55%,
+        var(--border)
+    );
+
+    background: var(--surface-hover);
 }
 
 .access-modal {
@@ -1959,7 +1995,9 @@ img {
   }
 
   .hero {
-    padding-top: 164px;
+    margin-top: 94px;
+    padding-top: 58px;
+    scroll-margin-top: 94px;
   }
 
   .hero-copy h1 {
@@ -2014,9 +2052,8 @@ img {
     padding: 30px 0;
   }
 
-  .footer-inner > button,
-.footer-inner > a {
-    justify-self: center;
+  .footer-inner > a {
+      justify-self: center;
   }
 }
 
@@ -2046,7 +2083,9 @@ img {
   }
 
   .hero {
-    padding: 150px 0 64px;
+    margin-top: 94px;
+    padding: 48px 0 64px;
+    scroll-margin-top: 94px;
   }
 
   .hero-copy h1 {

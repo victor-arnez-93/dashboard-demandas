@@ -41,10 +41,10 @@
         <button class="theme-toggle" id="landingThemeButton" type="button" aria-label="Alternar tema">
           <i class="fa-solid fa-sun"></i>
         </button>
-        <button class="btn-access" type="button" data-open-access>
+        <a class="btn-access" href="login.html">
           <i class="fa-solid fa-arrow-right-to-bracket"></i>
           <span>Entrar</span>
-        </button>
+        </a>
         <button class="menu-toggle" id="landingMenuButton" type="button" aria-label="Abrir menu" aria-controls="landingNav" aria-expanded="false">
           <i class="fa-solid fa-bars"></i>
         </button>
@@ -64,10 +64,10 @@
           <h1>Demandas organizadas.<br><span>Decisões mais claras.</span></h1>
           <p>Centralize solicitações, responsáveis, prazos, horas, conversores, análises e relatórios em um sistema web preparado para acompanhar a operação de ponta a ponta.</p>
           <div class="hero-actions">
-            <button class="btn-primary-landing" type="button" data-open-access>
+            <a class="btn-primary-landing" href="login.html">
               <span>Acessar o sistema</span>
               <i class="fa-solid fa-arrow-right"></i>
-            </button>
+            </a>
             <a class="btn-secondary-landing" href="#recursos">
               <i class="fa-solid fa-grid-2"></i>
               <span>Conhecer recursos</span>
@@ -210,7 +210,7 @@
     <section class="landing-section access-section">
       <div class="landing-container access-banner reveal">
         <div><span class="eyebrow">AMBIENTE WEB</span><h2>Organize a operação em um painel único</h2><p>Acesse o FLUUX pelo navegador e mantenha demandas, responsáveis, análises e relatórios conectados.</p></div>
-        <button class="btn-primary-landing" type="button" data-open-access><span>Entrar no FLUUX</span><i class="fa-solid fa-arrow-right"></i></button>
+        <a class="btn-primary-landing" href="login.html"><span>Entrar no FLUUX</span><i class="fa-solid fa-arrow-right"></i></a>
       </div>
     </section>
 
@@ -230,7 +230,7 @@
       <div class="landing-container final-cta-inner reveal">
         <span class="cta-icon"><i class="fa-solid fa-wave-square"></i></span>
         <div><small>FLUUX</small><h2>Pronto para organizar suas demandas?</h2><p>Entre no ambiente e acompanhe a operação com mais clareza.</p></div>
-        <button class="btn-primary-landing" type="button" data-open-access><span>Acessar agora</span><i class="fa-solid fa-arrow-right"></i></button>
+        <a class="btn-primary-landing" href="login.html"><span>Acessar agora</span><i class="fa-solid fa-arrow-right"></i></a>
       </div>
     </section>
   </main>
@@ -239,29 +239,10 @@
     <div class="landing-container footer-inner">
       <div class="footer-brand"><span class="brand-mark small"><img src="assets/img/logo.png" alt=""></span><span><strong>FLUUX</strong><small>Organização de Demandas</small></span></div>
       <p>© 2026 FLUUX. Sistema web para organização e acompanhamento de demandas.</p>
-      <button type="button" data-open-access><i class="fa-solid fa-lock"></i> Área restrita</button>
+      <a href="login.html"><i class="fa-solid fa-lock"></i> Área restrita</a>
     </div>
   </footer>
 
-  <div class="access-modal" id="accessModal" hidden>
-    <div class="modal-backdrop" data-close-access></div>
-    <section class="access-dialog" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
-      <button class="modal-close" type="button" data-close-access aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
-      <div class="access-logo"><img src="assets/img/logo.png" alt="FLUUX"></div>
-      <div class="access-heading">
-        <span>ACESSO RESTRITO</span>
-        <h2 id="accessTitle"><i class="fa-solid fa-shield-halved"></i> Validação de acesso</h2>
-        <p>Informe a credencial de entrada para continuar ao login oficial do sistema.</p>
-      </div>
-      <form id="preLoginForm" novalidate>
-        <label class="access-field"><span>E-mail</span><span class="access-input"><i class="fa-regular fa-envelope"></i><input id="preLoginEmail" type="email" autocomplete="username" value="admin@sistema.com" required></span></label>
-        <label class="access-field"><span>Senha</span><span class="access-input"><i class="fa-solid fa-key"></i><input id="preLoginPassword" type="password" autocomplete="current-password" placeholder="Digite a senha" required><button id="preLoginTogglePassword" type="button" aria-label="Mostrar senha"><i class="fa-regular fa-eye"></i></button></span></label>
-        <p class="access-message" id="preLoginMessage" role="alert" hidden></p>
-        <button class="access-submit" id="preLoginSubmit" type="submit"><i class="fa-solid fa-arrow-right-to-bracket"></i><span>Continuar para o login</span></button>
-      </form>
-      <div class="access-security"><i class="fa-solid fa-lock"></i><span><strong>Etapa de validação</strong><small>Após esta confirmação, o login oficial será solicitado.</small></span></div>
-    </section>
-  </div>
 
   <script src="assets/js/landing.js"></script>
 </body>

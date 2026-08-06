@@ -503,8 +503,8 @@ function exportExcel() {
     const converterRows = reportConverters.map(item => ({
       Polo: item.location_name || "",
       Subdivisão: item.location_subdivision_name || "",
-      "Número LPU": item.lpu_number || "",
-      Projeto: item.project || "",
+      "Número do chamado": item.lpu_number || "",
+      "LPU agregada": item.project || "",
       Descrição: item.issue_reason || "",
       Gestor: item.manager_name || "",
       "Tipo de equipamento": item.equipment_type || "",
@@ -980,8 +980,8 @@ function pdfConverterRows(records) {
       : [246, 246, 246];
 
     const identification = [
-      `LPU: ${pdfValue(item.lpu_number)}`,
-      `Projeto: ${pdfValue(item.project)}`,
+      `Chamado: ${pdfValue(item.lpu_number)}`,
+      `LPU agregada: ${pdfValue(item.project)}`,
       `Data: ${pdfStoredDate(item.service_date)}`,
     ].join("\n");
 
@@ -1505,7 +1505,7 @@ async function exportPdf() {
       startY: y,
 
       head: [[
-        "LPU e projeto",
+        "Chamado e LPU agregada",
         "Polo e gestor",
         "Descrição e equipamento",
         "Resolução e status",

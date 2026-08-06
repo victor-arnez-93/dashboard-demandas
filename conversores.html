@@ -89,7 +89,7 @@
               <input
                 id="converterSearch"
                 type="search"
-                placeholder="Buscar por LPU, projeto, polo, descrição ou gestor..."
+                placeholder="Buscar por chamado, LPU agregada, polo, descrição ou gestor..."
               >
             </div>
           </label>
@@ -137,8 +137,8 @@
             <thead>
               <tr>
                 <th>Polo</th>
-                <th>Número LPU</th>
-                <th>Projeto</th>
+                <th>Número do chamado</th>
+                <th>LPU agregada</th>
                 <th>Gestor</th>
                 <th>Equipamento</th>
                 <th>Atendimento</th>
@@ -179,12 +179,12 @@
             <input id="converterId" type="hidden">
             <div class="converter-form-grid">
               <label class="field">
-                <span>Número LPU *</span>
-                <input id="converterLpuNumber" type="text" maxlength="80" required placeholder="Ex.: 42-49">
+                <span>Número do chamado *</span>
+                <input id="converterLpuNumber" type="text" maxlength="80" required placeholder="Ex.: CH-123456">
               </label>
               <label class="field">
-                <span>Projeto *</span>
-                <input id="converterProject" type="text" minlength="3" maxlength="200" required placeholder="Nome do projeto">
+                <span>LPU agregada *</span>
+                <input id="converterProject" type="text" minlength="3" maxlength="200" required placeholder="Ex.: LPU 42-49">
               </label>
               <label class="field">
                 <span>Polo *</span>

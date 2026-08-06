@@ -294,7 +294,7 @@ function renderTable(items) {
     ? items.map(item => `<tr>
       <td title="${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}"><div class="converter-cell"><strong>${escapeHtml(item.location_name || "—")}</strong><small>${escapeHtml(item.location_subdivision_name || "")}</small></div></td>
       <td title="${escapeHtml(item.lpu_number || "—")}">${escapeHtml(item.lpu_number || "—")}</td>
-      <td title="${escapeHtml(item.project || "Projeto não informado")}"><div class="converter-cell"><strong>${escapeHtml(item.project || "Projeto não informado")}</strong><small>${escapeHtml(item.issue_reason || "Sem descrição")}</small></div></td>
+      <td title="${escapeHtml(item.project || "LPU agregada não informada")}"><div class="converter-cell"><strong>${escapeHtml(item.project || "LPU agregada não informada")}</strong><small>${escapeHtml(item.issue_reason || "Sem descrição")}</small></div></td>
       <td title="${escapeHtml(item.manager_name || "—")}">${escapeHtml(item.manager_name || "—")}</td>
       <td title="${escapeHtml(item.equipment_type || "—")}">${escapeHtml(item.equipment_type || "—")}</td>
       <td title="${escapeHtml(item.service_type || "—")}">${escapeHtml(item.service_type || "—")}</td>
@@ -381,10 +381,12 @@ async function handleTable(event) {
   if (button.dataset.action === "view") renderConverterDetail(record);
   if (button.dataset.action === "edit") editRecord(record);
   if (button.dataset.action === "delete") {
-    const identifier = record.lpu_number ? `LPU ${record.lpu_number}` : record.project || "selecionado";
+    const identifier = record.lpu_number || record.project || "selecionado";
     const confirmed = await confirmAction({
       title: "Excluir atendimento",
-      text: `O atendimento ${identifier} será removido permanentemente.`,
+      text: record.lpu_number
+        ? `O chamado ${identifier} será removido permanentemente.`
+        : `O atendimento ${identifier} será removido permanentemente.`,
       confirmLabel: "Excluir registro",
     });
     if (!confirmed) return;

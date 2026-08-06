@@ -85,10 +85,10 @@
               <label class="field"><span>Polo</span><select id="reportConverterLocation"><option value="">Todos</option></select></label>
               <label class="field"><span>Status</span><select id="reportConverterStatus"><option value="">Todos</option></select></label>
               <label class="field"><span>Tipo de atendimento</span><select id="reportConverterService"><option value="">Todos</option></select></label>
-              <label class="field"><span>Tipo de equipamento</span><select id="reportConverterEquipment"><option value="">Todos</option><option>Conversor</option><option>Fonte PoE</option></select></label>
+              <label class="field"><span>Tipo de equipamento</span><select id="reportConverterEquipment"><option value="">Todos</option><option>Conversor</option><option>Fonte PoE</option><option>Conversor e Fonte PoE</option></select></label>
               <label class="field"><span>Gestor</span><select id="reportConverterManager"><option value="">Todos</option></select></label>
               <label class="field"><span>Responsável</span><select id="reportConverterResponsible"><option value="">Todos</option></select></label>
-              <label class="field"><span>Busca no atendimento</span><input id="reportConverterSearch" type="search" placeholder="LPU, projeto, polo, descrição ou resolução"></label>
+              <label class="field"><span>Busca no atendimento</span><input id="reportConverterSearch" type="search" placeholder="Chamado, LPU agregada, polo, descrição ou resolução"></label>
             </div>
           </div>
           <div class="report-filter-feedback" id="converterFilterFeedback" aria-live="polite">Exibindo os atendimentos do mês atual.</div>
@@ -99,7 +99,7 @@
 
         <section class="table-shell report-section is-collapsed" id="converterReportSection">
           <div class="panel-head"><div><small>DETALHAMENTO</small><h2>Conversores e fontes PoE no período</h2></div><div class="report-section-actions"><strong id="reportConverterSummary">0 equipamentos</strong><button class="report-table-toggle" id="toggleConverterTable" type="button" aria-expanded="false" aria-controls="converterTableContent" aria-label="Mostrar tabela de equipamentos" title="Mostrar tabela"><i class="fa-solid fa-chevron-down"></i><span class="report-toggle-label">Mostrar tabela</span></button></div></div>
-          <div class="report-collapsible" id="converterTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-converters-table"><thead><tr><th>Polo</th><th>Número LPU</th><th>Projeto</th><th>Gestor</th><th>Equipamento</th><th>Atendimento</th><th>Qtd.</th><th>Descrição</th><th>Resolução</th><th>Status</th></tr></thead><tbody id="reportConvertersBody"><tr><td colspan="10" class="empty-table">Carregando equipamentos...</td></tr></tbody></table></div></div></div>
+          <div class="report-collapsible" id="converterTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-converters-table"><thead><tr><th>Polo</th><th>Número do chamado</th><th>LPU agregada</th><th>Gestor</th><th>Equipamento</th><th>Atendimento</th><th>Qtd.</th><th>Descrição</th><th>Resolução</th><th>Status</th></tr></thead><tbody id="reportConvertersBody"><tr><td colspan="10" class="empty-table">Carregando equipamentos...</td></tr></tbody></table></div></div></div>
         </section>
       </section>
     </main>

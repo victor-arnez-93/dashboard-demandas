@@ -193,8 +193,8 @@ export function renderConverterDetail(record) {
   if (!code || !content) return;
   code.textContent = converterCode(record);
   const cells = [
-    ["Número LPU", record.lpu_number || "—"],
-    ["Projeto", record.project || "—"],
+    ["Número do chamado", record.lpu_number || "—"],
+    ["LPU agregada", record.project || "—"],
     ["Data", formatDate(record.service_date, { year: true })],
     ["Polo", record.location_name],
     ["Subdivisão", record.location_subdivision_name || "—"],

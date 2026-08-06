@@ -582,14 +582,29 @@ body[data-page="relatorios"] .page-heading::after {
 .report-table-scroll {
   max-height: 405px;
   overflow: auto;
+  overscroll-behavior: contain;
   scrollbar-gutter: stable;
+}
+
+.report-table-scroll table {
+  width: 100%;
+  table-layout: fixed;
 }
 
 .report-table-scroll thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  color: #f96900;
+  overflow: hidden;
+  border-bottom-color: color-mix(in srgb, var(--border) 78%, var(--text-muted));
+  background: color-mix(in srgb, var(--surface-raised) 96%, var(--background));
+  color: var(--text-muted);
+  font: 800 0.67rem/1.2 var(--font-text);
+  letter-spacing: 0.075em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 var(--border);
 }
 
 .report-table-scroll tbody tr {
@@ -598,8 +613,20 @@ body[data-page="relatorios"] .page-heading::after {
 
 .report-table-scroll th,
 .report-table-scroll td {
+  min-width: 0;
+  padding: 13px 14px;
+  overflow: hidden;
   font-size: 0.78rem;
   line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.report-table-scroll td.empty-table {
+  overflow: visible;
+  text-align: center;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .report-demands-table {
@@ -613,12 +640,82 @@ body[data-page="relatorios"] .page-heading::after {
 .report-demands-table td:nth-child(3) strong,
 .report-demands-table td:nth-child(3) small {
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .report-demands-table td:nth-child(3) small {
   margin-top: 4px;
   color: var(--text-muted);
   font-size: 0.7rem;
+}
+
+.report-demands-table th:nth-child(1) {
+  width: 10%;
+}
+
+.report-demands-table th:nth-child(2) {
+  width: 6%;
+}
+
+.report-demands-table th:nth-child(3) {
+  width: 16%;
+}
+
+.report-demands-table th:nth-child(4),
+.report-demands-table th:nth-child(5) {
+  width: 9%;
+}
+
+.report-demands-table th:nth-child(6),
+.report-demands-table th:nth-child(11),
+.report-demands-table th:nth-child(12) {
+  width: 6%;
+}
+
+.report-demands-table th:nth-child(7) {
+  width: 8%;
+}
+
+.report-demands-table th:nth-child(8) {
+  width: 10%;
+}
+
+.report-demands-table th:nth-child(9),
+.report-demands-table th:nth-child(10) {
+  width: 7%;
+}
+
+.report-converters-table th:nth-child(1) {
+  width: 10%;
+}
+
+.report-converters-table th:nth-child(2) {
+  width: 7%;
+}
+
+.report-converters-table th:nth-child(3) {
+  width: 15%;
+}
+
+.report-converters-table th:nth-child(4),
+.report-converters-table th:nth-child(5),
+.report-converters-table th:nth-child(6) {
+  width: 9%;
+}
+
+.report-converters-table th:nth-child(7) {
+  width: 5%;
+}
+
+.report-converters-table th:nth-child(8),
+.report-converters-table th:nth-child(9) {
+  width: 13%;
+}
+
+.report-converters-table th:nth-child(10) {
+  width: 8%;
 }
 
 /* ============================================================

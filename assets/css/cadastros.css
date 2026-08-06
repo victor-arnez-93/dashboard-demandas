@@ -232,7 +232,17 @@ body[data-page="cadastros"] .page-heading p {
 
 .catalog-modal {
   width: min(590px, 100%);
+  max-height: min(860px, calc(100vh - 40px));
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+}
+
+.catalog-modal #catalogForm {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
 }
 
 .catalog-modal-head {
@@ -270,8 +280,14 @@ body[data-page="cadastros"] .page-heading p {
 
 .catalog-modal-form {
   display: grid;
+  min-height: 0;
+  flex: 1;
+  align-content: start;
   gap: 18px;
+  overflow-y: auto;
   padding: 24px;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .catalog-modal-form .field {
@@ -397,8 +413,10 @@ body[data-page="cadastros"] .page-heading p {
 }
 
 .catalog-modal-actions {
+  flex: 0 0 auto;
   padding: 18px 24px;
   background: color-mix(in srgb, var(--surface-raised) 74%, transparent);
+  box-shadow: 0 -8px 22px color-mix(in srgb, var(--background) 10%, transparent);
 }
 
 /* ============================================================
@@ -539,6 +557,10 @@ body[data-page="cadastros"] .page-heading p {
 
   .catalog-modal-head {
     padding: 21px 18px 17px;
+  }
+
+  .catalog-modal {
+    max-height: calc(100vh - 24px);
   }
 
   .catalog-modal-form {

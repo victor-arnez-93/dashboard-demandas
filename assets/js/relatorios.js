@@ -1,10 +1,16 @@
 import { bootPage } from "./shell.js";
-import { state, effectiveStatus, demandCode, activeCatalog } from "./store.js";
+import {
+  state,
+  effectiveStatus,
+  demandCode,
+  demandProject,
+  activeCatalog,
+} from "./store.js";
 import { escapeHtml, formatDate, formatHours, showToast } from "./ui.js";
 import { intervalFor, dateInInterval } from "./charts.js";
 
-let activePeriod = "30";
-let converterActivePeriod = "30";
+let activePeriod = "month";
+let converterActivePeriod = "month";
 let reportDemands = [];
 let reportConverters = [];
 
@@ -15,10 +21,10 @@ function currentInterval() {
 
 function periodLabel() {
   const labels = {
-    today: "Hoje",
-    "7": "Últimos 7 dias",
-    "30": "Últimos 30 dias",
+    week: "Semana atual",
     month: "Mês atual",
+    quarter: "Trimestre atual",
+    semester: "Semestre atual",
     year: `Ano de ${new Date().getFullYear()}`,
     custom: "Período personalizado",
   };
@@ -36,10 +42,10 @@ function converterCurrentInterval() {
 
 function converterPeriodLabel() {
   const labels = {
-    today: "Hoje",
-    "7": "Últimos 7 dias",
-    "30": "Últimos 30 dias",
+    week: "Semana atual",
     month: "Mês atual",
+    quarter: "Trimestre atual",
+    semester: "Semestre atual",
     year: `Ano de ${new Date().getFullYear()}`,
     custom: "Período personalizado",
   };
@@ -93,7 +99,7 @@ function getDemands() {
     const searchableContent = normalizedText([
       demandCode(item),
       item.lpu_number,
-      item.title,
+      demandProject(item),
       item.description,
       item.location_name,
       item.location_subdivision_name,
@@ -273,7 +279,7 @@ function render() {
   document.getElementById("reportDemandCount").textContent = `${reportDemands.length} ${reportDemands.length === 1 ? "registro" : "registros"}`;
 
   document.getElementById("reportBody").innerHTML = reportDemands.length ? reportDemands.map(item => `<tr>
-    <td>${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}</td><td>${escapeHtml(item.lpu_number || "—")}</td><td><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.description || "")}</small></td><td>${escapeHtml(item.manager?.trim() || "Gestor não informado")}</td><td>${escapeHtml(item.responsible)}</td><td>${escapeHtml(item.priority)}</td><td>${escapeHtml(effectiveStatus(item))}</td><td>${escapeHtml(item.manager_status || "—")}</td><td>${formatDate(item.start_date, { year: true })}</td><td>${formatDate(item.due_date, { year: true })}</td><td>${formatHours(item.estimated_hours)}</td><td>${formatHours(item.actual_hours)}</td>
+    <td>${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}</td><td>${escapeHtml(item.lpu_number || "—")}</td><td><strong>${escapeHtml(demandProject(item))}</strong><small>${escapeHtml(item.description || "")}</small></td><td>${escapeHtml(item.manager?.trim() || "Gestor não informado")}</td><td>${escapeHtml(item.responsible)}</td><td>${escapeHtml(item.priority)}</td><td>${escapeHtml(effectiveStatus(item))}</td><td>${escapeHtml(item.manager_status || "—")}</td><td>${formatDate(item.start_date, { year: true })}</td><td>${formatDate(item.due_date, { year: true })}</td><td>${formatHours(item.estimated_hours)}</td><td>${formatHours(item.actual_hours)}</td>
   </tr>`).join("") : `<tr><td colspan="12" class="empty-table">Nenhuma demanda encontrada para os filtros.</td></tr>`;
 
   const converters = converterSummary(reportConverters);
@@ -326,8 +332,8 @@ function clearDemandFilters() {
     document.getElementById(id).value = "";
   });
 
-  setPeriod("demands", "30");
-  showToast("Filtros de demandas restaurados para os últimos 30 dias.", "success");
+  setPeriod("demands", "month");
+  showToast("Filtros de demandas restaurados para o mês atual.", "success");
 }
 
 function clearConverterFilters() {
@@ -343,8 +349,8 @@ function clearConverterFilters() {
     document.getElementById(id).value = "";
   });
 
-  setPeriod("converters", "30");
-  showToast("Filtros de equipamentos restaurados para os últimos 30 dias.", "success");
+  setPeriod("converters", "month");
+  showToast("Filtros de equipamentos restaurados para o mês atual.", "success");
 }
 
 function setupTableToggle(sectionId, buttonId) {
@@ -441,7 +447,7 @@ function exportExcel() {
       Polo: item.location_name || "",
       Subdivisão: item.location_subdivision_name || "",
       "Número LPU": item.lpu_number || "",
-      Projeto: item.title,
+      Projeto: demandProject(item),
       Descrição: item.description,
       Solicitante: item.requester || "",
       Gestor: item.manager?.trim() || "Gestor não informado",
@@ -905,7 +911,7 @@ function pdfDemandRows(records) {
       },
 
       {
-        content: pdfValue(item.title),
+        content: pdfValue(demandProject(item)),
 
         styles: {
           fillColor,
@@ -1592,6 +1598,6 @@ bootPage(() => {
   setupTableToggle("converterReportSection", "toggleConverterTable");
   document.getElementById("exportExcelButton").addEventListener("click", exportExcel);
   document.getElementById("exportPdfButton").addEventListener("click", exportPdf);
-  setPeriod("demands", "30");
-  setPeriod("converters", "30");
+  setPeriod("demands", "month");
+  setPeriod("converters", "month");
 });

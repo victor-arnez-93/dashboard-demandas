@@ -1,4 +1,10 @@
-import { state, effectiveStatus, demandCode, converterCode } from "./store.js";
+import {
+  state,
+  effectiveStatus,
+  demandCode,
+  demandProject,
+  converterCode,
+} from "./store.js";
 
 export function escapeHtml(value = "") {
   return String(value)
@@ -122,6 +128,16 @@ export function statusClass(status) {
     "Aguardando retorno": "status-retorno",
     "Concluída": "status-concluida",
     "Concluído": "status-concluida",
+    "Concluído Validado": "status-concluida",
+    "Concluído Faturado": "status-concluida",
+    "Aprovado Faturar": "status-concluida",
+    "Finalizado": "status-concluida",
+    "Solicitado": "status-pendente",
+    "Pendente Liberação GP": "status-retorno",
+    "Pendente Liberação Gestor": "status-retorno",
+    "Liberado para Execução": "status-andamento",
+    "Aguardando Validação": "status-retorno",
+    "Aguardando Revisão do Fornecedor": "status-retorno",
     "Atrasada": "status-atrasada",
     "Cancelada": "status-cancelada",
     "Cancelado": "status-cancelada",
@@ -134,7 +150,7 @@ export function priorityClass(priority) {
 }
 
 export function demandCell(demand) {
-  return `<div class="demand-cell"><i class="fa-regular fa-file-lines"></i><span><strong>${escapeHtml(demand.title)}</strong><small>${escapeHtml(demandCode(demand))} · ${escapeHtml(demand.location_name || "Polo não informado")}</small></span></div>`;
+  return `<div class="demand-cell"><i class="fa-regular fa-file-lines"></i><span><strong>${escapeHtml(demandProject(demand))}</strong><small>${escapeHtml(demandCode(demand))} · ${escapeHtml(demand.location_name || "Polo não informado")}</small></span></div>`;
 }
 
 export function renderDemandDetail(demand) {
@@ -143,7 +159,7 @@ export function renderDemandDetail(demand) {
   const content = document.getElementById("demandDetailContent");
   if (!code || !title || !content) return;
   code.textContent = demandCode(demand);
-  title.textContent = demand.title;
+  title.textContent = demandProject(demand);
   const cells = [
     ["Status", effectiveStatus(demand)],
     ["Status do gestor", demand.manager_status || "—"],

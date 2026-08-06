@@ -72,7 +72,7 @@
 
           <div>
             <strong>Período das análises</strong>
-            <p id="analysisPeriodStatus">Exibindo os últimos 30 dias.</p>
+            <p id="analysisPeriodStatus">Exibindo o mês atual.</p>
           </div>
         </div>
 
@@ -83,35 +83,43 @@
         >
           <button
             type="button"
+            data-analysis-period="week"
+            aria-pressed="false"
+          >
+            Semanal
+          </button>
+
+          <button
+            type="button"
             class="active"
-            data-analysis-period="30"
+            data-analysis-period="month"
             aria-pressed="true"
           >
-            30 dias
+            Mensal
           </button>
 
           <button
             type="button"
-            data-analysis-period="90"
+            data-analysis-period="quarter"
             aria-pressed="false"
           >
-            90 dias
+            Trimestral
           </button>
 
           <button
             type="button"
-            data-analysis-period="365"
+            data-analysis-period="semester"
             aria-pressed="false"
           >
-            Ano
+            Semestral
           </button>
 
           <button
             type="button"
-            data-analysis-period="all"
+            data-analysis-period="year"
             aria-pressed="false"
           >
-            Tudo
+            Anual
           </button>
         </div>
       </section>

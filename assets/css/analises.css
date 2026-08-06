@@ -76,7 +76,7 @@ body[data-page="analises"] .page-heading p {
 
 .analysis-period-switch {
   display: grid;
-  grid-template-columns: repeat(4, minmax(74px, 1fr));
+  grid-template-columns: repeat(5, minmax(82px, 1fr));
   flex: 0 0 auto;
   gap: 5px;
   padding: 5px;
@@ -89,7 +89,7 @@ body[data-page="analises"] .page-heading p {
 .analysis-period-switch button {
   position: relative;
   min-height: 38px;
-  padding: 8px 14px;
+  padding: 8px 12px;
   overflow: hidden;
   border: 1px solid transparent;
   border-radius: 11px;

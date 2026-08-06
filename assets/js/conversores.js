@@ -84,8 +84,8 @@ function populateSelects() {
   locationSelect.innerHTML = `<option value="">Selecione</option>${options(locations)}`;
   responsibleSelect.innerHTML = `<option value="">Não informado</option>${options(responsibles)}<option value="__other__">Outro</option>`;
   managerSelect.innerHTML = `<option value="">Selecione</option>${options(managers)}`;
-  locationFilter.innerHTML = `<option value="">Todos os polos</option>${locations.map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
-  managerFilter.innerHTML = `<option value="">Todos os gestores</option>${managers.map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
+  locationFilter.innerHTML = `<option value="">Todos</option>${locations.map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
+  managerFilter.innerHTML = `<option value="">Todos</option>${managers.map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
 
   if ([...locationSelect.options].some(option => option.value === currentLocation)) locationSelect.value = currentLocation;
   if ([...responsibleSelect.options].some(option => option.value === currentResponsible)) responsibleSelect.value = currentResponsible;
@@ -272,12 +272,12 @@ function emptyTableMarkup() {
 function renderTable(items) {
   document.getElementById("converterBody").innerHTML = items.length
     ? items.map(item => `<tr>
-      <td><div class="converter-cell"><strong>${escapeHtml(item.location_name || "—")}</strong><small>${escapeHtml(item.location_subdivision_name || "")}</small></div></td>
-      <td>${escapeHtml(item.lpu_number || "—")}</td>
-      <td><div class="converter-cell"><strong>${escapeHtml(item.project || "Projeto não informado")}</strong><small>${escapeHtml(item.issue_reason || "Sem descrição")}</small></div></td>
-      <td>${escapeHtml(item.manager_name || "—")}</td>
-      <td>${escapeHtml(item.equipment_type || "—")}</td>
-      <td>${escapeHtml(item.service_type || "—")}</td>
+      <td title="${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}"><div class="converter-cell"><strong>${escapeHtml(item.location_name || "—")}</strong><small>${escapeHtml(item.location_subdivision_name || "")}</small></div></td>
+      <td title="${escapeHtml(item.lpu_number || "—")}">${escapeHtml(item.lpu_number || "—")}</td>
+      <td title="${escapeHtml(item.project || "Projeto não informado")}"><div class="converter-cell"><strong>${escapeHtml(item.project || "Projeto não informado")}</strong><small>${escapeHtml(item.issue_reason || "Sem descrição")}</small></div></td>
+      <td title="${escapeHtml(item.manager_name || "—")}">${escapeHtml(item.manager_name || "—")}</td>
+      <td title="${escapeHtml(item.equipment_type || "—")}">${escapeHtml(item.equipment_type || "—")}</td>
+      <td title="${escapeHtml(item.service_type || "—")}">${escapeHtml(item.service_type || "—")}</td>
       <td>${Number(item.quantity_replaced || 0)}</td>
       <td>${formatDate(item.service_date)}</td>
       <td><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status || "—")}</span></td>

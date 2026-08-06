@@ -61,13 +61,15 @@
 .converter-filter-bar {
   display: grid;
   grid-template-columns:
-    minmax(280px, 1.4fr)
-    repeat(2, minmax(135px, .52fr))
-    repeat(3, minmax(160px, .7fr))
-    auto;
+    minmax(210px, 1.45fr)
+    repeat(2, minmax(124px, 0.72fr))
+    minmax(120px, 0.76fr)
+    minmax(126px, 0.78fr)
+    minmax(130px, 0.82fr)
+    minmax(106px, auto);
   align-items: end;
-  gap: 12px;
-  padding: 18px;
+  gap: 10px;
+  padding: 16px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -87,7 +89,7 @@
 .converter-filter-bar .field input,
 .converter-filter-bar .field select,
 .converter-filter-bar .btn-secondary {
-  min-height: 50px;
+  min-height: 46px;
   border-radius: 14px;
 }
 
@@ -108,8 +110,8 @@
 
 .converter-filter-bar .field input,
 .converter-filter-bar .field select {
-  padding-inline: 14px;
-  font-size: 13px;
+  padding-inline: 12px;
+  font-size: 12.5px;
   font-weight: 550;
 }
 
@@ -119,7 +121,7 @@
 }
 
 .converter-clear-filter {
-  min-width: 124px;
+  min-width: 106px;
   align-self: end;
   white-space: nowrap;
 }
@@ -134,15 +136,16 @@
 ============================================================ */
 
 .converter-table-scroll {
-  max-height: 356px;
+  max-height: 326px;
   overflow-x: auto;
   overflow-y: auto;
+  overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }
 
 .converter-table-scroll table {
   width: 100%;
-  min-width: 1280px;
+  min-width: 1180px;
   table-layout: fixed;
 }
 
@@ -152,20 +155,38 @@
 
 .converter-table-scroll th,
 .converter-table-scroll td {
-  overflow-wrap: anywhere;
+  min-width: 0;
+  padding-right: 12px;
+  padding-left: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.converter-table-scroll th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--surface-raised) 96%, var(--background));
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  box-shadow: 0 1px 0 var(--border);
 }
 
 .converter-table-scroll th:nth-child(1),
-.converter-table-scroll td:nth-child(1) { width: 13%; }
+.converter-table-scroll td:nth-child(1) { width: 12%; }
 
 .converter-table-scroll th:nth-child(2),
 .converter-table-scroll td:nth-child(2) { width: 8%; }
 
 .converter-table-scroll th:nth-child(3),
-.converter-table-scroll td:nth-child(3) { width: 20%; }
+.converter-table-scroll td:nth-child(3) { width: 18%; }
 
 .converter-table-scroll th:nth-child(4),
-.converter-table-scroll td:nth-child(4) { width: 10%; }
+.converter-table-scroll td:nth-child(4) { width: 11%; }
 
 .converter-table-scroll th:nth-child(5),
 .converter-table-scroll td:nth-child(5) { width: 10%; }
@@ -183,10 +204,10 @@
 .converter-table-scroll td:nth-child(8) { width: 7%; }
 
 .converter-table-scroll th:nth-child(9),
-.converter-table-scroll td:nth-child(9) { width: 9%; }
+.converter-table-scroll td:nth-child(9) { width: 10%; }
 
 .converter-table-scroll th:nth-child(10),
-.converter-table-scroll td:nth-child(10) { width: 8%; }
+.converter-table-scroll td:nth-child(10) { width: 9%; }
 
 .converter-cell {
   display: grid;
@@ -350,13 +371,13 @@
    RESPONSIVIDADE
 ============================================================ */
 
-@media (max-width: 1180px) {
+@media (max-width: 1220px) {
   .converter-filter-bar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .converter-filter-bar .converter-search {
-    grid-column: 1 / -1;
+    grid-column: span 2;
   }
 
   .converter-clear-filter {

@@ -182,6 +182,22 @@ export function demandCode(demand) {
   return demand.lpu_number ? `LPU ${demand.lpu_number}` : "LPU não informada";
 }
 
+export function demandProject(demand) {
+  const original = String(demand?.title || "").trim();
+  const lpuNumber = String(demand?.lpu_number || "").trim();
+
+  if (!original || !lpuNumber) return original || "Projeto não informado";
+
+  const escapedLpu = lpuNumber.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const duplicatedPrefix = new RegExp(
+    `^\\s*LPU\\s*${escapedLpu}\\s*(?:[-–—:|]\\s*)?(?:Projeto\\s*:?\\s*)?`,
+    "i",
+  );
+  const project = original.replace(duplicatedPrefix, "").trim();
+
+  return project || original;
+}
+
 export function converterCode(record) {
   return record.lpu_number ? `LPU ${record.lpu_number}` : "LPU não informada";
 }

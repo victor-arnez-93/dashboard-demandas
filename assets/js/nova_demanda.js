@@ -1,5 +1,14 @@
 import { bootPage } from "./shell.js";
-import { state, activeCatalog, catalogItem, findOrCreateCatalog, locationSubdivisions, saveDemand, demandCode } from "./store.js";
+import {
+  state,
+  activeCatalog,
+  catalogItem,
+  findOrCreateCatalog,
+  locationSubdivisions,
+  saveDemand,
+  demandCode,
+  demandProject,
+} from "./store.js";
 import { showToast } from "./ui.js";
 import { bindSmartText, bindNumericOnly, smartName, smartSentence, numberValue } from "./form-utils.js";
 
@@ -119,7 +128,7 @@ function validateDraft(draft) {
   }
   const duplicate = state.demands.some(item =>
     item.id !== draft.id &&
-    item.title.localeCompare(draft.title, "pt-BR", { sensitivity: "accent" }) === 0 &&
+    demandProject(item).localeCompare(draft.title, "pt-BR", { sensitivity: "accent" }) === 0 &&
     (item.manager?.trim() || "Gestor não informado").localeCompare(draft.catalogs.managers.name, "pt-BR", { sensitivity: "accent" }) === 0
   );
   if (duplicate) {
@@ -215,7 +224,7 @@ function loadDemand(id) {
   document.getElementById("demandFormHeading").textContent = `Editar ${demandCode(demand)}`;
   document.getElementById("saveDemandButton").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salvar alterações`;
   document.getElementById("demandLpuNumber").value = demand.lpu_number || "";
-  document.getElementById("demandTitle").value = demand.title;
+  document.getElementById("demandTitle").value = demandProject(demand);
   document.getElementById("demandDescription").value = demand.description;
   document.getElementById("demandRequester").value = demand.requester || "";
   const values = {

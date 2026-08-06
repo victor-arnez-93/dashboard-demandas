@@ -229,6 +229,14 @@ export function intervalFor(period, customStart = "", customEnd = "") {
     return { start, end };
   }
   if (period === "month") return { start: new Date(today.getFullYear(), today.getMonth(), 1), end };
+  if (period === "quarter") {
+    const quarterStartMonth = Math.floor(today.getMonth() / 3) * 3;
+    return { start: new Date(today.getFullYear(), quarterStartMonth, 1), end };
+  }
+  if (period === "semester") {
+    const semesterStartMonth = today.getMonth() < 6 ? 0 : 6;
+    return { start: new Date(today.getFullYear(), semesterStartMonth, 1), end };
+  }
   if (period === "year") return { start: new Date(today.getFullYear(), 0, 1), end };
   if (period === "all") return { start: new Date(2000, 0, 1), end };
   const days = Math.max(1, Number(period || 30));

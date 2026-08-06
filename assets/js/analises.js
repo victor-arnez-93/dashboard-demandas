@@ -10,13 +10,14 @@ import {
   dateInInterval,
 } from "./charts.js";
 
-let period = "30";
+let period = "month";
 
 const periodLabels = {
-  30: "Exibindo os últimos 30 dias.",
-  90: "Exibindo os últimos 90 dias.",
-  365: "Exibindo o ano corrente.",
-  all: "Exibindo todo o histórico disponível.",
+  week: "Exibindo a semana atual.",
+  month: "Exibindo o mês atual.",
+  quarter: "Exibindo o trimestre atual.",
+  semester: "Exibindo o semestre atual.",
+  year: "Exibindo o ano atual.",
 };
 
 function safeText(value, fallback = "Não informado") {
@@ -408,7 +409,7 @@ function render() {
 
   setText(
     "analysisPeriodStatus",
-    periodLabels[period] || periodLabels[30]
+    periodLabels[period] || periodLabels.month
   );
 
   setText(

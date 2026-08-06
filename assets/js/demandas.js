@@ -5,6 +5,7 @@ import {
   effectiveStatus,
   removeDemand,
   demandCode,
+  demandProject,
 } from "./store.js";
 import {
   escapeHtml,
@@ -23,7 +24,7 @@ function populateFilters() {
   const location = document.getElementById("locationFilter");
 
   manager.innerHTML = `
-    <option value="">Todos os gestores</option>
+    <option value="">Todos</option>
     ${activeCatalog("managers")
       .map(item => `<option>${escapeHtml(item.name)}</option>`)
       .join("")}
@@ -31,7 +32,7 @@ function populateFilters() {
   `;
 
   location.innerHTML = `
-    <option value="">Todos os polos</option>
+    <option value="">Todos</option>
     ${activeCatalog("locations")
       .map(item => `<option>${escapeHtml(item.name)}</option>`)
       .join("")}
@@ -266,13 +267,15 @@ function filtered() {
 }
 
 function demandSummary(item) {
+  const project = demandProject(item);
+
   return `
     <div class="demand-summary">
-      <strong title="${escapeHtml(item.title)}">
-        ${escapeHtml(item.title)}
+      <strong title="${escapeHtml(project)}">
+        ${escapeHtml(project)}
       </strong>
 
-      <small>
+      <small title="${escapeHtml(item.description || "Sem descrição")}">
         ${escapeHtml(item.description || "Sem descrição")}
       </small>
     </div>
@@ -282,20 +285,27 @@ function demandSummary(item) {
 function row(item) {
   const status = effectiveStatus(item);
   const manager = item.manager?.trim() || "Gestor não informado";
+  const project = demandProject(item);
+  const location = [item.location_name, item.location_subdivision_name]
+    .filter(Boolean)
+    .join(" · ") || "—";
 
   return `
     <tr>
-      <td>${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}</td>
+      <td title="${escapeHtml(location)}">${escapeHtml(location)}</td>
 
-      <td>${escapeHtml(item.lpu_number || "—")}</td>
+      <td title="${escapeHtml(item.lpu_number || "—")}">${escapeHtml(item.lpu_number || "—")}</td>
 
       <td>${demandSummary(item)}</td>
 
-      <td class="${manager === "Gestor não informado" ? "manager-missing" : ""}">
+      <td
+        class="${manager === "Gestor não informado" ? "manager-missing" : ""}"
+        title="${escapeHtml(manager)}"
+      >
         ${escapeHtml(manager)}
       </td>
 
-      <td>${escapeHtml(item.responsible)}</td>
+      <td title="${escapeHtml(item.responsible || "—")}">${escapeHtml(item.responsible || "—")}</td>
 
       <td>
         <span class="priority-pill ${priorityClass(item.priority)}">
@@ -309,10 +319,10 @@ function row(item) {
         </span>
       </td>
 
-      <td>
-        <span class="status-pill ${statusClass(item.manager_status)}">
-          ${escapeHtml(item.manager_status || "—")}
-        </span>
+      <td class="manager-status-cell" title="${escapeHtml(item.manager_status || "—")}">
+        ${item.manager_status
+          ? `<span class="status-pill ${statusClass(item.manager_status)}">${escapeHtml(item.manager_status)}</span>`
+          : `<span class="table-dash">—</span>`}
       </td>
 
       <td>${formatDate(item.due_date)}</td>
@@ -325,7 +335,7 @@ function row(item) {
             data-id="${item.id}"
             type="button"
             title="Visualizar"
-            aria-label="Visualizar ${escapeHtml(item.title)}"
+            aria-label="Visualizar ${escapeHtml(project)}"
           >
             <i class="fa-regular fa-eye"></i>
           </button>
@@ -336,7 +346,7 @@ function row(item) {
             data-id="${item.id}"
             type="button"
             title="Editar"
-            aria-label="Editar ${escapeHtml(item.title)}"
+            aria-label="Editar ${escapeHtml(project)}"
           >
             <i class="fa-solid fa-pen"></i>
           </button>
@@ -347,7 +357,7 @@ function row(item) {
             data-id="${item.id}"
             type="button"
             title="Excluir"
-            aria-label="Excluir ${escapeHtml(item.title)}"
+            aria-label="Excluir ${escapeHtml(project)}"
           >
             <i class="fa-regular fa-trash-can"></i>
           </button>
@@ -392,7 +402,7 @@ async function handleAction(event) {
   if (button.dataset.action === "delete") {
     const confirmed = await confirmAction({
       title: "Excluir demanda",
-      text: `A demanda “${item.title}” será removida permanentemente.`,
+      text: `A demanda “${demandProject(item)}” será removida permanentemente.`,
       confirmLabel: "Excluir demanda",
     });
 

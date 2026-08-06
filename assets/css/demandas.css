@@ -37,18 +37,36 @@ body[data-page="demandas"] .page-heading p {
   z-index: 20;
   display: grid;
   grid-template-columns:
-    minmax(280px, 1.65fr)
-    repeat(5, minmax(152px, 0.78fr))
-    auto;
-  gap: 11px;
+    minmax(220px, 1.45fr)
+    minmax(96px, 0.65fr)
+    minmax(96px, 0.65fr)
+    minmax(112px, 0.72fr)
+    minmax(148px, 0.94fr)
+    minmax(92px, 0.62fr)
+    minmax(98px, auto);
+  align-items: end;
+  gap: 10px;
   padding: 16px;
   border-bottom: 1px solid var(--border);
+}
+
+.filter-field {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.filter-field > span:first-child {
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.25;
 }
 
 .filter-bar .input-shell,
 .custom-select-trigger,
 .filter-clear {
-  min-height: 48px;
+  min-height: 44px;
 }
 
 .search-filter {
@@ -58,7 +76,7 @@ body[data-page="demandas"] .page-heading p {
 .search-filter input {
   min-width: 0;
   color: var(--text);
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 500;
 }
 
@@ -68,8 +86,9 @@ body[data-page="demandas"] .page-heading p {
 }
 
 .filter-clear {
-  min-width: 104px;
+  min-width: 98px;
   border-radius: 15px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -99,12 +118,12 @@ body[data-page="demandas"] .page-heading p {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 15px;
+  padding: 0 12px;
   border: 1px solid var(--border-strong);
   border-radius: 15px;
   background: var(--surface-input);
   color: var(--text);
-  font: 600 14px/1.2 "Inter", sans-serif;
+  font: 600 12.5px/1.2 "Inter", sans-serif;
   text-align: left;
   cursor: pointer;
   outline: none;
@@ -213,7 +232,7 @@ body[data-page="demandas"] .page-heading p {
 ============================================================ */
 
 .demands-table-scroll {
-  max-height: 390px;
+  max-height: 344px;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -279,16 +298,26 @@ body[data-page="demandas"] .page-heading p {
   white-space: nowrap;
 }
 
+.demands-table th:nth-child(2) {
+  transform: translateX(-8px);
+}
+
+.demands-table th:nth-child(8) {
+  transform: translateX(11px);
+}
+
 .demands-table tbody tr {
   height: 72px;
 }
 
 .demands-table td {
+  overflow: hidden;
   color: var(--text-soft);
   font-size: 12px;
   font-weight: 500;
   line-height: 1.4;
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .demands-table td:first-child {
@@ -317,10 +346,24 @@ body[data-page="demandas"] .page-heading p {
 
 .demand-summary small {
   display: block;
+  min-width: 0;
+  overflow: hidden;
   color: var(--text-muted);
   font-size: 10.5px;
   font-weight: 500;
   line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manager-status-cell {
+  white-space: nowrap;
+}
+
+.table-dash {
+  display: inline-block;
+  color: var(--text-soft);
+  line-height: 1;
 }
 
 .manager-missing {
@@ -411,11 +454,11 @@ body[data-page="demandas"]
 
 @media (max-width: 1420px) {
   .filter-bar {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .filter-bar .search-filter {
-    grid-column: 1 / -1;
+  .filter-field-search {
+    grid-column: span 2;
   }
 
   .filter-clear {
@@ -447,7 +490,7 @@ body[data-page="demandas"]
     padding: 13px;
   }
 
-  .filter-bar .search-filter {
+  .filter-field-search {
     grid-column: auto;
   }
 

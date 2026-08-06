@@ -69,57 +69,81 @@
 
       <section class="table-shell demands-shell">
         <div class="filter-bar" aria-label="Filtros das demandas">
-          <label class="input-shell search-filter">
-            <i class="fa-solid fa-magnifying-glass"></i>
+          <label class="filter-field filter-field-search">
+            <span>Buscar</span>
 
-            <input
-              id="demandSearch"
-              type="search"
-              placeholder="Buscar por LPU, projeto, polo, gestor ou responsável..."
-              autocomplete="off"
-            >
+            <span class="input-shell search-filter">
+              <i class="fa-solid fa-magnifying-glass"></i>
+
+              <input
+                id="demandSearch"
+                type="search"
+                placeholder="LPU, projeto, polo, gestor..."
+                autocomplete="off"
+              >
+            </span>
           </label>
 
-          <select id="statusFilter" aria-label="Filtrar por status">
-            <option value="">Todos os status</option>
-            <option>Pendente</option>
-            <option>Em andamento</option>
-            <option>Aguardando retorno</option>
-            <option>Concluída</option>
-            <option>Atrasada</option>
-            <option>Cancelada</option>
-          </select>
+          <label class="filter-field">
+            <span>Status</span>
 
-          <select id="priorityFilter" aria-label="Filtrar por prioridade">
-            <option value="">Todas as prioridades</option>
-            <option>Baixa</option>
-            <option>Normal</option>
-            <option>Alta</option>
-            <option>Urgente</option>
-          </select>
+            <select id="statusFilter" aria-label="Filtrar por status">
+              <option value="">Todos</option>
+              <option>Pendente</option>
+              <option>Em andamento</option>
+              <option>Aguardando retorno</option>
+              <option>Concluída</option>
+              <option>Atrasada</option>
+              <option>Cancelada</option>
+            </select>
+          </label>
 
-          <select id="managerFilter" aria-label="Filtrar por gestor">
-            <option value="">Todos os gestores</option>
-          </select>
+          <label class="filter-field">
+            <span>Prioridade</span>
 
-          <select id="managerStatusFilter" aria-label="Filtrar por status do gestor">
-            <option value="">Todos os status do gestor</option>
-            <option>Solicitado</option>
-            <option>Pendente Liberação GP</option>
-            <option>Pendente Liberação Gestor</option>
-            <option>Liberado para Execução</option>
-            <option>Aguardando Validação</option>
-            <option>Aguardando Revisão do Fornecedor</option>
-            <option>Concluído Validado</option>
-            <option>Aprovado Faturar</option>
-            <option>Concluído Faturado</option>
-            <option>Cancelada</option>
-            <option>Finalizado</option>
-          </select>
+            <select id="priorityFilter" aria-label="Filtrar por prioridade">
+              <option value="">Todos</option>
+              <option>Baixa</option>
+              <option>Normal</option>
+              <option>Alta</option>
+              <option>Urgente</option>
+            </select>
+          </label>
 
-          <select id="locationFilter" aria-label="Filtrar por polo">
-            <option value="">Todos os polos</option>
-          </select>
+          <label class="filter-field">
+            <span>Gestor</span>
+
+            <select id="managerFilter" aria-label="Filtrar por gestor">
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <label class="filter-field">
+            <span>Status do gestor</span>
+
+            <select id="managerStatusFilter" aria-label="Filtrar por status do gestor">
+              <option value="">Todos</option>
+              <option>Solicitado</option>
+              <option>Pendente Liberação GP</option>
+              <option>Pendente Liberação Gestor</option>
+              <option>Liberado para Execução</option>
+              <option>Aguardando Validação</option>
+              <option>Aguardando Revisão do Fornecedor</option>
+              <option>Concluído Validado</option>
+              <option>Aprovado Faturar</option>
+              <option>Concluído Faturado</option>
+              <option>Cancelada</option>
+              <option>Finalizado</option>
+            </select>
+          </label>
+
+          <label class="filter-field">
+            <span>Polo</span>
+
+            <select id="locationFilter" aria-label="Filtrar por polo">
+              <option value="">Todos</option>
+            </select>
+          </label>
 
           <button
             class="btn-secondary filter-clear"

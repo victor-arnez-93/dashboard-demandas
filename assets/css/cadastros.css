@@ -1,6 +1,6 @@
 /* ============================================================
    CADASTROS.CSS — GESTORES, RESPONSÁVEIS, DEPARTAMENTOS,
-   CATEGORIAS E LOCAIS
+   POLOS E SUAS SUBDIVISÕES
    Somente regras específicas desta página.
 ============================================================ */
 
@@ -292,6 +292,22 @@ body[data-page="cadastros"] .page-heading p {
 
 .catalog-description-field:not([hidden]) {
   display: grid;
+}
+
+.catalog-subdivision-label-field:not([hidden]),
+.catalog-subdivisions-field:not([hidden]) {
+  display: grid;
+}
+
+.catalog-subdivisions-field textarea {
+  min-height: 132px;
+}
+
+.catalog-subdivisions-field small {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .switch-row {

@@ -17,7 +17,7 @@ const NAV = [
   { page: "analises", href: "analises.html", icon: "fa-chart-column", text: "Análises" },
   { page: "relatorios", href: "relatorios.html", icon: "fa-file-lines", text: "Relatórios", regular: true },
   { label: "OPERAÇÃO", spaced: true },
-  { page: "conversores", href: "conversores.html", icon: "fa-network-wired", text: "Conversores", count: "navConverterCount" },
+  { page: "conversores", href: "conversores.html", icon: "fa-network-wired", text: "Conversores e PoE", count: "navConverterCount" },
   { label: "SISTEMA", spaced: true },
   { page: "configuracoes", href: "configuracoes.html", icon: "fa-sliders", text: "Configurações" },
 ];

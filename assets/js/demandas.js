@@ -20,7 +20,7 @@ const customSelects = new Map();
 
 function populateFilters() {
   const manager = document.getElementById("managerFilter");
-  const category = document.getElementById("categoryFilter");
+  const location = document.getElementById("locationFilter");
 
   manager.innerHTML = `
     <option value="">Todos os gestores</option>
@@ -30,9 +30,9 @@ function populateFilters() {
     <option>Gestor não informado</option>
   `;
 
-  category.innerHTML = `
-    <option value="">Todas as categorias</option>
-    ${activeCatalog("categories")
+  location.innerHTML = `
+    <option value="">Todos os polos</option>
+    ${activeCatalog("locations")
       .map(item => `<option>${escapeHtml(item.name)}</option>`)
       .join("")}
   `;
@@ -223,7 +223,8 @@ function initializeCustomSelects() {
     "statusFilter",
     "priorityFilter",
     "managerFilter",
-    "categoryFilter",
+    "managerStatusFilter",
+    "locationFilter",
   ].forEach(id => enhanceSelect(document.getElementById(id)));
 
   document.addEventListener("click", event => {
@@ -244,12 +245,13 @@ function filtered() {
   const status = document.getElementById("statusFilter").value;
   const priority = document.getElementById("priorityFilter").value;
   const manager = document.getElementById("managerFilter").value;
-  const category = document.getElementById("categoryFilter").value;
+  const managerStatus = document.getElementById("managerStatusFilter").value;
+  const location = document.getElementById("locationFilter").value;
 
   return state.demands.filter(item => {
     const managerName = item.manager?.trim() || "Gestor não informado";
 
-    const text = `${demandCode(item)} ${item.title} ${item.description} ${managerName} ${item.responsible} ${item.requester || ""} ${item.category}`
+    const text = `${demandCode(item)} ${item.lpu_number || ""} ${item.title} ${item.description} ${item.location_name || ""} ${item.location_subdivision_name || ""} ${managerName} ${item.responsible} ${item.requester || ""} ${item.manager_status || ""}`
       .toLocaleLowerCase("pt-BR");
 
     return (
@@ -257,7 +259,8 @@ function filtered() {
       (!status || effectiveStatus(item) === status) &&
       (!priority || item.priority === priority) &&
       (!manager || managerName === manager) &&
-      (!category || item.category === category)
+      (!managerStatus || item.manager_status === managerStatus) &&
+      (!location || item.location_name === location)
     );
   });
 }
@@ -270,7 +273,7 @@ function demandSummary(item) {
       </strong>
 
       <small>
-        Entrada em ${formatDate(item.start_date)}
+        ${escapeHtml(item.description || "Sem descrição")}
       </small>
     </div>
   `;
@@ -282,7 +285,9 @@ function row(item) {
 
   return `
     <tr>
-      <td>${demandCode(item)}</td>
+      <td>${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}</td>
+
+      <td>${escapeHtml(item.lpu_number || "—")}</td>
 
       <td>${demandSummary(item)}</td>
 
@@ -291,7 +296,6 @@ function row(item) {
       </td>
 
       <td>${escapeHtml(item.responsible)}</td>
-      <td>${escapeHtml(item.category)}</td>
 
       <td>
         <span class="priority-pill ${priorityClass(item.priority)}">
@@ -299,13 +303,19 @@ function row(item) {
         </span>
       </td>
 
-      <td>${formatDate(item.due_date)}</td>
-
       <td>
         <span class="status-pill ${statusClass(status)}">
           ${escapeHtml(status)}
         </span>
       </td>
+
+      <td>
+        <span class="status-pill ${statusClass(item.manager_status)}">
+          ${escapeHtml(item.manager_status || "—")}
+        </span>
+      </td>
+
+      <td>${formatDate(item.due_date)}</td>
 
       <td>
         <div class="action-buttons">
@@ -354,7 +364,7 @@ function render() {
     ? items.map(row).join("")
     : `
       <tr>
-        <td colspan="9" class="empty-table">
+        <td colspan="10" class="empty-table">
           Nenhuma demanda corresponde aos filtros.
         </td>
       </tr>
@@ -408,7 +418,8 @@ function clearFilters() {
     "statusFilter",
     "priorityFilter",
     "managerFilter",
-    "categoryFilter",
+    "managerStatusFilter",
+    "locationFilter",
   ].forEach(id => {
     const select = document.getElementById(id);
     select.value = "";
@@ -429,7 +440,8 @@ bootPage(() => {
     "statusFilter",
     "priorityFilter",
     "managerFilter",
-    "categoryFilter",
+    "managerStatusFilter",
+    "locationFilter",
   ].forEach(id => {
     document.getElementById(id).addEventListener("input", render);
   });

@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/relatorios.css?v=20260802-3">
+  <link rel="stylesheet" href="assets/css/relatorios.css?v=20260806-1">
   
 </head>
 <body data-page="relatorios" data-page-label="Relatórios">
@@ -45,9 +45,10 @@
               <label class="field"><span>Status</span><select id="reportStatus"><option value="">Todos</option><option>Pendente</option><option>Em andamento</option><option>Aguardando retorno</option><option>Concluída</option><option>Atrasada</option><option>Cancelada</option></select></label>
               <label class="field"><span>Prioridade</span><select id="reportPriority"><option value="">Todas</option><option>Baixa</option><option>Normal</option><option>Alta</option><option>Urgente</option></select></label>
               <label class="field"><span>Gestor</span><select id="reportManager"><option value="">Todos</option></select></label>
-              <label class="field"><span>Categoria</span><select id="reportCategory"><option value="">Todas</option></select></label>
+              <label class="field"><span>Status do gestor</span><select id="reportManagerStatus"><option value="">Todos</option><option>Solicitado</option><option>Pendente Liberação GP</option><option>Pendente Liberação Gestor</option><option>Liberado para Execução</option><option>Aguardando Validação</option><option>Aguardando Revisão do Fornecedor</option><option>Concluído Validado</option><option>Aprovado Faturar</option><option>Concluído Faturado</option><option>Cancelada</option><option>Finalizado</option></select></label>
+              <label class="field"><span>Polo</span><select id="reportLocation"><option value="">Todos</option></select></label>
               <label class="field"><span>Responsável</span><select id="reportResponsible"><option value="">Todos</option></select></label>
-              <label class="field"><span>Busca geral na demanda</span><input id="reportDemandSearch" type="search" placeholder="Chamado, título, descrição ou solicitante"></label>
+              <label class="field"><span>Busca geral na demanda</span><input id="reportDemandSearch" type="search" placeholder="LPU, projeto, polo, descrição ou solicitante"></label>
             </div>
           </div>
           <div class="report-filter-feedback" id="demandFilterFeedback" aria-live="polite">Exibindo as demandas dos últimos 30 dias.</div>
@@ -58,19 +59,19 @@
 
         <section class="table-shell report-section is-collapsed" id="demandReportSection">
           <div class="panel-head"><div><small>DETALHAMENTO</small><h2>Demandas do relatório</h2></div><div class="report-section-actions"><strong id="reportDemandCount">0 registros</strong><button class="report-table-toggle" id="toggleDemandTable" type="button" aria-expanded="false" aria-controls="demandTableContent" aria-label="Mostrar tabela de demandas" title="Mostrar tabela"><i class="fa-solid fa-chevron-down"></i><span class="report-toggle-label">Mostrar tabela</span></button></div></div>
-          <div class="report-collapsible" id="demandTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-demands-table"><thead><tr><th>Código</th><th>Demanda</th><th>Gestor</th><th>Responsável</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Entrada</th><th>Prazo</th><th>Est.</th><th>Real.</th></tr></thead><tbody id="reportBody"><tr><td colspan="11" class="empty-table">Carregando relatório...</td></tr></tbody></table></div></div></div>
+          <div class="report-collapsible" id="demandTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-demands-table"><thead><tr><th>Polo</th><th>Número LPU</th><th>Projeto</th><th>Gestor</th><th>Responsável</th><th>Prioridade</th><th>Status</th><th>Status gestor</th><th>Entrada</th><th>Prazo</th><th>Est.</th><th>Real.</th></tr></thead><tbody id="reportBody"><tr><td colspan="12" class="empty-table">Carregando relatório...</td></tr></tbody></table></div></div></div>
         </section>
       </section>
 
       <section class="report-module report-module-converters" aria-labelledby="converterModuleTitle">
         <div class="report-module-heading">
           <div class="report-module-icon"><i class="fa-solid fa-network-wired"></i></div>
-          <div><span>CONVERSORES</span><h2 id="converterModuleTitle">Relatório de sustentação</h2><p>Analise os atendimentos, polos e substituições em um recorte independente.</p></div>
+          <div><span>CONVERSORES E FONTES POE</span><h2 id="converterModuleTitle">Relatório de sustentação</h2><p>Analise os atendimentos, polos e equipamentos em um recorte independente.</p></div>
         </div>
 
         <div class="panel report-filter-panel">
           <div class="report-filter-heading">
-            <div><span class="report-filter-eyebrow"><i class="fa-solid fa-sliders"></i> FILTROS DE CONVERSORES</span><h3>Defina o recorte de sustentação</h3></div>
+            <div><span class="report-filter-eyebrow"><i class="fa-solid fa-sliders"></i> FILTROS DE EQUIPAMENTOS</span><h3>Defina o recorte de sustentação</h3></div>
             <button class="report-clear-button" id="clearConverterFilters" type="button"><i class="fa-solid fa-rotate-left"></i> Limpar</button>
           </div>
           <div class="report-filter-content">
@@ -84,19 +85,21 @@
               <label class="field"><span>Polo</span><select id="reportConverterLocation"><option value="">Todos</option></select></label>
               <label class="field"><span>Status</span><select id="reportConverterStatus"><option value="">Todos</option></select></label>
               <label class="field"><span>Tipo de atendimento</span><select id="reportConverterService"><option value="">Todos</option></select></label>
+              <label class="field"><span>Tipo de equipamento</span><select id="reportConverterEquipment"><option value="">Todos</option><option>Conversor</option><option>Fonte PoE</option></select></label>
+              <label class="field"><span>Gestor</span><select id="reportConverterManager"><option value="">Todos</option></select></label>
               <label class="field"><span>Responsável</span><select id="reportConverterResponsible"><option value="">Todos</option></select></label>
-              <label class="field"><span>Busca no atendimento</span><input id="reportConverterSearch" type="search" placeholder="Chamado, descrição, resolução ou conversão"></label>
+              <label class="field"><span>Busca no atendimento</span><input id="reportConverterSearch" type="search" placeholder="LPU, projeto, polo, descrição ou resolução"></label>
             </div>
           </div>
           <div class="report-filter-feedback" id="converterFilterFeedback" aria-live="polite">Exibindo os atendimentos dos últimos 30 dias.</div>
         </div>
 
-        <div class="report-summary-heading"><div><span>VISÃO GERAL</span><h3>Resumo de sustentação</h3></div><small>Os indicadores acompanham os filtros de conversores.</small></div>
-        <div class="report-cards report-converter-cards"><article class="report-card report-card-converter"><small>Atendimentos</small><strong id="reportConverterRecords">0</strong><p id="reportConverterPeriodLabel">Últimos 30 dias</p></article><article class="report-card report-card-converter"><small>Conversores trocados</small><strong id="reportConverterQuantity">0</strong><p>quantidade substituída</p></article><article class="report-card report-card-converter"><small>Polos atendidos</small><strong id="reportConverterLocations">0</strong><p>locais com ocorrência</p></article><article class="report-card report-card-converter report-card-location"><small>Polo mais recorrente</small><strong id="reportConverterTopLocation">—</strong><p id="reportConverterTopLocationCount">sem ocorrências</p></article></div>
+        <div class="report-summary-heading"><div><span>VISÃO GERAL</span><h3>Resumo de sustentação</h3></div><small>Os indicadores acompanham os filtros de equipamentos.</small></div>
+        <div class="report-cards report-converter-cards"><article class="report-card report-card-converter"><small>Atendimentos</small><strong id="reportConverterRecords">0</strong><p id="reportConverterPeriodLabel">Últimos 30 dias</p></article><article class="report-card report-card-converter"><small>Equipamentos registrados</small><strong id="reportConverterQuantity">0</strong><p>quantidade informada</p></article><article class="report-card report-card-converter"><small>Polos atendidos</small><strong id="reportConverterLocations">0</strong><p>locais com ocorrência</p></article><article class="report-card report-card-converter report-card-location"><small>Polo mais recorrente</small><strong id="reportConverterTopLocation">—</strong><p id="reportConverterTopLocationCount">sem ocorrências</p></article></div>
 
         <section class="table-shell report-section is-collapsed" id="converterReportSection">
-          <div class="panel-head"><div><small>DETALHAMENTO</small><h2>Conversores de mídia no período</h2></div><div class="report-section-actions"><strong id="reportConverterSummary">0 trocas</strong><button class="report-table-toggle" id="toggleConverterTable" type="button" aria-expanded="false" aria-controls="converterTableContent" aria-label="Mostrar tabela de conversores" title="Mostrar tabela"><i class="fa-solid fa-chevron-down"></i><span class="report-toggle-label">Mostrar tabela</span></button></div></div>
-          <div class="report-collapsible" id="converterTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-converters-table"><thead><tr><th>Nº do chamado</th><th>Data</th><th>Polo</th><th>Ponto</th><th>Atendimento</th><th>Conversão</th><th>Qtd.</th><th>Descrição</th><th>Resolução</th><th>Status</th></tr></thead><tbody id="reportConvertersBody"><tr><td colspan="10" class="empty-table">Carregando conversores...</td></tr></tbody></table></div></div></div>
+          <div class="panel-head"><div><small>DETALHAMENTO</small><h2>Conversores e fontes PoE no período</h2></div><div class="report-section-actions"><strong id="reportConverterSummary">0 equipamentos</strong><button class="report-table-toggle" id="toggleConverterTable" type="button" aria-expanded="false" aria-controls="converterTableContent" aria-label="Mostrar tabela de equipamentos" title="Mostrar tabela"><i class="fa-solid fa-chevron-down"></i><span class="report-toggle-label">Mostrar tabela</span></button></div></div>
+          <div class="report-collapsible" id="converterTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-converters-table"><thead><tr><th>Polo</th><th>Número LPU</th><th>Projeto</th><th>Gestor</th><th>Equipamento</th><th>Atendimento</th><th>Qtd.</th><th>Descrição</th><th>Resolução</th><th>Status</th></tr></thead><tbody id="reportConvertersBody"><tr><td colspan="10" class="empty-table">Carregando equipamentos...</td></tr></tbody></table></div></div></div>
         </section>
       </section>
     </main>
@@ -106,6 +109,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="assets/js/env.js"></script>
-  <script type="module" src="assets/js/relatorios.js?v=20260802-3"></script>
+  <script type="module" src="assets/js/relatorios.js?v=20260806-1"></script>
 </body>
 </html>

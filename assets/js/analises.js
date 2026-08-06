@@ -401,7 +401,10 @@ function render() {
 
   const colors = chartColors();
   const managers = buildManagerSeries(demands);
-  const categories = buildCountSeries(demands, item => item.category);
+  const demandLocations = buildCountSeries(
+    demands,
+    item => item.location_name,
+  );
 
   setText(
     "analysisPeriodStatus",
@@ -414,8 +417,8 @@ function render() {
   );
 
   setText(
-    "categoryChartSummary",
-    plural(categories.labels.length, "categoria", "categorias")
+    "demandLocationChartSummary",
+    plural(demandLocations.labels.length, "polo", "polos")
   );
 
   setText(
@@ -457,14 +460,14 @@ function render() {
     plugins: [emptyStatePlugin, valueLabelsPlugin],
   });
 
-  createChart("categoryChart", {
+  createChart("demandLocationChart", {
     type: "bar",
     data: {
-      labels: categories.labels,
+      labels: demandLocations.labels,
       datasets: [
         {
           label: "Demandas",
-          data: categories.values,
+          data: demandLocations.values,
           backgroundColor: context =>
             horizontalGradient(
               context,
@@ -600,7 +603,7 @@ function render() {
 
   setText(
     "converterTrendSummary",
-    plural(converterTotal, "troca", "trocas")
+    plural(converterTotal, "equipamento", "equipamentos")
   );
 
   createChart("converterTrendChart", {
@@ -609,7 +612,7 @@ function render() {
       labels: converterTrend.labels,
       datasets: [
         {
-          label: "Conversores trocados",
+          label: "Equipamentos registrados",
           data: converterTrend.values,
           borderColor: colors.accent,
           backgroundColor: context => {
@@ -665,7 +668,7 @@ function render() {
 
   setText(
     "converterLocationSummary",
-    plural(locations.labels.length, "local", "locais")
+    plural(locations.labels.length, "polo", "polos")
   );
 
   createChart("converterLocationChart", {

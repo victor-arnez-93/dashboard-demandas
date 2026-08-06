@@ -48,7 +48,7 @@ function converterPeriodLabel() {
 
 function populateFilters() {
   document.getElementById("reportManager").innerHTML = `<option value="">Todos</option>${activeCatalog("managers").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}<option>Gestor não informado</option>`;
-  document.getElementById("reportCategory").innerHTML = `<option value="">Todas</option>${activeCatalog("categories").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
+  document.getElementById("reportLocation").innerHTML = `<option value="">Todos</option>${activeCatalog("locations").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
   document.getElementById("reportResponsible").innerHTML = `<option value="">Todos</option>${activeCatalog("responsibles").map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}<option>Responsável não informado</option>`;
 
   const uniqueValues = field => [...new Set(state.converters
@@ -63,7 +63,8 @@ function populateFilters() {
   fillConverterSelect("reportConverterLocation", uniqueValues("location_name"));
   fillConverterSelect("reportConverterStatus", uniqueValues("status"));
   fillConverterSelect("reportConverterService", uniqueValues("service_type"));
-    document.getElementById("reportConverterResponsible").innerHTML =
+  fillConverterSelect("reportConverterManager", uniqueValues("manager_name"));
+  document.getElementById("reportConverterResponsible").innerHTML =
     `<option value="">Todos</option>` +
     activeCatalog("responsibles")
       .map(item => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`)
@@ -82,7 +83,8 @@ function getDemands() {
   const status = document.getElementById("reportStatus").value;
   const priority = document.getElementById("reportPriority").value;
   const manager = document.getElementById("reportManager").value;
-  const category = document.getElementById("reportCategory").value;
+  const managerStatus = document.getElementById("reportManagerStatus").value;
+  const location = document.getElementById("reportLocation").value;
   const responsible = document.getElementById("reportResponsible").value;
   const search = normalizedText(document.getElementById("reportDemandSearch").value.trim());
   return state.demands.filter(item => {
@@ -90,14 +92,16 @@ function getDemands() {
     const responsibleName = item.responsible?.trim() || "Responsável não informado";
     const searchableContent = normalizedText([
       demandCode(item),
-      item.demand_number,
+      item.lpu_number,
       item.title,
       item.description,
+      item.location_name,
+      item.location_subdivision_name,
       item.requester,
       item.manager,
       item.responsible,
       item.department,
-      item.category,
+      item.manager_status,
       item.priority,
       effectiveStatus(item),
       Array.isArray(item.tags) ? item.tags.join(" ") : item.tags,
@@ -108,7 +112,8 @@ function getDemands() {
       (!status || effectiveStatus(item) === status) &&
       (!priority || item.priority === priority) &&
       (!manager || managerName === manager) &&
-      (!category || item.category === category) &&
+      (!managerStatus || item.manager_status === managerStatus) &&
+      (!location || item.location_name === location) &&
       (!responsible || responsibleName === responsible) &&
       (!search || searchableContent.includes(search));
   });
@@ -119,16 +124,20 @@ function getConverters() {
   const location = document.getElementById("reportConverterLocation").value;
   const status = document.getElementById("reportConverterStatus").value;
   const service = document.getElementById("reportConverterService").value;
+  const equipment = document.getElementById("reportConverterEquipment").value;
+  const manager = document.getElementById("reportConverterManager").value;
   const responsible = document.getElementById("reportConverterResponsible").value;
   const search = normalizedText(document.getElementById("reportConverterSearch").value.trim());
 
   return state.converters.filter(item => {
     const searchableContent = normalizedText([
-      item.ticket_number,
+      item.lpu_number,
+      item.project,
       item.location_name,
-      item.point_reference,
+      item.location_subdivision_name,
+      item.manager_name,
+      item.equipment_type,
       item.service_type,
-      item.conversion_direction,
       item.issue_reason,
       item.notes,
       item.status,
@@ -139,6 +148,8 @@ function getConverters() {
       (!location || item.location_name === location) &&
       (!status || item.status === status) &&
       (!service || item.service_type === service) &&
+      (!equipment || item.equipment_type === equipment) &&
+      (!manager || item.manager_name === manager) &&
       (!responsible || item.responsible_name === responsible) &&
       (!search || searchableContent.includes(search));
   });
@@ -178,7 +189,8 @@ function updateFilterFeedback() {
     "reportStatus",
     "reportPriority",
     "reportManager",
-    "reportCategory",
+    "reportManagerStatus",
+    "reportLocation",
     "reportResponsible",
     "reportDemandSearch",
   ]);
@@ -186,6 +198,8 @@ function updateFilterFeedback() {
     "reportConverterLocation",
     "reportConverterStatus",
     "reportConverterService",
+    "reportConverterEquipment",
+    "reportConverterManager",
     "reportConverterResponsible",
     "reportConverterSearch",
   ]);
@@ -259,8 +273,8 @@ function render() {
   document.getElementById("reportDemandCount").textContent = `${reportDemands.length} ${reportDemands.length === 1 ? "registro" : "registros"}`;
 
   document.getElementById("reportBody").innerHTML = reportDemands.length ? reportDemands.map(item => `<tr>
-    <td>${demandCode(item)}</td><td>${escapeHtml(item.title)}</td><td>${escapeHtml(item.manager?.trim() || "Gestor não informado")}</td><td>${escapeHtml(item.responsible)}</td><td>${escapeHtml(item.category)}</td><td>${escapeHtml(item.priority)}</td><td>${escapeHtml(effectiveStatus(item))}</td><td>${formatDate(item.start_date, { year: true })}</td><td>${formatDate(item.due_date, { year: true })}</td><td>${formatHours(item.estimated_hours)}</td><td>${formatHours(item.actual_hours)}</td>
-  </tr>`).join("") : `<tr><td colspan="11" class="empty-table">Nenhuma demanda encontrada para os filtros.</td></tr>`;
+    <td>${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}</td><td>${escapeHtml(item.lpu_number || "—")}</td><td><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.description || "")}</small></td><td>${escapeHtml(item.manager?.trim() || "Gestor não informado")}</td><td>${escapeHtml(item.responsible)}</td><td>${escapeHtml(item.priority)}</td><td>${escapeHtml(effectiveStatus(item))}</td><td>${escapeHtml(item.manager_status || "—")}</td><td>${formatDate(item.start_date, { year: true })}</td><td>${formatDate(item.due_date, { year: true })}</td><td>${formatHours(item.estimated_hours)}</td><td>${formatHours(item.actual_hours)}</td>
+  </tr>`).join("") : `<tr><td colspan="12" class="empty-table">Nenhuma demanda encontrada para os filtros.</td></tr>`;
 
   const converters = converterSummary(reportConverters);
   document.getElementById("reportConverterRecords").textContent = reportConverters.length;
@@ -270,10 +284,10 @@ function render() {
   document.getElementById("reportConverterTopLocation").textContent = converters.topLocation;
   document.getElementById("reportConverterTopLocation").title = converters.topLocation;
   document.getElementById("reportConverterTopLocationCount").textContent = converters.topLocationCount;
-  document.getElementById("reportConverterSummary").textContent = `${converters.quantity} ${converters.quantity === 1 ? "troca" : "trocas"}`;
+  document.getElementById("reportConverterSummary").textContent = `${converters.quantity} ${converters.quantity === 1 ? "equipamento" : "equipamentos"}`;
   document.getElementById("reportConvertersBody").innerHTML = reportConverters.length ? reportConverters.map(item => `<tr>
-    <td>${escapeHtml(item.ticket_number || "Não informado")}</td><td>${formatDate(item.service_date, { year: true })}</td><td>${escapeHtml(item.location_name || "—")}</td><td>${escapeHtml(item.point_reference || "—")}</td><td>${escapeHtml(item.service_type || "—")}</td><td>${escapeHtml(item.conversion_direction || "—")}</td><td>${Number(item.quantity_replaced || 0)}</td><td>${escapeHtml(item.issue_reason || "—")}</td><td>${escapeHtml(item.notes || "—")}</td><td>${escapeHtml(item.status || "—")}</td>
-  </tr>`).join("") : `<tr><td colspan="10" class="empty-table">Nenhum atendimento de conversor encontrado para os filtros.</td></tr>`;
+    <td>${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}</td><td>${escapeHtml(item.lpu_number || "—")}</td><td>${escapeHtml(item.project || "—")}</td><td>${escapeHtml(item.manager_name || "—")}</td><td>${escapeHtml(item.equipment_type || "—")}</td><td>${escapeHtml(item.service_type || "—")}</td><td>${Number(item.quantity_replaced || 0)}</td><td>${escapeHtml(item.issue_reason || "—")}</td><td>${escapeHtml(item.notes || "—")}</td><td>${escapeHtml(item.status || "—")}</td>
+  </tr>`).join("") : `<tr><td colspan="10" class="empty-table">Nenhum atendimento de equipamento encontrado para os filtros.</td></tr>`;
 
   updateFilterFeedback();
 }
@@ -304,7 +318,8 @@ function clearDemandFilters() {
     "reportStatus",
     "reportPriority",
     "reportManager",
-    "reportCategory",
+    "reportManagerStatus",
+    "reportLocation",
     "reportResponsible",
     "reportDemandSearch",
   ].forEach(id => {
@@ -320,6 +335,8 @@ function clearConverterFilters() {
     "reportConverterLocation",
     "reportConverterStatus",
     "reportConverterService",
+    "reportConverterEquipment",
+    "reportConverterManager",
     "reportConverterResponsible",
     "reportConverterSearch",
   ].forEach(id => {
@@ -327,7 +344,7 @@ function clearConverterFilters() {
   });
 
   setPeriod("converters", "30");
-  showToast("Filtros de conversores restaurados para os últimos 30 dias.", "success");
+  showToast("Filtros de equipamentos restaurados para os últimos 30 dias.", "success");
 }
 
 function setupTableToggle(sectionId, buttonId) {
@@ -398,9 +415,9 @@ function exportExcel() {
   if (reportConverters.length) {
     summaryRows.push(
       [],
-      ["Sustentação de conversores", "Valor"],
+      ["Conversores e fontes PoE", "Valor"],
       ["Atendimentos", reportConverters.length],
-      ["Conversores trocados", converters.quantity],
+      ["Equipamentos registrados", converters.quantity],
       ["Polos atendidos", converters.locationCount],
       ["Polo mais recorrente", converters.topLocation],
     );
@@ -421,16 +438,18 @@ function exportExcel() {
 
   if (reportDemands.length) {
     const demandRows = reportDemands.map(item => ({
-      Código: demandCode(item),
-      Demanda: item.title,
+      Polo: item.location_name || "",
+      Subdivisão: item.location_subdivision_name || "",
+      "Número LPU": item.lpu_number || "",
+      Projeto: item.title,
       Descrição: item.description,
       Solicitante: item.requester || "",
       Gestor: item.manager?.trim() || "Gestor não informado",
       Responsável: item.responsible || "",
       Departamento: item.department || "",
-      Categoria: item.category || "",
       Prioridade: item.priority || "",
-      Status: effectiveStatus(item),
+      "Status operacional": effectiveStatus(item),
+      "Status do gestor": item.manager_status || "",
       Entrada: new Date(`${item.start_date}T12:00:00`),
       Prazo: new Date(`${item.due_date}T12:00:00`),
       "Horas estimadas": Number(item.estimated_hours || 0),
@@ -440,14 +459,14 @@ function exportExcel() {
     }));
 
     const demandSheet = XLSX.utils.json_to_sheet(demandRows, { cellDates: true });
-    demandSheet["!cols"] = [12, 34, 48, 22, 22, 22, 20, 20, 12, 20, 14, 14, 16, 16, 24, 42]
+    demandSheet["!cols"] = [24, 22, 14, 34, 48, 22, 22, 22, 20, 12, 20, 28, 14, 14, 16, 16, 24, 42]
       .map(wch => ({ wch }));
-    demandSheet["!autofilter"] = { ref: demandSheet["!ref"] || "A1:P1" };
+    demandSheet["!autofilter"] = { ref: demandSheet["!ref"] || "A1:R1" };
     demandSheet["!freeze"] = { xSplit: 0, ySplit: 1 };
 
     for (let row = 2; row <= demandRows.length + 1; row += 1) {
-      if (demandSheet[`K${row}`]) demandSheet[`K${row}`].z = "dd/mm/yyyy";
-      if (demandSheet[`L${row}`]) demandSheet[`L${row}`].z = "dd/mm/yyyy";
+      if (demandSheet[`M${row}`]) demandSheet[`M${row}`].z = "dd/mm/yyyy";
+      if (demandSheet[`N${row}`]) demandSheet[`N${row}`].z = "dd/mm/yyyy";
     }
 
     XLSX.utils.book_append_sheet(workbook, demandSheet, "Demandas");
@@ -476,30 +495,32 @@ function exportExcel() {
 
   if (reportConverters.length) {
     const converterRows = reportConverters.map(item => ({
-      "Nº do chamado": item.ticket_number || "Não informado",
-      Data: new Date(`${item.service_date}T12:00:00`),
-      Polo: item.location_name,
-      Ponto: item.point_reference || "",
-      Atendimento: item.service_type,
-      Conversão: item.conversion_direction || "",
-      Quantidade: Number(item.quantity_replaced || 0),
+      Polo: item.location_name || "",
+      Subdivisão: item.location_subdivision_name || "",
+      "Número LPU": item.lpu_number || "",
+      Projeto: item.project || "",
       Descrição: item.issue_reason || "",
+      Gestor: item.manager_name || "",
+      "Tipo de equipamento": item.equipment_type || "",
+      Atendimento: item.service_type,
+      Quantidade: Number(item.quantity_replaced || 0),
+      Data: new Date(`${item.service_date}T12:00:00`),
       Status: item.status,
       Responsável: item.responsible_name || "",
       Resolução: item.notes || "",
     }));
 
     const converterSheet = XLSX.utils.json_to_sheet(converterRows, { cellDates: true });
-    converterSheet["!cols"] = [12, 14, 28, 22, 18, 18, 12, 40, 20, 22, 42]
+    converterSheet["!cols"] = [26, 22, 14, 34, 40, 22, 20, 18, 12, 14, 20, 22, 42]
       .map(wch => ({ wch }));
-    converterSheet["!autofilter"] = { ref: converterSheet["!ref"] || "A1:K1" };
+    converterSheet["!autofilter"] = { ref: converterSheet["!ref"] || "A1:M1" };
     converterSheet["!freeze"] = { xSplit: 0, ySplit: 1 };
 
     for (let row = 2; row <= converterRows.length + 1; row += 1) {
-      if (converterSheet[`B${row}`]) converterSheet[`B${row}`].z = "dd/mm/yyyy";
+      if (converterSheet[`J${row}`]) converterSheet[`J${row}`].z = "dd/mm/yyyy";
     }
 
-    XLSX.utils.book_append_sheet(workbook, converterSheet, "Conversores");
+    XLSX.utils.book_append_sheet(workbook, converterSheet, "Conversores e PoE");
   }
 
   XLSX.writeFile(workbook, `fluux_relatorio_demandas_${fileDate()}.xlsx`);
@@ -564,7 +585,8 @@ function pdfFilterSummary() {
   const status = document.getElementById("reportStatus").value;
   const priority = document.getElementById("reportPriority").value;
   const manager = document.getElementById("reportManager").value;
-  const category = document.getElementById("reportCategory").value;
+  const managerStatus = document.getElementById("reportManagerStatus").value;
+  const location = document.getElementById("reportLocation").value;
   const responsible = document
     .getElementById("reportResponsible")
     .value
@@ -573,24 +595,29 @@ function pdfFilterSummary() {
   const converterLocation = document.getElementById("reportConverterLocation").value;
   const converterStatus = document.getElementById("reportConverterStatus").value;
   const converterService = document.getElementById("reportConverterService").value;
+  const converterEquipment = document.getElementById("reportConverterEquipment").value;
+  const converterManager = document.getElementById("reportConverterManager").value;
   const converterResponsible = document.getElementById("reportConverterResponsible").value;
   const converterSearch = document.getElementById("reportConverterSearch").value.trim();
 
   if (status) demandLabels.push(`status ${status}`);
   if (priority) demandLabels.push(`prioridade ${priority}`);
   if (manager) demandLabels.push(`gestor ${manager}`);
-  if (category) demandLabels.push(`categoria ${category}`);
+  if (managerStatus) demandLabels.push(`status do gestor ${managerStatus}`);
+  if (location) demandLabels.push(`polo ${location}`);
   if (responsible) demandLabels.push(`responsável ${responsible}`);
   if (demandSearch) demandLabels.push(`busca “${demandSearch}”`);
   if (converterLocation) converterLabels.push(`polo ${converterLocation}`);
   if (converterStatus) converterLabels.push(`status ${converterStatus}`);
   if (converterService) converterLabels.push(`atendimento ${converterService}`);
+  if (converterEquipment) converterLabels.push(`equipamento ${converterEquipment}`);
+  if (converterManager) converterLabels.push(`gestor ${converterManager}`);
   if (converterResponsible) converterLabels.push(`responsável ${converterResponsible}`);
   if (converterSearch) converterLabels.push(`busca “${converterSearch}”`);
 
   return [
     `Demandas: ${demandLabels.length ? demandLabels.join(", ") : "sem filtros específicos"}`,
-    `Conversores: ${converterLabels.length ? converterLabels.join(", ") : "sem filtros específicos"}`,
+    `Conversores e fontes PoE: ${converterLabels.length ? converterLabels.join(", ") : "sem filtros específicos"}`,
   ].join(" | ");
 }
 
@@ -823,6 +850,12 @@ function pdfDemandRows(records) {
       "Gestor não informado";
 
     const managementLines = [
+      `Polo: ${pdfValue(item.location_name)}`,
+
+      item.location_subdivision_name
+        ? `Subdivisão: ${pdfValue(item.location_subdivision_name)}`
+        : null,
+
       `Gestor: ${manager}`,
       `Responsável: ${pdfValue(item.responsible)}`,
 
@@ -830,20 +863,14 @@ function pdfDemandRows(records) {
         ? `Solicitante: ${pdfValue(item.requester)}`
         : null,
 
-      [
-        item.department
-          ? `Departamento: ${pdfValue(item.department)}`
-          : null,
-
-        item.category
-          ? `Categoria: ${pdfValue(item.category)}`
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" · "),
+      item.department
+        ? `Departamento: ${pdfValue(item.department)}`
+        : null,
 
       `Prioridade: ${pdfValue(item.priority)} · ` +
-        `Status: ${effectiveStatus(item)}`,
+        `Status operacional: ${effectiveStatus(item)}`,
+
+      `Status do gestor: ${pdfValue(item.manager_status)}`,
     ].filter(Boolean);
 
     const effortLines = [
@@ -864,7 +891,10 @@ function pdfDemandRows(records) {
      */
     rows.push([
       {
-        content: demandCode(item),
+        content: pdfValue(
+          item.lpu_number,
+          "Não informada",
+        ),
         rowSpan: 2,
 
         styles: {
@@ -943,26 +973,18 @@ function pdfConverterRows(records) {
       ? [255, 255, 255]
       : [246, 246, 246];
 
-    const conversion = pdfValue(
-      item.conversion_direction,
-    ).replace(
-      /\s*(?:→|->)\s*/g,
-      " para ",
-    );
-
-    const ticket = [
-      pdfValue(
-        item.ticket_number,
-        "Não informado",
-      ),
+    const identification = [
+      `LPU: ${pdfValue(item.lpu_number)}`,
+      `Projeto: ${pdfValue(item.project)}`,
       `Data: ${pdfStoredDate(item.service_date)}`,
     ].join("\n");
 
     const location = [
-      pdfValue(item.location_name),
-      String(item.point_reference || "").trim()
-        ? `Ponto: ${pdfValue(item.point_reference)}`
+      `Polo: ${pdfValue(item.location_name)}`,
+      String(item.location_subdivision_name || "").trim()
+        ? `Subdivisão: ${pdfValue(item.location_subdivision_name)}`
         : null,
+      `Gestor: ${pdfValue(item.manager_name)}`,
     ].filter(Boolean).join("\n");
 
     const description = [
@@ -971,8 +993,8 @@ function pdfConverterRows(records) {
         "Sem descrição informada.",
       ),
       [
+        `Equipamento: ${pdfValue(item.equipment_type)}`,
         `Atendimento: ${pdfValue(item.service_type)}`,
-        `Conversão: ${conversion}`,
         `Quantidade: ${Number(item.quantity_replaced || 0)}`,
       ].join(" · "),
     ].join("\n\n");
@@ -999,7 +1021,7 @@ function pdfConverterRows(records) {
 
     return [
       {
-        content: ticket,
+        content: identification,
         styles: {
           ...baseStyles,
           fontStyle: "bold",
@@ -1077,7 +1099,7 @@ async function exportPdf() {
       periodLabel(),
 
     subject:
-      `Demandas e conversores — ` +
+      `Demandas, conversores e fontes PoE — ` +
       pdfIntervalLabel(),
 
     author:
@@ -1225,7 +1247,7 @@ async function exportPdf() {
     : (
       "Não houve demandas no período selecionado. " +
       "O documento apresenta somente os registros " +
-      "de sustentação de conversores encontrados " +
+      "de conversores e fontes PoE encontrados " +
       "no período."
     );
 
@@ -1283,9 +1305,9 @@ async function exportPdf() {
       startY: y,
 
       head: [[
-        "Código",
-        "Demanda",
-        "Gestão e classificação",
+        "Número LPU",
+        "Projeto",
+        "Polo e gestão",
         "Datas e esforço",
       ]],
 
@@ -1431,7 +1453,7 @@ async function exportPdf() {
 
     y = pdfDrawSectionTitle(
       doc,
-      "Sustentação de conversores",
+      "Conversores e fontes PoE",
       y,
     );
 
@@ -1445,11 +1467,11 @@ async function exportPdf() {
           ? ""
           : "s"
       } · ` +
-      `${converters.quantity} conversor${
+      `${converters.quantity} equipamento${
         converters.quantity === 1
           ? ""
-          : "es"
-      } trocado${
+          : "s"
+      } registrado${
         converters.quantity === 1
           ? ""
           : "s"
@@ -1477,10 +1499,10 @@ async function exportPdf() {
       startY: y,
 
       head: [[
-        "Nº do chamado",
-        "Polo",
-        "Descrição",
-        "Resolução",
+        "LPU e projeto",
+        "Polo e gestor",
+        "Descrição e equipamento",
+        "Resolução e status",
       ]],
 
       body: pdfConverterRows(
@@ -1550,12 +1572,15 @@ bootPage(() => {
     "reportStatus",
     "reportPriority",
     "reportManager",
-    "reportCategory",
+    "reportManagerStatus",
+    "reportLocation",
     "reportResponsible",
     "reportDemandSearch",
     "reportConverterLocation",
     "reportConverterStatus",
     "reportConverterService",
+    "reportConverterEquipment",
+    "reportConverterManager",
     "reportConverterResponsible",
     "reportConverterSearch",
   ].forEach(id => document.getElementById(id).addEventListener("input", render));

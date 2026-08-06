@@ -24,6 +24,7 @@ export const state = {
     departments: [],
     categories: [],
     locations: [],
+    locationSubdivisions: [],
   },
 };
 
@@ -44,6 +45,7 @@ function emptyCatalogs() {
     departments: [],
     categories: [],
     locations: [],
+    locationSubdivisions: [],
   };
 }
 
@@ -125,6 +127,7 @@ export async function initializeStore(session) {
     departmentsResult,
     categoriesResult,
     locationsResult,
+    locationSubdivisionsResult,
   ] = await Promise.all([
     sb.from("companies").select("*").eq("id", companyId).maybeSingle(),
     sb.from("app_settings").select("*").eq("company_id", companyId).eq("id", 1).maybeSingle(),
@@ -135,6 +138,7 @@ export async function initializeStore(session) {
     sb.from("departments").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
     sb.from("demand_categories").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
     sb.from("service_locations").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
+    sb.from("service_location_subdivisions").select("*").eq("company_id", companyId).order("is_active", { ascending: false }).order("name"),
   ]);
 
   if (companyResult.error) throw companyResult.error;
@@ -163,6 +167,7 @@ export async function initializeStore(session) {
   state.catalogs.departments = ensureCompanyRows(departmentsResult, "departamentos");
   state.catalogs.categories = ensureCompanyRows(categoriesResult, "categorias");
   state.catalogs.locations = ensureCompanyRows(locationsResult, "locais");
+  state.catalogs.locationSubdivisions = ensureCompanyRows(locationSubdivisionsResult, "subdivisões de polos");
 
   log.success("DADOS", "Dados reais carregados.", {
     empresa: state.company.name,
@@ -174,11 +179,11 @@ export async function initializeStore(session) {
 }
 
 export function demandCode(demand) {
-  return `FLX-${String(demand.demand_number || 0).padStart(4, "0")}`;
+  return demand.lpu_number ? `LPU ${demand.lpu_number}` : "LPU não informada";
 }
 
 export function converterCode(record) {
-  return `CNV-${String(record.record_number || 0).padStart(4, "0")}`;
+  return record.lpu_number ? `LPU ${record.lpu_number}` : "LPU não informada";
 }
 
 export function effectiveStatus(demand) {
@@ -199,6 +204,7 @@ export async function saveDemand(payload, id = null) {
   const sb = getSupabase();
   const companyId = requireActiveCompanyId();
   const normalized = {
+    lpu_number: payload.lpu_number?.trim() || null,
     title: payload.title,
     description: payload.description,
     requester: payload.requester || null,
@@ -206,10 +212,13 @@ export async function saveDemand(payload, id = null) {
     responsible_id: payload.responsible_id || null,
     manager: payload.manager,
     manager_id: payload.manager_id || null,
+    manager_status: payload.manager_status || null,
+    location_id: payload.location_id || null,
+    location_name: payload.location_name || null,
+    location_subdivision_id: payload.location_subdivision_id || null,
+    location_subdivision_name: payload.location_subdivision_name || null,
     department: payload.department || null,
     department_id: payload.department_id || null,
-    category: payload.category,
-    category_id: payload.category_id || null,
     priority: payload.priority,
     status: payload.status,
     start_date: payload.start_date,
@@ -252,7 +261,10 @@ export async function saveCatalog(type, payload, id = null) {
     is_active: payload.is_active ?? true,
     updated_by: state.user.id,
   };
-  if (type === "locations") normalized.description = payload.description || null;
+  if (type === "locations") {
+    normalized.description = payload.description || null;
+    normalized.subdivision_label = payload.subdivision_label?.trim() || null;
+  }
 
   const sb = getSupabase();
   const companyId = requireActiveCompanyId();
@@ -288,6 +300,7 @@ export async function setCatalogActive(type, id, isActive) {
     ...catalogItem(type, id),
     name: catalogItem(type, id)?.name,
     description: catalogItem(type, id)?.description,
+    subdivision_label: catalogItem(type, id)?.subdivision_label,
     is_active: isActive,
   }, id);
 }
@@ -303,21 +316,80 @@ export async function findOrCreateCatalog(type, name, description = null) {
   return saveCatalog(type, { name: normalized, description, is_active: true });
 }
 
+export function locationSubdivisions(locationId, { activeOnly = true } = {}) {
+  return (state.catalogs.locationSubdivisions || [])
+    .filter(item => item.location_id === locationId && (!activeOnly || item.is_active))
+    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+}
+
+async function saveLocationSubdivision(payload, id = null) {
+  const sb = getSupabase();
+  const companyId = requireActiveCompanyId();
+  const normalized = {
+    location_id: payload.location_id,
+    name: payload.name.trim(),
+    is_active: payload.is_active ?? true,
+    updated_by: state.user.id,
+  };
+  const result = id
+    ? await sb.from("service_location_subdivisions").update(normalized).eq("company_id", companyId).eq("id", id).select().single()
+    : await sb.from("service_location_subdivisions").insert({ ...normalized, company_id: companyId, created_by: state.user.id }).select().single();
+  const saved = ensureCompanyRecord(result, "a subdivisão do polo");
+  const items = state.catalogs.locationSubdivisions;
+  const index = items.findIndex(item => item.id === saved.id);
+  if (index >= 0) items[index] = saved;
+  else items.push(saved);
+  return saved;
+}
+
+export async function syncLocationSubdivisions(locationId, names = []) {
+  const desiredNames = [...new Set(names.map(name => String(name || "").trim()).filter(Boolean))];
+  const existing = locationSubdivisions(locationId, { activeOnly: false });
+
+  for (const item of existing) {
+    const desired = desiredNames.find(name =>
+      name.localeCompare(item.name, "pt-BR", { sensitivity: "accent" }) === 0
+    );
+    await saveLocationSubdivision({
+      location_id: locationId,
+      name: desired || item.name,
+      is_active: Boolean(desired),
+    }, item.id);
+  }
+
+  for (const name of desiredNames) {
+    const exists = existing.some(item =>
+      item.name.localeCompare(name, "pt-BR", { sensitivity: "accent" }) === 0
+    );
+    if (!exists) {
+      await saveLocationSubdivision({ location_id: locationId, name, is_active: true });
+    }
+  }
+
+  state.catalogs.locationSubdivisions.sort((a, b) =>
+    Number(b.is_active) - Number(a.is_active) || a.name.localeCompare(b.name, "pt-BR")
+  );
+}
+
 export async function saveConverter(payload, id = null) {
   const companyId = requireActiveCompanyId();
   const normalized = {
-    ticket_number: payload.ticket_number?.trim() || null,
+    lpu_number: payload.lpu_number?.trim() || null,
+    project: payload.project?.trim() || null,
     service_date: payload.service_date,
     location_id: payload.location_id || null,
     location_name: payload.location_name,
-    point_reference: payload.point_reference || null,
+    location_subdivision_id: payload.location_subdivision_id || null,
+    location_subdivision_name: payload.location_subdivision_name || null,
     service_type: payload.service_type,
-    conversion_direction: payload.conversion_direction || null,
+    equipment_type: payload.equipment_type,
     quantity_replaced: Number(payload.quantity_replaced || 1),
     issue_reason: payload.issue_reason || null,
     status: payload.status,
     responsible_id: payload.responsible_id || null,
     responsible_name: payload.responsible_name || null,
+    manager_id: payload.manager_id || null,
+    manager_name: payload.manager_name || null,
     notes: payload.notes || null,
     updated_by: state.user.id,
   };

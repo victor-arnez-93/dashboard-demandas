@@ -4,6 +4,8 @@ import {
   saveCatalog,
   setCatalogActive,
   removeCatalog,
+  locationSubdivisions,
+  syncLocationSubdivisions,
 } from "./store.js";
 import {
   escapeHtml,
@@ -30,14 +32,9 @@ const META = {
     plural: "Departamentos",
     icon: "fa-building",
   },
-  categories: {
-    label: "Categoria",
-    plural: "Categorias",
-    icon: "fa-tags",
-  },
   locations: {
-    label: "Local",
-    plural: "Locais",
+    label: "Polo",
+    plural: "Polos",
     icon: "fa-location-dot",
   },
 };
@@ -99,7 +96,16 @@ function render() {
 
         <td>
           <span class="catalog-description">
-            ${escapeHtml(item.description || "—")}
+            ${escapeHtml(
+              activeType === "locations"
+                ? [
+                    item.description,
+                    item.subdivision_label
+                      ? `${item.subdivision_label}: ${locationSubdivisions(item.id).map(entry => entry.name).join(", ") || "nenhuma cadastrada"}`
+                      : "Sem subdivisão",
+                  ].filter(Boolean).join(" · ")
+                : item.description || "—"
+            )}
           </span>
         </td>
 
@@ -178,6 +184,16 @@ function openCatalog(item = null) {
 
   document.getElementById("catalogDescriptionField").hidden =
     activeType !== "locations";
+
+  document.getElementById("catalogSubdivisionLabelField").hidden =
+    activeType !== "locations";
+  document.getElementById("catalogSubdivisionsField").hidden =
+    activeType !== "locations";
+  document.getElementById("catalogSubdivisionLabel").value =
+    item?.subdivision_label || "";
+  document.getElementById("catalogSubdivisions").value = item
+    ? locationSubdivisions(item.id).map(entry => entry.name).join("\n")
+    : "";
 
   document.getElementById("catalogActive").checked =
     item?.is_active ?? true;
@@ -299,10 +315,38 @@ async function saveCurrentCatalog(event) {
     .getElementById("catalogDescription")
     .value
     .trim();
+  const subdivisionLabel = smartName(
+    document.getElementById("catalogSubdivisionLabel").value,
+  );
+  const subdivisions = document
+    .getElementById("catalogSubdivisions")
+    .value
+    .split(/\r?\n/)
+    .map(value => smartName(value))
+    .filter(Boolean);
 
   if (name.length < 2) {
     showToast("Informe um nome válido.", "error");
     document.getElementById("catalogName").focus();
+    return;
+  }
+
+  if (
+    type === "locations"
+    && subdivisionLabel.length === 1
+  ) {
+    showToast("O nome da subdivisão deve ter pelo menos 2 caracteres.", "error");
+    document.getElementById("catalogSubdivisionLabel").focus();
+    return;
+  }
+
+  if (
+    type === "locations"
+    && subdivisions.length
+    && !subdivisionLabel
+  ) {
+    showToast("Informe o nome da subdivisão antes de cadastrar as opções.", "error");
+    document.getElementById("catalogSubdivisionLabel").focus();
     return;
   }
 
@@ -324,15 +368,20 @@ async function saveCurrentCatalog(event) {
   try {
     button.disabled = true;
 
-    await saveCatalog(
+    const saved = await saveCatalog(
       type,
       {
         name,
         description,
+        subdivision_label: type === "locations" ? subdivisionLabel : null,
         is_active: document.getElementById("catalogActive").checked,
       },
       id || null,
     );
+
+    if (type === "locations") {
+      await syncLocationSubdivisions(saved.id, subdivisions);
+    }
 
     closeModal("catalogModal");
     showToast("Cadastro salvo com sucesso.", "success");
@@ -349,6 +398,7 @@ async function saveCurrentCatalog(event) {
 
 bootPage(() => {
   bindSmartText(document.getElementById("catalogName"), "name");
+  bindSmartText(document.getElementById("catalogSubdivisionLabel"), "name");
 
   document.querySelectorAll("[data-catalog-type]").forEach(button => {
     button.addEventListener("click", () => changeCatalogType(button));

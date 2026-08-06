@@ -98,9 +98,9 @@ function renderConverters(range) {
   document.getElementById("pConverterQuantity").textContent = quantity;
   document.getElementById("pConverterLocation").textContent = locations[0]?.[0] || "—";
   document.getElementById("pConverterDoneRate").textContent = `${Math.round(done / Math.max(records.length, 1) * 100)}%`;
-  document.getElementById("pConverterHeadline").textContent = `${quantity} ${quantity === 1 ? "conversor trocado" : "conversores trocados"} no período`;
+  document.getElementById("pConverterHeadline").textContent = `${quantity} ${quantity === 1 ? "equipamento registrado" : "equipamentos registrados"} no período`;
   const trend = trendForConverters(records, range);
-  createChart("pConverterTrendChart", { type: "line", data: { labels: trend.labels, datasets: [{ label: "Conversores trocados", data: trend.values, borderColor: colors.accent, backgroundColor: `${colors.accent}22`, fill: true, tension: .38, pointRadius: 3, borderWidth: 2.5 }] }, options: baseOptions() });
+  createChart("pConverterTrendChart", { type: "line", data: { labels: trend.labels, datasets: [{ label: "Equipamentos registrados", data: trend.values, borderColor: colors.accent, backgroundColor: `${colors.accent}22`, fill: true, tension: .38, pointRadius: 3, borderWidth: 2.5 }] }, options: baseOptions() });
   createChart("pConverterLocationChart", { type: "bar", data: { labels: locations.map(([label]) => label), datasets: [{ label: "Ocorrências", data: locations.map(([,value]) => value), backgroundColor: `${colors.primary}e5`, borderRadius: 8, maxBarThickness: 48 }] }, options: { ...baseOptions({ horizontal: true, legend: false }), plugins: { ...baseOptions({ horizontal: true, legend: false }).plugins, legend: { display: false } } } });
 }
 

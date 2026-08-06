@@ -98,21 +98,53 @@
           </div>
 
           <div class="form-grid">
-            <label class="field full">
-              <span>Título *</span>
+            <label class="field">
+              <span>Número LPU *</span>
+
+              <input
+                id="demandLpuNumber"
+                type="text"
+                minlength="1"
+                maxlength="80"
+                placeholder="Ex.: 42-49"
+                required
+              >
+
+              <small class="field-error">
+                Informe o número LPU.
+              </small>
+            </label>
+
+            <label class="field">
+              <span>Projeto *</span>
 
               <input
                 id="demandTitle"
                 type="text"
                 minlength="4"
                 maxlength="160"
-                placeholder="Ex.: Revisar documentação do processo"
+                placeholder="Ex.: Atualização da infraestrutura de rede"
                 required
               >
 
               <small class="field-error">
-                Informe um título com pelo menos 4 caracteres.
+                Informe um projeto com pelo menos 4 caracteres.
               </small>
+            </label>
+
+            <label class="field">
+              <span>Polo *</span>
+              <select id="demandLocation" required>
+                <option value="">Selecione</option>
+              </select>
+              <small class="field-error">Selecione um polo.</small>
+            </label>
+
+            <label class="field" id="demandSubdivisionField" hidden>
+              <span id="demandSubdivisionLabel">Subdivisão</span>
+              <select id="demandSubdivision">
+                <option value="">Não informado</option>
+              </select>
             </label>
 
             <label class="field full">
@@ -219,32 +251,6 @@
               >
             </label>
 
-            <label class="field">
-              <span>Categoria *</span>
-
-              <select id="demandCategory" required>
-                <option value="">Selecione</option>
-              </select>
-
-              <small class="field-error">
-                Selecione ou informe uma categoria.
-              </small>
-            </label>
-
-            <label
-              class="field conditional-field"
-              id="demandCategoryOtherField"
-              hidden
-            >
-              <span>Outra categoria *</span>
-
-              <input
-                id="demandCategoryOther"
-                type="text"
-                maxlength="120"
-                placeholder="Digite a categoria"
-              >
-            </label>
           </div>
         </section>
 
@@ -282,6 +288,24 @@
                 <option>Aguardando retorno</option>
                 <option>Concluída</option>
                 <option>Cancelada</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Status do gestor *</span>
+
+              <select id="demandManagerStatus" required>
+                <option selected>Solicitado</option>
+                <option>Pendente Liberação GP</option>
+                <option>Pendente Liberação Gestor</option>
+                <option>Liberado para Execução</option>
+                <option>Aguardando Validação</option>
+                <option>Aguardando Revisão do Fornecedor</option>
+                <option>Concluído Validado</option>
+                <option>Aprovado Faturar</option>
+                <option>Concluído Faturado</option>
+                <option>Cancelada</option>
+                <option>Finalizado</option>
               </select>
             </label>
 
@@ -361,7 +385,7 @@
             <i class="fa-solid fa-circle-info"></i>
 
             <span>
-              Gestores, responsáveis, departamentos e categorias podem ser
+              Gestores, responsáveis, departamentos, polos e subdivisões podem ser
               mantidos previamente na página Cadastros. A opção “Outro” cria
               uma nova opção somente depois que o formulário inteiro estiver
               válido.

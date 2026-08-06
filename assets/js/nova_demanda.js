@@ -1,5 +1,5 @@
 import { bootPage } from "./shell.js";
-import { state, activeCatalog, catalogItem, findOrCreateCatalog, saveDemand } from "./store.js";
+import { state, activeCatalog, catalogItem, findOrCreateCatalog, locationSubdivisions, saveDemand, demandCode } from "./store.js";
 import { showToast } from "./ui.js";
 import { bindSmartText, bindNumericOnly, smartName, smartSentence, numberValue } from "./form-utils.js";
 
@@ -7,7 +7,6 @@ const catalogFields = [
   { type: "responsibles", select: "demandResponsible", other: "demandResponsibleOther", field: "demandResponsibleOtherField", required: true },
   { type: "managers", select: "demandManager", other: "demandManagerOther", field: "demandManagerOtherField", required: true },
   { type: "departments", select: "demandDepartment", other: "demandDepartmentOther", field: "demandDepartmentOtherField", required: false },
-  { type: "categories", select: "demandCategory", other: "demandCategoryOther", field: "demandCategoryOtherField", required: true },
 ];
 
 function inputDate(date) {
@@ -25,6 +24,24 @@ function populateCatalogs() {
     element.innerHTML = `<option value="">${required ? "Selecione" : "Não informado"}</option>${activeCatalog(type).map(optionMarkup).join("")}<option value="__other__">Outro</option>`;
     if ([...element.options].some(option => option.value === current)) element.value = current;
   });
+
+  const location = document.getElementById("demandLocation");
+  const current = location.value;
+  location.innerHTML = `<option value="">Selecione</option>${activeCatalog("locations").map(optionMarkup).join("")}`;
+  if ([...location.options].some(option => option.value === current)) location.value = current;
+}
+
+function populateSubdivisions(locationId, selectedId = "") {
+  const location = catalogItem("locations", locationId);
+  const items = locationSubdivisions(locationId);
+  const field = document.getElementById("demandSubdivisionField");
+  const select = document.getElementById("demandSubdivision");
+  const visible = Boolean(location?.subdivision_label);
+  field.hidden = !visible;
+  document.getElementById("demandSubdivisionLabel").textContent = location?.subdivision_label || "Subdivisão";
+  select.innerHTML = `<option value="">Não informado</option>${items.map(optionMarkup).join("")}`;
+  if ([...select.options].some(option => option.value === selectedId)) select.value = selectedId;
+  if (!visible) select.value = "";
 }
 
 function toggleOther(config) {
@@ -47,14 +64,20 @@ function catalogDraft(config) {
 
 function collectDraft() {
   const catalogs = Object.fromEntries(catalogFields.map(config => [config.type, catalogDraft(config)]));
+  const locationId = document.getElementById("demandLocation").value;
+  const subdivisionId = document.getElementById("demandSubdivision").value;
   return {
     id: document.getElementById("demandId").value,
+    lpu_number: document.getElementById("demandLpuNumber").value.trim(),
     title: smartSentence(document.getElementById("demandTitle").value),
     description: smartSentence(document.getElementById("demandDescription").value),
     requester: smartName(document.getElementById("demandRequester").value),
     catalogs,
+    location: catalogItem("locations", locationId),
+    subdivision: (state.catalogs.locationSubdivisions || []).find(item => item.id === subdivisionId) || null,
     priority: document.getElementById("demandPriority").value,
     status: document.getElementById("demandStatus").value,
+    manager_status: document.getElementById("demandManagerStatus").value,
     start_date: document.getElementById("demandStartDate").value,
     due_date: document.getElementById("demandDueDate").value,
     estimated_hours: numberValue(document.getElementById("demandEstimatedHours").value),
@@ -72,11 +95,12 @@ function validateDraft(draft) {
   document.querySelectorAll(".field.invalid").forEach(field => field.classList.remove("invalid"));
   let valid = true;
   const checks = [
+    ["demandLpuNumber", Boolean(draft.lpu_number)],
     ["demandTitle", draft.title.length >= 4],
     ["demandDescription", draft.description.length >= 5],
     ["demandResponsible", Boolean(draft.catalogs.responsibles.name)],
     ["demandManager", Boolean(draft.catalogs.managers.name)],
-    ["demandCategory", Boolean(draft.catalogs.categories.name)],
+    ["demandLocation", Boolean(draft.location)],
     ["demandStartDate", Boolean(draft.start_date)],
     ["demandDueDate", Boolean(draft.due_date)],
   ];
@@ -119,6 +143,7 @@ async function resolveCatalogs(draft) {
 
 function payloadFrom(draft, catalogs) {
   return {
+    lpu_number: draft.lpu_number,
     title: draft.title,
     description: draft.description,
     requester: draft.requester,
@@ -126,10 +151,13 @@ function payloadFrom(draft, catalogs) {
     responsible_id: catalogs.responsibles?.id || null,
     manager: catalogs.managers?.name || "",
     manager_id: catalogs.managers?.id || null,
+    manager_status: draft.manager_status,
+    location_id: draft.location?.id || null,
+    location_name: draft.location?.name || null,
+    location_subdivision_id: draft.subdivision?.id || null,
+    location_subdivision_name: draft.subdivision?.name || null,
     department: catalogs.departments?.name || "",
     department_id: catalogs.departments?.id || null,
-    category: catalogs.categories?.name || "",
-    category_id: catalogs.categories?.id || null,
     priority: draft.priority,
     status: draft.status,
     start_date: draft.start_date,
@@ -154,7 +182,9 @@ function resetForm() {
   document.getElementById("demandDueDate").value = inputDate(due);
   document.getElementById("demandPriority").value = "Normal";
   document.getElementById("demandStatus").value = "Pendente";
+  document.getElementById("demandManagerStatus").value = "Solicitado";
   populateCatalogs();
+  populateSubdivisions("");
   catalogFields.forEach(toggleOther);
   document.querySelectorAll(".field.invalid").forEach(field => field.classList.remove("invalid"));
 }
@@ -182,8 +212,9 @@ function loadDemand(id) {
     return;
   }
   document.getElementById("demandId").value = demand.id;
-  document.getElementById("demandFormHeading").textContent = `Editar FLX-${String(demand.demand_number).padStart(4, "0")}`;
+  document.getElementById("demandFormHeading").textContent = `Editar ${demandCode(demand)}`;
   document.getElementById("saveDemandButton").innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Salvar alterações`;
+  document.getElementById("demandLpuNumber").value = demand.lpu_number || "";
   document.getElementById("demandTitle").value = demand.title;
   document.getElementById("demandDescription").value = demand.description;
   document.getElementById("demandRequester").value = demand.requester || "";
@@ -191,11 +222,13 @@ function loadDemand(id) {
     responsibles: [demand.responsible_id, demand.responsible],
     managers: [demand.manager_id, demand.manager],
     departments: [demand.department_id, demand.department],
-    categories: [demand.category_id, demand.category],
   };
   catalogFields.forEach(config => setCatalogValue(config, ...values[config.type]));
+  document.getElementById("demandLocation").value = demand.location_id || "";
+  populateSubdivisions(demand.location_id || "", demand.location_subdivision_id || "");
   document.getElementById("demandPriority").value = demand.priority;
   document.getElementById("demandStatus").value = demand.status;
+  document.getElementById("demandManagerStatus").value = demand.manager_status || "Solicitado";
   document.getElementById("demandStartDate").value = demand.start_date;
   document.getElementById("demandDueDate").value = demand.due_date;
   document.getElementById("demandEstimatedHours").value = demand.estimated_hours || "";
@@ -208,9 +241,10 @@ bootPage(() => {
   populateCatalogs();
   resetForm();
   catalogFields.forEach(config => document.getElementById(config.select).addEventListener("change", () => toggleOther(config)));
+  document.getElementById("demandLocation").addEventListener("change", event => populateSubdivisions(event.currentTarget.value));
   [
     ["demandTitle", "sentence"], ["demandDescription", "sentence"], ["demandRequester", "name"],
-    ["demandResponsibleOther", "name"], ["demandManagerOther", "name"], ["demandDepartmentOther", "name"], ["demandCategoryOther", "name"],
+    ["demandResponsibleOther", "name"], ["demandManagerOther", "name"], ["demandDepartmentOther", "name"],
     ["demandNotes", "sentence"],
   ].forEach(([id, mode]) => bindSmartText(document.getElementById(id), mode));
   bindNumericOnly(document.getElementById("demandEstimatedHours"));

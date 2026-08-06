@@ -1,5 +1,5 @@
 /* ============================================================
-   RELATÓRIOS — DEMANDAS E CONVERSORES
+   RELATÓRIOS — DEMANDAS, CONVERSORES E FONTES POE
    Cada módulo possui filtros, resumo e detalhamento próprios.
 ============================================================ */
 
@@ -603,11 +603,22 @@ body[data-page="relatorios"] .page-heading::after {
 }
 
 .report-demands-table {
-  min-width: 1180px;
+  min-width: 1540px;
 }
 
 .report-converters-table {
-  min-width: 1320px;
+  min-width: 1460px;
+}
+
+.report-demands-table td:nth-child(3) strong,
+.report-demands-table td:nth-child(3) small {
+  display: block;
+}
+
+.report-demands-table td:nth-child(3) small {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
 }
 
 /* ============================================================

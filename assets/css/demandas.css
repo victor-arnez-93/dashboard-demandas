@@ -38,7 +38,7 @@ body[data-page="demandas"] .page-heading p {
   display: grid;
   grid-template-columns:
     minmax(280px, 1.65fr)
-    repeat(4, minmax(152px, 0.78fr))
+    repeat(5, minmax(152px, 0.78fr))
     auto;
   gap: 11px;
   padding: 16px;
@@ -225,12 +225,16 @@ body[data-page="demandas"] .page-heading p {
   table-layout: fixed;
 }
 
-.demands-table .col-code {
-  width: 7%;
+.demands-table .col-location {
+  width: 11%;
+}
+
+.demands-table .col-lpu {
+  width: 8%;
 }
 
 .demands-table .col-demand {
-  width: 30%;
+  width: 20%;
 }
 
 .demands-table .col-manager {
@@ -239,10 +243,6 @@ body[data-page="demandas"] .page-heading p {
 
 .demands-table .col-responsible {
   width: 10%;
-}
-
-.demands-table .col-category {
-  width: 9%;
 }
 
 .demands-table .col-priority {
@@ -257,8 +257,12 @@ body[data-page="demandas"] .page-heading p {
   width: 10%;
 }
 
+.demands-table .col-manager-status {
+  width: 14%;
+}
+
 .demands-table .col-actions {
-  width: 10%;
+  width: 7%;
 }
 
 .demands-table th,
@@ -425,7 +429,7 @@ body[data-page="demandas"]
   }
 
   .demands-table {
-    min-width: 1080px;
+    min-width: 1380px;
   }
 }
 

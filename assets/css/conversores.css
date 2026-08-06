@@ -1,5 +1,5 @@
 /* ============================================================
-   CONVERSORES.CSS — SUSTENTAÇÃO DE CONVERSORES DE MÍDIA
+   CONVERSORES.CSS — CONVERSORES E FONTES POE
    Somente regras específicas desta página.
 ============================================================ */
 
@@ -61,10 +61,9 @@
 .converter-filter-bar {
   display: grid;
   grid-template-columns:
-    minmax(300px, 1.45fr)
-    minmax(145px, .52fr)
-    minmax(145px, .52fr)
-    minmax(190px, .72fr)
+    minmax(280px, 1.4fr)
+    repeat(2, minmax(135px, .52fr))
+    repeat(3, minmax(160px, .7fr))
     auto;
   align-items: end;
   gap: 12px;
@@ -143,7 +142,7 @@
 
 .converter-table-scroll table {
   width: 100%;
-  min-width: 1080px;
+  min-width: 1280px;
   table-layout: fixed;
 }
 
@@ -157,37 +156,61 @@
 }
 
 .converter-table-scroll th:nth-child(1),
-.converter-table-scroll td:nth-child(1) { width: 8%; }
+.converter-table-scroll td:nth-child(1) { width: 13%; }
 
 .converter-table-scroll th:nth-child(2),
 .converter-table-scroll td:nth-child(2) { width: 8%; }
 
 .converter-table-scroll th:nth-child(3),
-.converter-table-scroll td:nth-child(3) { width: 13%; }
+.converter-table-scroll td:nth-child(3) { width: 20%; }
 
 .converter-table-scroll th:nth-child(4),
-.converter-table-scroll td:nth-child(4) { width: 12%; }
+.converter-table-scroll td:nth-child(4) { width: 10%; }
 
 .converter-table-scroll th:nth-child(5),
-.converter-table-scroll td:nth-child(5) { width: 11%; }
+.converter-table-scroll td:nth-child(5) { width: 10%; }
 
 .converter-table-scroll th:nth-child(6),
-.converter-table-scroll td:nth-child(6) { width: 11%; }
+.converter-table-scroll td:nth-child(6) { width: 10%; }
 
 .converter-table-scroll th:nth-child(7),
 .converter-table-scroll td:nth-child(7) {
-  width: 6%;
+  width: 5%;
   text-align: center;
 }
 
 .converter-table-scroll th:nth-child(8),
-.converter-table-scroll td:nth-child(8) { width: 14%; }
+.converter-table-scroll td:nth-child(8) { width: 7%; }
 
 .converter-table-scroll th:nth-child(9),
-.converter-table-scroll td:nth-child(9) { width: 10%; }
+.converter-table-scroll td:nth-child(9) { width: 9%; }
 
 .converter-table-scroll th:nth-child(10),
-.converter-table-scroll td:nth-child(10) { width: 9%; }
+.converter-table-scroll td:nth-child(10) { width: 8%; }
+
+.converter-cell {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.converter-cell strong,
+.converter-cell small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.converter-cell strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.converter-cell small {
+  color: var(--text-muted);
+  font-size: 10px;
+}
 
 .converter-table-scroll tbody tr.converter-empty-row {
   height: 218px;

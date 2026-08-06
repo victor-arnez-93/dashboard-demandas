@@ -134,7 +134,7 @@ export function priorityClass(priority) {
 }
 
 export function demandCell(demand) {
-  return `<div class="demand-cell"><i class="fa-regular fa-file-lines"></i><span><strong>${escapeHtml(demand.title)}</strong><small>${demandCode(demand)} · Entrada em ${formatDate(demand.start_date)}</small></span></div>`;
+  return `<div class="demand-cell"><i class="fa-regular fa-file-lines"></i><span><strong>${escapeHtml(demand.title)}</strong><small>${escapeHtml(demandCode(demand))} · ${escapeHtml(demand.location_name || "Polo não informado")}</small></span></div>`;
 }
 
 export function renderDemandDetail(demand) {
@@ -146,11 +146,14 @@ export function renderDemandDetail(demand) {
   title.textContent = demand.title;
   const cells = [
     ["Status", effectiveStatus(demand)],
+    ["Status do gestor", demand.manager_status || "—"],
     ["Prioridade", demand.priority],
+    ["Número LPU", demand.lpu_number || "—"],
+    ["Polo", demand.location_name || "—"],
+    ["Subdivisão", demand.location_subdivision_name || "—"],
     ["Gestor", demand.manager || "Gestor não informado"],
     ["Responsável", demand.responsible],
     ["Solicitante", demand.requester || "—"],
-    ["Categoria", demand.category],
     ["Departamento", demand.department || "—"],
     ["Entrada", formatDate(demand.start_date, { year: true })],
     ["Prazo", formatDate(demand.due_date, { year: true })],
@@ -172,14 +175,16 @@ export function renderConverterDetail(record) {
   const code = document.getElementById("converterDetailCode");
   const content = document.getElementById("converterDetailContent");
   if (!code || !content) return;
-  code.textContent = record.ticket_number || converterCode(record);
+  code.textContent = converterCode(record);
   const cells = [
-    ["Nº do chamado", record.ticket_number || "—"],
+    ["Número LPU", record.lpu_number || "—"],
+    ["Projeto", record.project || "—"],
     ["Data", formatDate(record.service_date, { year: true })],
     ["Polo", record.location_name],
-    ["Ponto / referência", record.point_reference || "—"],
+    ["Subdivisão", record.location_subdivision_name || "—"],
+    ["Gestor", record.manager_name || "—"],
     ["Atendimento", record.service_type],
-    ["Conversão", record.conversion_direction || "—"],
+    ["Tipo de equipamento", record.equipment_type || "—"],
     ["Quantidade", String(record.quantity_replaced || 0)],
     ["Status", record.status],
     ["Responsável", record.responsible_name || "—"],

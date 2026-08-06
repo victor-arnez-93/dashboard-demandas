@@ -3,37 +3,332 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="FLUUX — Conversores.">
+  <meta name="description" content="FLUUX — Conversores e fontes PoE.">
   <meta name="theme-color" content="#090d10">
-  <title>FLUUX — Conversores</title>
-  <script>document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";</script>
+  <title>FLUUX — Conversores e fontes PoE</title>
+  <script>
+    document.documentElement.dataset.theme =
+      matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  </script>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+  >
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/conversores.css">
-  
 </head>
-<body data-page="conversores" data-page-label="Conversores">
+
+<body data-page="conversores" data-page-label="Conversores e fontes PoE">
   <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
-  <div class="boot-screen" id="bootScreen"><div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div><span class="spinner"></span><p>Conectando ao sistema...</p></div>
+
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-logo">
+      <img src="assets/img/logo.png" alt="FLUUX">
+    </div>
+    <span class="spinner"></span>
+    <p>Conectando ao sistema...</p>
+  </div>
+
   <div class="app-shell" id="appShell" hidden>
     <main class="main-content" id="mainContent" tabindex="-1">
-      <div class="page-heading"><div><span class="eyebrow">SUSTENTAÇÃO</span><h1>Conversores de mídia</h1><p>Registre trocas, acompanhe recorrências e identifique polos com mais problemas.</p></div><div class="header-actions"><button class="btn-primary" id="newConverterButton" type="button"><i class="fa-solid fa-plus"></i> Novo atendimento</button></div></div>
-      <section class="converter-kpis"><article class="converter-kpi"><i class="fa-solid fa-screwdriver-wrench"></i><small>Atendimentos no período</small><strong id="converterMonthRecords">0</strong><p>conforme os filtros</p></article><article class="converter-kpi"><i class="fa-solid fa-network-wired"></i><small>Conversores trocados</small><strong id="converterMonthQuantity">0</strong><p>no período selecionado</p></article><article class="converter-kpi"><i class="fa-solid fa-location-dot"></i><small>Polo mais recorrente</small><strong id="converterTopLocation">—</strong><p id="converterTopLocationText">sem ocorrências</p></article><article class="converter-kpi"><i class="fa-solid fa-circle-check"></i><small>Concluídos</small><strong id="converterDoneRate">0%</strong><p>no período selecionado</p></article></section>
-      <section class="table-shell"><div class="converter-filter-bar"><label class="field converter-search"><span>Buscar</span><div class="input-shell"><i class="fa-solid fa-magnifying-glass"></i><input id="converterSearch" type="search" placeholder="Buscar por chamado, polo, ponto ou descrição..."></div></label><label class="field"><span>De</span><input id="converterStartDate" type="date"></label><label class="field"><span>Até</span><input id="converterEndDate" type="date"></label><label class="field converter-location-filter"><span>Polo</span><select id="converterLocationFilter"><option value="">Todos os polos</option></select></label><button class="btn-secondary converter-clear-filter" id="clearConverterFilters" type="button"><i class="fa-solid fa-filter-circle-xmark"></i> Limpar</button></div><div class="converter-table-scroll"><table><thead><tr><th>Nº do chamado</th><th>Data</th><th>Polo</th><th>Ponto</th><th>Atendimento</th><th>Conversão</th><th>Qtd.</th><th>Descrição</th><th>Status</th><th>Ações</th></tr></thead><tbody id="converterBody"><tr><td colspan="10" class="empty-table">Carregando registros...</td></tr></tbody></table></div><footer class="table-footer"><span id="converterCount">0 registros exibidos</span><span>Dados sincronizados com o Supabase</span></footer></section>
-      <div class="modal-layer" id="converterModal" hidden><div class="modal-backdrop" data-close-modal="converterModal"></div><section class="modal-card converter-modal" role="dialog" aria-modal="true"><div class="modal-head"><div><small>SUSTENTAÇÃO</small><h2 id="converterModalTitle">Novo atendimento</h2></div><button class="icon-btn" type="button" data-close-modal="converterModal"><i class="fa-solid fa-xmark"></i></button></div><form id="converterForm" novalidate><input id="converterId" type="hidden"><div class="converter-form-grid"><label class="field"><span>Nº do chamado *</span><input id="converterTicketNumber" type="text" maxlength="80" required placeholder="Ex.: INC1234567"></label><label class="field"><span>Data *</span><input id="converterDate" type="date" required></label><label class="field"><span>Polo *</span><select id="converterLocation" required><option value="">Selecione</option></select></label><label class="field conditional-field" id="converterLocationOtherField" hidden><span>Outro polo *</span><input id="converterLocationOther" type="text" maxlength="160"></label><label class="field"><span>Ponto / referência</span><input id="converterPoint" type="text" maxlength="160" placeholder="Ex.: Rack 02, andar, sala técnica"></label><label class="field"><span>Tipo de atendimento *</span><select id="converterServiceType" required><option>Troca</option><option>Manutenção</option><option>Diagnóstico</option><option>Instalação</option><option value="__other__">Outro</option></select></label><label class="field conditional-field" id="converterServiceTypeOtherField" hidden><span>Outro tipo *</span><input id="converterServiceTypeOther" type="text" maxlength="80"></label><label class="field"><span>Conversão</span><select id="converterDirection"><option value="">Não informado</option><option>UTP → Fibra</option><option>Fibra → UTP</option><option>Bidirecional</option><option value="__other__">Outro</option></select></label><label class="field conditional-field" id="converterDirectionOtherField" hidden><span>Outra conversão</span><input id="converterDirectionOther" type="text" maxlength="80"></label><label class="field"><span>Quantidade trocada *</span><input id="converterQuantity" type="text" inputmode="numeric" value="1" required></label><label class="field"><span>Status *</span><select id="converterStatus" required><option>Concluído</option><option>Pendente</option><option>Em andamento</option><option>Aguardando material</option><option value="__other__">Outro</option></select></label><label class="field conditional-field" id="converterStatusOtherField" hidden><span>Outro status *</span><input id="converterStatusOther" type="text" maxlength="60"></label><label class="field"><span>Responsável</span><select id="converterResponsible"><option value="">Não informado</option></select></label><label class="field conditional-field" id="converterResponsibleOtherField" hidden><span>Outro responsável</span><input id="converterResponsibleOther" type="text" maxlength="120"></label><label class="field full"><span>Descrição</span><textarea id="converterReason" maxlength="1000" placeholder="Descreva o problema, a causa ou o sintoma observado"></textarea></label><label class="field full"><span>Resolução</span><textarea id="converterNotes" maxlength="4000" placeholder="Descreva o que foi realizado e o resultado do atendimento"></textarea></label></div><div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="converterModal">Cancelar</button><button class="btn-primary" id="saveConverterButton" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar registro</button></div></form></section></div>
-      <div class="modal-layer" id="converterDetailModal" hidden><div class="modal-backdrop" data-close-modal="converterDetailModal"></div><section class="modal-card" role="dialog" aria-modal="true"><div class="modal-head"><div><small id="converterDetailCode">CONVERSOR</small><h2>Detalhes do atendimento</h2></div><button class="icon-btn" type="button" data-close-modal="converterDetailModal"><i class="fa-solid fa-xmark"></i></button></div><div class="detail-content" id="converterDetailContent"></div><div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="converterDetailModal">Fechar</button><button class="btn-primary" id="converterDetailEditButton" type="button"><i class="fa-solid fa-pen"></i> Editar</button></div></section></div>
-      <div class="modal-layer" id="confirmModal" hidden><div class="modal-backdrop" data-close-modal="confirmModal"></div><section class="modal-card confirm-card"><div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><h2 id="confirmTitle">Confirmar ação</h2><p id="confirmText">Deseja continuar?</p><div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="confirmModal">Cancelar</button><button class="btn-danger" id="confirmActionButton" type="button">Confirmar</button></div></section></div>
+      <div class="page-heading">
+        <div>
+          <span class="eyebrow">SUSTENTAÇÃO</span>
+          <h1>Conversores e fontes PoE</h1>
+          <p>Registre equipamentos, acompanhe recorrências e identifique polos com mais atendimentos.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-primary" id="newConverterButton" type="button">
+            <i class="fa-solid fa-plus"></i>
+            Novo atendimento
+          </button>
+        </div>
+      </div>
+
+      <section class="converter-kpis">
+        <article class="converter-kpi">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          <small>Atendimentos no período</small>
+          <strong id="converterMonthRecords">0</strong>
+          <p>conforme os filtros</p>
+        </article>
+        <article class="converter-kpi">
+          <i class="fa-solid fa-network-wired"></i>
+          <small>Equipamentos registrados</small>
+          <strong id="converterMonthQuantity">0</strong>
+          <p>no período selecionado</p>
+        </article>
+        <article class="converter-kpi">
+          <i class="fa-solid fa-location-dot"></i>
+          <small>Polo mais recorrente</small>
+          <strong id="converterTopLocation">—</strong>
+          <p id="converterTopLocationText">sem ocorrências</p>
+        </article>
+        <article class="converter-kpi">
+          <i class="fa-solid fa-circle-check"></i>
+          <small>Concluídos</small>
+          <strong id="converterDoneRate">0%</strong>
+          <p>no período selecionado</p>
+        </article>
+      </section>
+
+      <section class="table-shell">
+        <div class="converter-filter-bar">
+          <label class="field converter-search">
+            <span>Buscar</span>
+            <div class="input-shell">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                id="converterSearch"
+                type="search"
+                placeholder="Buscar por LPU, projeto, polo, descrição ou gestor..."
+              >
+            </div>
+          </label>
+          <label class="field">
+            <span>De</span>
+            <input id="converterStartDate" type="date">
+          </label>
+          <label class="field">
+            <span>Até</span>
+            <input id="converterEndDate" type="date">
+          </label>
+          <label class="field converter-location-filter">
+            <span>Polo</span>
+            <select id="converterLocationFilter">
+              <option value="">Todos os polos</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Equipamento</span>
+            <select id="converterEquipmentFilter">
+              <option value="">Todos</option>
+              <option>Conversor</option>
+              <option>Fonte PoE</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Gestor</span>
+            <select id="converterManagerFilter">
+              <option value="">Todos os gestores</option>
+            </select>
+          </label>
+          <button
+            class="btn-secondary converter-clear-filter"
+            id="clearConverterFilters"
+            type="button"
+          >
+            <i class="fa-solid fa-filter-circle-xmark"></i>
+            Limpar
+          </button>
+        </div>
+
+        <div class="converter-table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Polo</th>
+                <th>Número LPU</th>
+                <th>Projeto</th>
+                <th>Gestor</th>
+                <th>Equipamento</th>
+                <th>Atendimento</th>
+                <th>Qtd.</th>
+                <th>Data</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="converterBody">
+              <tr>
+                <td colspan="10" class="empty-table">Carregando registros...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="table-footer">
+          <span id="converterCount">0 registros exibidos</span>
+          <span>Dados sincronizados com o Supabase</span>
+        </footer>
+      </section>
+
+      <div class="modal-layer" id="converterModal" hidden>
+        <div class="modal-backdrop" data-close-modal="converterModal"></div>
+        <section class="modal-card converter-modal" role="dialog" aria-modal="true">
+          <div class="modal-head">
+            <div>
+              <small>EQUIPAMENTOS</small>
+              <h2 id="converterModalTitle">Novo atendimento</h2>
+            </div>
+            <button class="icon-btn" type="button" data-close-modal="converterModal">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <form id="converterForm" novalidate>
+            <input id="converterId" type="hidden">
+            <div class="converter-form-grid">
+              <label class="field">
+                <span>Número LPU *</span>
+                <input id="converterLpuNumber" type="text" maxlength="80" required placeholder="Ex.: 42-49">
+              </label>
+              <label class="field">
+                <span>Projeto *</span>
+                <input id="converterProject" type="text" minlength="3" maxlength="200" required placeholder="Nome do projeto">
+              </label>
+              <label class="field">
+                <span>Polo *</span>
+                <select id="converterLocation" required>
+                  <option value="">Selecione</option>
+                </select>
+              </label>
+              <label class="field" id="converterSubdivisionField" hidden>
+                <span id="converterSubdivisionLabel">Subdivisão</span>
+                <select id="converterSubdivision">
+                  <option value="">Não informado</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Gestor *</span>
+                <select id="converterManager" required>
+                  <option value="">Selecione</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Data *</span>
+                <input id="converterDate" type="date" required>
+              </label>
+              <label class="field">
+                <span>Tipo de equipamento *</span>
+                <select id="converterEquipmentType" required>
+                  <option>Conversor</option>
+                  <option>Fonte PoE</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Tipo de atendimento *</span>
+                <select id="converterServiceType" required>
+                  <option>Troca</option>
+                  <option>Manutenção</option>
+                  <option>Diagnóstico</option>
+                  <option>Instalação</option>
+                  <option value="__other__">Outro</option>
+                </select>
+              </label>
+              <label class="field conditional-field" id="converterServiceTypeOtherField" hidden>
+                <span>Outro tipo *</span>
+                <input id="converterServiceTypeOther" type="text" maxlength="80">
+              </label>
+              <label class="field">
+                <span>Quantidade *</span>
+                <input id="converterQuantity" type="text" inputmode="numeric" value="1" required>
+              </label>
+              <label class="field">
+                <span>Status *</span>
+                <select id="converterStatus" required>
+                  <option>Concluído</option>
+                  <option>Pendente</option>
+                  <option>Em andamento</option>
+                  <option>Aguardando material</option>
+                  <option value="__other__">Outro</option>
+                </select>
+              </label>
+              <label class="field conditional-field" id="converterStatusOtherField" hidden>
+                <span>Outro status *</span>
+                <input id="converterStatusOther" type="text" maxlength="60">
+              </label>
+              <label class="field">
+                <span>Responsável</span>
+                <select id="converterResponsible">
+                  <option value="">Não informado</option>
+                </select>
+              </label>
+              <label class="field conditional-field" id="converterResponsibleOtherField" hidden>
+                <span>Outro responsável</span>
+                <input id="converterResponsibleOther" type="text" maxlength="120">
+              </label>
+              <label class="field full">
+                <span>Descrição</span>
+                <textarea id="converterReason" maxlength="1000" placeholder="Descreva o problema, a causa ou o sintoma observado"></textarea>
+              </label>
+              <label class="field full">
+                <span>Resolução</span>
+                <textarea id="converterNotes" maxlength="4000" placeholder="Descreva o que foi realizado e o resultado do atendimento"></textarea>
+              </label>
+            </div>
+            <div class="modal-actions">
+              <button class="btn-ghost" type="button" data-close-modal="converterModal">Cancelar</button>
+              <button class="btn-primary" id="saveConverterButton" type="submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Salvar registro
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <div class="modal-layer" id="converterDetailModal" hidden>
+        <div class="modal-backdrop" data-close-modal="converterDetailModal"></div>
+        <section class="modal-card" role="dialog" aria-modal="true">
+          <div class="modal-head">
+            <div>
+              <small id="converterDetailCode">EQUIPAMENTO</small>
+              <h2>Detalhes do atendimento</h2>
+            </div>
+            <button class="icon-btn" type="button" data-close-modal="converterDetailModal">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="detail-content" id="converterDetailContent"></div>
+          <div class="modal-actions">
+            <button class="btn-ghost" type="button" data-close-modal="converterDetailModal">Fechar</button>
+            <button class="btn-primary" id="converterDetailEditButton" type="button">
+              <i class="fa-solid fa-pen"></i>
+              Editar
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="modal-layer" id="confirmModal" hidden>
+        <div class="modal-backdrop" data-close-modal="confirmModal"></div>
+        <section class="modal-card confirm-card">
+          <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <h2 id="confirmTitle">Confirmar ação</h2>
+          <p id="confirmText">Deseja continuar?</p>
+          <div class="modal-actions">
+            <button class="btn-ghost" type="button" data-close-modal="confirmModal">Cancelar</button>
+            <button class="btn-danger" id="confirmActionButton" type="button">Confirmar</button>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
-  <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
+
+  <div class="fatal-layer" id="fatalLayer" hidden>
+    <section>
+      <i class="fa-solid fa-plug-circle-xmark"></i>
+      <h1>Não foi possível iniciar o FLUUX</h1>
+      <p id="fatalMessage">Confira a configuração e tente novamente.</p>
+      <button class="btn-primary" type="button" onclick="location.reload()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Tentar novamente
+      </button>
+      <a href="index.html">Voltar ao login</a>
+    </section>
+  </div>
+
   <div class="toast-region" id="toastRegion" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
   <script src="assets/js/env.js"></script>
   <script type="module" src="assets/js/conversores.js"></script>
 </body>

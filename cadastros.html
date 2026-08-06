@@ -56,8 +56,7 @@
           <span class="eyebrow">BASES REUTILIZÁVEIS</span>
           <h1>Cadastros</h1>
           <p>
-            Mantenha gestores, responsáveis, departamentos,
-            categorias e locais padronizados.
+            Mantenha gestores, responsáveis, departamentos e polos padronizados.
           </p>
         </div>
 
@@ -107,24 +106,13 @@
 
             <button
               class="catalog-tab"
-              data-catalog-type="categories"
-              type="button"
-              role="tab"
-              aria-selected="false"
-            >
-              <i class="fa-solid fa-tags"></i>
-              Categorias
-            </button>
-
-            <button
-              class="catalog-tab"
               data-catalog-type="locations"
               type="button"
               role="tab"
               aria-selected="false"
             >
               <i class="fa-solid fa-location-dot"></i>
-              Locais/Polos
+              Polos
             </button>
           </div>
 
@@ -227,8 +215,38 @@
                 <textarea
                   id="catalogDescription"
                   maxlength="500"
-                  placeholder="Informação complementar do local"
+                  placeholder="Informação complementar do polo"
                 ></textarea>
+              </label>
+
+              <label
+                class="field catalog-subdivision-label-field"
+                id="catalogSubdivisionLabelField"
+                hidden
+              >
+                <span>Nome da subdivisão</span>
+                <input
+                  id="catalogSubdivisionLabel"
+                  type="text"
+                  maxlength="40"
+                  placeholder="Ex.: Torre, Prédio, Bloco"
+                >
+              </label>
+
+              <label
+                class="field catalog-subdivisions-field"
+                id="catalogSubdivisionsField"
+                hidden
+              >
+                <span>Subdivisões do polo</span>
+                <textarea
+                  id="catalogSubdivisions"
+                  maxlength="2000"
+                  placeholder="Digite uma subdivisão por linha"
+                ></textarea>
+                <small>
+                  Exemplo: Conceição, Alfredo Egídio ou CT1 — uma opção por linha.
+                </small>
               </label>
 
               <div class="switch-row">

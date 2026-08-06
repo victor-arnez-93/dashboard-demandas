@@ -75,7 +75,7 @@
             <input
               id="demandSearch"
               type="search"
-              placeholder="Buscar por título, código, gestor ou responsável..."
+              placeholder="Buscar por LPU, projeto, polo, gestor ou responsável..."
               autocomplete="off"
             >
           </label>
@@ -102,8 +102,23 @@
             <option value="">Todos os gestores</option>
           </select>
 
-          <select id="categoryFilter" aria-label="Filtrar por categoria">
-            <option value="">Todas as categorias</option>
+          <select id="managerStatusFilter" aria-label="Filtrar por status do gestor">
+            <option value="">Todos os status do gestor</option>
+            <option>Solicitado</option>
+            <option>Pendente Liberação GP</option>
+            <option>Pendente Liberação Gestor</option>
+            <option>Liberado para Execução</option>
+            <option>Aguardando Validação</option>
+            <option>Aguardando Revisão do Fornecedor</option>
+            <option>Concluído Validado</option>
+            <option>Aprovado Faturar</option>
+            <option>Concluído Faturado</option>
+            <option>Cancelada</option>
+            <option>Finalizado</option>
+          </select>
+
+          <select id="locationFilter" aria-label="Filtrar por polo">
+            <option value="">Todos os polos</option>
           </select>
 
           <button
@@ -119,34 +134,36 @@
         <div class="demands-table-scroll">
           <table class="demands-table">
             <colgroup>
-              <col class="col-code">
+              <col class="col-location">
+              <col class="col-lpu">
               <col class="col-demand">
               <col class="col-manager">
               <col class="col-responsible">
-              <col class="col-category">
               <col class="col-priority">
-              <col class="col-due">
               <col class="col-status">
+              <col class="col-manager-status">
+              <col class="col-due">
               <col class="col-actions">
             </colgroup>
 
             <thead>
               <tr>
-                <th>Código</th>
-                <th>Demanda</th>
+                <th>Polo</th>
+                <th>Número LPU</th>
+                <th>Projeto</th>
                 <th>Gestor</th>
                 <th>Responsável</th>
-                <th>Categoria</th>
                 <th>Prioridade</th>
-                <th>Prazo</th>
                 <th>Status</th>
+                <th>Status gestor</th>
+                <th>Prazo</th>
                 <th>Ações</th>
               </tr>
             </thead>
 
             <tbody id="allDemandsBody">
               <tr>
-                <td colspan="9" class="empty-table">
+                <td colspan="10" class="empty-table">
                   Carregando demandas...
                 </td>
               </tr>

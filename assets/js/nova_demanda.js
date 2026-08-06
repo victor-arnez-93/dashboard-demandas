@@ -36,7 +36,7 @@ function populateCatalogs() {
 
   const location = document.getElementById("demandLocation");
   const current = location.value;
-  location.innerHTML = `<option value="">Selecione</option>${activeCatalog("locations").map(optionMarkup).join("")}`;
+  location.innerHTML = `<option value="">Selecione</option>${activeCatalog("locations").map(optionMarkup).join("")}<option value="__other__">Outro polo</option>`;
   if ([...location.options].some(option => option.value === current)) location.value = current;
 }
 
@@ -63,6 +63,46 @@ function toggleOther(config) {
   if (!visible) input.closest(".field")?.classList.remove("invalid");
 }
 
+function toggleLocationOther() {
+  const select = document.getElementById("demandLocation");
+  const field = document.getElementById("demandLocationOtherField");
+  const input = document.getElementById("demandLocationOther");
+  const visible = select.value === "__other__";
+
+  field.hidden = !visible;
+  input.required = visible;
+
+  if (visible) {
+    populateSubdivisions("");
+  } else {
+    input.closest(".field")?.classList.remove("invalid");
+  }
+}
+
+function locationDraft() {
+  const selected = document.getElementById("demandLocation").value;
+
+  if (!selected) {
+    return { id: null, name: "", isOther: false };
+  }
+
+  if (selected === "__other__") {
+    return {
+      id: null,
+      name: smartName(document.getElementById("demandLocationOther").value),
+      isOther: true,
+    };
+  }
+
+  const item = catalogItem("locations", selected);
+
+  return {
+    id: item?.id || null,
+    name: item?.name || "",
+    isOther: false,
+  };
+}
+
 function catalogDraft(config) {
   const selected = document.getElementById(config.select).value;
   if (!selected) return { id: null, name: "", isOther: false };
@@ -73,7 +113,7 @@ function catalogDraft(config) {
 
 function collectDraft() {
   const catalogs = Object.fromEntries(catalogFields.map(config => [config.type, catalogDraft(config)]));
-  const locationId = document.getElementById("demandLocation").value;
+  const location = locationDraft();
   const subdivisionId = document.getElementById("demandSubdivision").value;
   return {
     id: document.getElementById("demandId").value,
@@ -82,8 +122,10 @@ function collectDraft() {
     description: smartSentence(document.getElementById("demandDescription").value),
     requester: smartName(document.getElementById("demandRequester").value),
     catalogs,
-    location: catalogItem("locations", locationId),
-    subdivision: (state.catalogs.locationSubdivisions || []).find(item => item.id === subdivisionId) || null,
+    location,
+    subdivision: location.isOther
+      ? null
+      : (state.catalogs.locationSubdivisions || []).find(item => item.id === subdivisionId) || null,
     priority: document.getElementById("demandPriority").value,
     status: document.getElementById("demandStatus").value,
     manager_status: document.getElementById("demandManagerStatus").value,
@@ -109,7 +151,7 @@ function validateDraft(draft) {
     ["demandDescription", draft.description.length >= 5],
     ["demandResponsible", Boolean(draft.catalogs.responsibles.name)],
     ["demandManager", Boolean(draft.catalogs.managers.name)],
-    ["demandLocation", Boolean(draft.location)],
+    ["demandLocation", Boolean(draft.location.name)],
     ["demandStartDate", Boolean(draft.start_date)],
     ["demandDueDate", Boolean(draft.due_date)],
   ];
@@ -121,6 +163,10 @@ function validateDraft(draft) {
       valid = false;
     }
   });
+  if (draft.location.isOther && !draft.location.name) {
+    setInvalid("demandLocationOther", true);
+    valid = false;
+  }
   if (draft.start_date && draft.due_date && draft.due_date < draft.start_date) {
     setInvalid("demandDueDate", true);
     showToast("O prazo não pode ser anterior à data de entrada.", "error");
@@ -142,11 +188,23 @@ function validateDraft(draft) {
 
 async function resolveCatalogs(draft) {
   const result = {};
+
   for (const config of catalogFields) {
     const item = draft.catalogs[config.type];
-    if (!item.name) { result[config.type] = null; continue; }
-    result[config.type] = item.id ? catalogItem(config.type, item.id) : await findOrCreateCatalog(config.type, item.name);
+    if (!item.name) {
+      result[config.type] = null;
+      continue;
+    }
+
+    result[config.type] = item.id
+      ? catalogItem(config.type, item.id)
+      : await findOrCreateCatalog(config.type, item.name);
   }
+
+  result.location = draft.location.id
+    ? catalogItem("locations", draft.location.id)
+    : await findOrCreateCatalog("locations", draft.location.name);
+
   return result;
 }
 
@@ -161,8 +219,8 @@ function payloadFrom(draft, catalogs) {
     manager: catalogs.managers?.name || "",
     manager_id: catalogs.managers?.id || null,
     manager_status: draft.manager_status,
-    location_id: draft.location?.id || null,
-    location_name: draft.location?.name || null,
+    location_id: catalogs.location?.id || null,
+    location_name: catalogs.location?.name || draft.location.name || null,
     location_subdivision_id: draft.subdivision?.id || null,
     location_subdivision_name: draft.subdivision?.name || null,
     department: catalogs.departments?.name || "",
@@ -195,6 +253,7 @@ function resetForm() {
   populateCatalogs();
   populateSubdivisions("");
   catalogFields.forEach(toggleOther);
+  toggleLocationOther();
   document.querySelectorAll(".field.invalid").forEach(field => field.classList.remove("invalid"));
 }
 
@@ -212,6 +271,34 @@ function setCatalogValue(config, id, name) {
     other.value = "";
   }
   toggleOther(config);
+}
+
+function setLocationValue(id, name) {
+  const select = document.getElementById("demandLocation");
+  const other = document.getElementById("demandLocationOther");
+
+  if (id && [...select.options].some(option => option.value === id)) {
+    select.value = id;
+    other.value = "";
+  } else if (name) {
+    const matching = [...select.options].find(option =>
+      option.value !== "__other__" &&
+      option.textContent.localeCompare(name, "pt-BR", { sensitivity: "accent" }) === 0
+    );
+
+    if (matching) {
+      select.value = matching.value;
+      other.value = "";
+    } else {
+      select.value = "__other__";
+      other.value = name;
+    }
+  } else {
+    select.value = "";
+    other.value = "";
+  }
+
+  toggleLocationOther();
 }
 
 function loadDemand(id) {
@@ -233,8 +320,13 @@ function loadDemand(id) {
     departments: [demand.department_id, demand.department],
   };
   catalogFields.forEach(config => setCatalogValue(config, ...values[config.type]));
-  document.getElementById("demandLocation").value = demand.location_id || "";
-  populateSubdivisions(demand.location_id || "", demand.location_subdivision_id || "");
+  setLocationValue(demand.location_id, demand.location_name);
+
+  const selectedLocation = document.getElementById("demandLocation").value;
+  populateSubdivisions(
+    selectedLocation === "__other__" ? "" : selectedLocation,
+    demand.location_subdivision_id || "",
+  );
   document.getElementById("demandPriority").value = demand.priority;
   document.getElementById("demandStatus").value = demand.status;
   document.getElementById("demandManagerStatus").value = demand.manager_status || "Solicitado";
@@ -250,11 +342,14 @@ bootPage(() => {
   populateCatalogs();
   resetForm();
   catalogFields.forEach(config => document.getElementById(config.select).addEventListener("change", () => toggleOther(config)));
-  document.getElementById("demandLocation").addEventListener("change", event => populateSubdivisions(event.currentTarget.value));
+  document.getElementById("demandLocation").addEventListener("change", event => {
+    toggleLocationOther();
+    populateSubdivisions(event.currentTarget.value === "__other__" ? "" : event.currentTarget.value);
+  });
   [
     ["demandTitle", "sentence"], ["demandDescription", "sentence"], ["demandRequester", "name"],
     ["demandResponsibleOther", "name"], ["demandManagerOther", "name"], ["demandDepartmentOther", "name"],
-    ["demandNotes", "sentence"],
+    ["demandLocationOther", "name"], ["demandNotes", "sentence"],
   ].forEach(([id, mode]) => bindSmartText(document.getElementById(id), mode));
   bindNumericOnly(document.getElementById("demandEstimatedHours"));
   bindNumericOnly(document.getElementById("demandActualHours"));

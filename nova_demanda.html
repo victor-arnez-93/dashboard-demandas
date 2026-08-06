@@ -137,7 +137,23 @@
               <select id="demandLocation" required>
                 <option value="">Selecione</option>
               </select>
-              <small class="field-error">Selecione um polo.</small>
+              <small class="field-error">Selecione ou informe um polo.</small>
+            </label>
+
+            <label
+              class="field conditional-field"
+              id="demandLocationOtherField"
+              hidden
+            >
+              <span>Outro polo *</span>
+              <input
+                id="demandLocationOther"
+                type="text"
+                maxlength="160"
+                placeholder="Digite o nome do polo"
+              >
+              <small class="field-error">Informe o nome do novo polo.</small>
+              <small>O polo será adicionado automaticamente aos Cadastros.</small>
             </label>
 
             <label class="field" id="demandSubdivisionField" hidden>
@@ -386,9 +402,9 @@
 
             <span>
               Gestores, responsáveis, departamentos, polos e subdivisões podem ser
-              mantidos previamente na página Cadastros. A opção “Outro” cria
-              uma nova opção somente depois que o formulário inteiro estiver
-              válido.
+              mantidos previamente na página Cadastros. Ao escolher “Outro polo”,
+              o novo polo será cadastrado automaticamente quando o formulário
+              inteiro estiver válido.
             </span>
           </div>
         </section>

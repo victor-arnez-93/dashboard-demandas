@@ -27,6 +27,7 @@ import {
 } from "./form-utils.js";
 
 const otherFields = [
+  ["converterLocation", "converterLocationOtherField", "converterLocationOther"],
   ["converterServiceType", "converterServiceTypeOtherField", "converterServiceTypeOther"],
   ["converterStatus", "converterStatusOtherField", "converterStatusOther"],
   ["converterResponsible", "converterResponsibleOtherField", "converterResponsibleOther"],
@@ -81,7 +82,7 @@ function populateSelects() {
   const currentLocationFilter = locationFilter.value;
   const currentManagerFilter = managerFilter.value;
 
-  locationSelect.innerHTML = `<option value="">Selecione</option>${options(locations)}`;
+  locationSelect.innerHTML = `<option value="">Selecione</option>${options(locations)}<option value="__other__">Outro polo</option>`;
   responsibleSelect.innerHTML = `<option value="">Não informado</option>${options(responsibles)}<option value="__other__">Outro</option>`;
   managerSelect.innerHTML = `<option value="">Selecione</option>${options(managers)}`;
   locationFilter.innerHTML = `<option value="">Todos</option>${locations.map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
@@ -109,7 +110,15 @@ function populateSubdivisions(locationId, selectedId = "") {
 function toggleOther(selectId, fieldId, inputId) {
   const visible = document.getElementById(selectId).value === "__other__";
   document.getElementById(fieldId).hidden = !visible;
-  document.getElementById(inputId).required = visible && ["converterServiceType", "converterStatus"].includes(selectId);
+  document.getElementById(inputId).required = visible && [
+    "converterLocation",
+    "converterServiceType",
+    "converterStatus",
+  ].includes(selectId);
+
+  if (!visible) {
+    document.getElementById(inputId).closest(".field")?.classList.remove("invalid");
+  }
 }
 
 function resetForm() {
@@ -145,7 +154,11 @@ function valueFromSelect(selectId, otherId, mode = "name") {
 }
 
 function collectDraft() {
-  const locationId = document.getElementById("converterLocation").value;
+  const location = valueFromSelect(
+    "converterLocation",
+    "converterLocationOther",
+    "name",
+  );
   const subdivisionId = document.getElementById("converterSubdivision").value;
   const managerId = document.getElementById("converterManager").value;
   return {
@@ -153,8 +166,10 @@ function collectDraft() {
     lpu_number: document.getElementById("converterLpuNumber").value.trim(),
     project: smartSentence(document.getElementById("converterProject").value),
     service_date: document.getElementById("converterDate").value,
-    location: catalogItem("locations", locationId),
-    subdivision: (state.catalogs.locationSubdivisions || []).find(item => item.id === subdivisionId) || null,
+    location,
+    subdivision: location.other
+      ? null
+      : (state.catalogs.locationSubdivisions || []).find(item => item.id === subdivisionId) || null,
     manager: catalogItem("managers", managerId),
     equipment_type: document.getElementById("converterEquipmentType").value,
     service_type: valueFromSelect("converterServiceType", "converterServiceTypeOther", "sentence"),
@@ -171,7 +186,7 @@ function validateDraft(draft) {
     ["converterLpuNumber", Boolean(draft.lpu_number)],
     ["converterProject", draft.project.length >= 3],
     ["converterDate", Boolean(draft.service_date)],
-    ["converterLocation", Boolean(draft.location)],
+    ["converterLocation", Boolean(draft.location.name)],
     ["converterManager", Boolean(draft.manager)],
     ["converterEquipmentType", Boolean(draft.equipment_type)],
     ["converterServiceType", Boolean(draft.service_type.name)],
@@ -185,6 +200,7 @@ function validateDraft(draft) {
     if (!ok) valid = false;
   });
   [
+    [draft.location, "converterLocationOther"],
     [draft.service_type, "converterServiceTypeOther"],
     [draft.status, "converterStatusOther"],
     [draft.responsible, "converterResponsibleOther"],
@@ -199,6 +215,10 @@ function validateDraft(draft) {
 }
 
 async function payloadFromDraft(draft) {
+  const location = draft.location.id
+    ? catalogItem("locations", draft.location.id)
+    : await findOrCreateCatalog("locations", draft.location.name);
+
   let responsible = null;
   if (draft.responsible.name) {
     responsible = draft.responsible.id
@@ -209,8 +229,8 @@ async function payloadFromDraft(draft) {
     lpu_number: draft.lpu_number,
     project: draft.project,
     service_date: draft.service_date,
-    location_id: draft.location?.id || null,
-    location_name: draft.location?.name || null,
+    location_id: location?.id || null,
+    location_name: location?.name || draft.location.name || null,
     location_subdivision_id: draft.subdivision?.id || null,
     location_subdivision_name: draft.subdivision?.name || null,
     manager_id: draft.manager?.id || null,
@@ -324,8 +344,17 @@ function editRecord(record) {
   document.getElementById("converterLpuNumber").value = record.lpu_number || "";
   document.getElementById("converterProject").value = record.project || "";
   document.getElementById("converterDate").value = record.service_date;
-  setSelectValue("converterLocation", null, record.location_id, record.location_name);
-  populateSubdivisions(record.location_id || "", record.location_subdivision_id || "");
+  setSelectValue(
+    "converterLocation",
+    "converterLocationOther",
+    record.location_id,
+    record.location_name,
+  );
+  const selectedLocation = document.getElementById("converterLocation").value;
+  populateSubdivisions(
+    selectedLocation === "__other__" ? "" : selectedLocation,
+    record.location_subdivision_id || "",
+  );
   setSelectValue("converterManager", null, record.manager_id, record.manager_name);
   document.getElementById("converterEquipmentType").value = record.equipment_type || "Conversor";
   setSelectValue("converterServiceType", "converterServiceTypeOther", null, record.service_type);
@@ -374,9 +403,14 @@ bootPage(() => {
   applyDefaultFilters();
   resetForm();
   otherFields.forEach(args => document.getElementById(args[0]).addEventListener("change", () => toggleOther(...args)));
-  document.getElementById("converterLocation").addEventListener("change", event => populateSubdivisions(event.currentTarget.value));
+  document.getElementById("converterLocation").addEventListener("change", event => {
+    populateSubdivisions(
+      event.currentTarget.value === "__other__" ? "" : event.currentTarget.value,
+    );
+  });
   [
     ["converterProject", "sentence"],
+    ["converterLocationOther", "name"],
     ["converterServiceTypeOther", "sentence"],
     ["converterStatusOther", "sentence"],
     ["converterResponsibleOther", "name"],

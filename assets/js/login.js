@@ -1,5 +1,6 @@
 import { log } from "./logger.js";
 import {
+  clearStoredAuthSessions,
   configureAuthPersistence,
   getSupabase,
   isConfigured,
@@ -149,7 +150,7 @@ async function boot() {
   applyLoginTheme(savedTheme);
 
   if (remember) {
-    remember.checked = shouldRememberSession();
+    remember.checked = false;
   }
 
   if (!isConfigured()) {
@@ -170,9 +171,16 @@ async function boot() {
       throw error;
     }
 
-    if (data.session) {
-      location.replace("inicio.html");
+    if (!data.session) {
+      clearStoredAuthSessions();
+      return;
     }
+
+    if (remember) {
+      remember.checked = true;
+    }
+
+    location.replace("inicio.html");
   } catch (error) {
     log.error(
       "AUTH",

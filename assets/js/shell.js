@@ -1,7 +1,14 @@
 import { log } from "./logger.js";
 import { requireSession, getSupabase, clearStoredAuthSessions } from "./supabase-client.js";
 import { initializeStore, resetStore, state, saveProfile } from "./store.js";
-import { applyTheme, applyIdentity, initClock, closeModal, showToast } from "./ui.js";
+import {
+  applyTheme,
+  applyIdentity,
+  initClock,
+  openModal,
+  closeModal,
+  showToast,
+} from "./ui.js";
 import { initializeWeather, openWeather, closeWeather, refreshWeather } from "./weather.js";
 
 const VERSION = "v1.3.0";
@@ -89,7 +96,51 @@ function mountShell() {
           </div>
         </div>
       </div>
-    </header>`;
+    </header>
+
+    <div class="modal-layer" id="logoutConfirmModal" hidden>
+      <div
+        class="modal-backdrop"
+        data-close-modal="logoutConfirmModal"
+      ></div>
+
+      <section
+        class="modal-card confirm-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logoutConfirmTitle"
+        aria-describedby="logoutConfirmText"
+      >
+        <div class="confirm-icon">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </div>
+
+        <h2 id="logoutConfirmTitle">Sair do sistema?</h2>
+
+        <p id="logoutConfirmText">
+          Sua sessão será encerrada e será necessário entrar novamente.
+        </p>
+
+        <div class="modal-actions">
+          <button
+            class="btn-ghost"
+            type="button"
+            data-close-modal="logoutConfirmModal"
+          >
+            Cancelar
+          </button>
+
+          <button
+            class="btn-danger"
+            id="logoutConfirmButton"
+            type="button"
+          >
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Sair</span>
+          </button>
+        </div>
+      </section>
+    </div>`;
   main.replaceWith(column);
   column.appendChild(main);
   shell.appendChild(column);
@@ -151,8 +202,32 @@ function bindShell() {
     }
   });
 
-  document.getElementById("logoutButton")?.addEventListener("click", async () => {
-    try { await getSupabase().auth.signOut(); } catch (error) { log.warn("AUTH", "Falha ao encerrar sessão no servidor.", error); }
+  document.getElementById("logoutButton")?.addEventListener("click", () => {
+    userMenu.hidden = true;
+    userButton?.setAttribute("aria-expanded", "false");
+    openModal("logoutConfirmModal");
+  });
+
+  document.getElementById("logoutConfirmButton")?.addEventListener("click", async event => {
+    const button = event.currentTarget;
+    const label = button.querySelector("span");
+
+    button.disabled = true;
+
+    if (label) {
+      label.textContent = "Saindo...";
+    }
+
+    try {
+      await getSupabase().auth.signOut();
+    } catch (error) {
+      log.warn(
+        "AUTH",
+        "Falha ao encerrar sessão no servidor.",
+        error,
+      );
+    }
+
     resetStore();
     clearStoredAuthSessions();
     sessionStorage.clear();

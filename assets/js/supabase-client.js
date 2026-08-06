@@ -34,8 +34,10 @@ function clearAuthFrom(storage) {
 }
 
 export function clearStoredAuthSessions() {
+  localStorage.removeItem(REMEMBER_KEY);
   clearAuthFrom(localStorage);
   clearAuthFrom(sessionStorage);
+  client = null;
 }
 
 export function configureAuthPersistence(remember) {

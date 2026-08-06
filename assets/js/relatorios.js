@@ -6,7 +6,14 @@ import {
   demandProject,
   activeCatalog,
 } from "./store.js";
-import { escapeHtml, formatDate, formatHours, showToast } from "./ui.js";
+import {
+  escapeHtml,
+  formatDate,
+  formatHours,
+  showToast,
+  renderDemandDetail,
+  renderConverterDetail,
+} from "./ui.js";
 import { intervalFor, dateInInterval } from "./charts.js";
 
 let activePeriod = "month";
@@ -278,9 +285,44 @@ function render() {
   document.getElementById("reportPeriodLabel").textContent = periodLabel();
   document.getElementById("reportDemandCount").textContent = `${reportDemands.length} ${reportDemands.length === 1 ? "registro" : "registros"}`;
 
-  document.getElementById("reportBody").innerHTML = reportDemands.length ? reportDemands.map(item => `<tr>
-    <td>${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}</td><td>${escapeHtml(item.lpu_number || "—")}</td><td><strong>${escapeHtml(demandProject(item))}</strong><small>${escapeHtml(item.description || "")}</small></td><td>${escapeHtml(item.manager?.trim() || "Gestor não informado")}</td><td>${escapeHtml(item.responsible)}</td><td>${escapeHtml(item.priority)}</td><td>${escapeHtml(effectiveStatus(item))}</td><td>${escapeHtml(item.manager_status || "—")}</td><td>${formatDate(item.start_date, { year: true })}</td><td>${formatDate(item.due_date, { year: true })}</td><td>${formatHours(item.estimated_hours)}</td><td>${formatHours(item.actual_hours)}</td>
-  </tr>`).join("") : `<tr><td colspan="12" class="empty-table">Nenhuma demanda encontrada para os filtros.</td></tr>`;
+  document.getElementById("reportBody").innerHTML = reportDemands.length
+    ? reportDemands.map(item => {
+      const project = demandProject(item);
+      const location = [item.location_name, item.location_subdivision_name]
+        .filter(Boolean)
+        .join(" · ") || "—";
+
+      return `<tr>
+        <td title="${escapeHtml(location)}">${escapeHtml(location)}</td>
+        <td title="${escapeHtml(item.lpu_number || "—")}">${escapeHtml(item.lpu_number || "—")}</td>
+        <td title="${escapeHtml(project)}">
+          <strong>${escapeHtml(project)}</strong>
+          <small title="${escapeHtml(item.description || "Sem descrição")}">${escapeHtml(item.description || "")}</small>
+        </td>
+        <td title="${escapeHtml(item.manager?.trim() || "Gestor não informado")}">${escapeHtml(item.manager?.trim() || "Gestor não informado")}</td>
+        <td title="${escapeHtml(item.responsible || "—")}">${escapeHtml(item.responsible || "—")}</td>
+        <td title="${escapeHtml(item.priority || "—")}">${escapeHtml(item.priority || "—")}</td>
+        <td title="${escapeHtml(effectiveStatus(item))}">${escapeHtml(effectiveStatus(item))}</td>
+        <td title="${escapeHtml(item.manager_status || "—")}">${escapeHtml(item.manager_status || "—")}</td>
+        <td>${formatDate(item.start_date, { year: true })}</td>
+        <td>${formatDate(item.due_date, { year: true })}</td>
+        <td>${formatHours(item.estimated_hours)}</td>
+        <td>${formatHours(item.actual_hours)}</td>
+        <td class="report-actions-cell">
+          <button
+            class="action-btn report-view-button"
+            type="button"
+            data-report-detail="demand"
+            data-id="${escapeHtml(item.id)}"
+            title="Visualizar todas as informações"
+            aria-label="Visualizar detalhes de ${escapeHtml(project)}"
+          >
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </td>
+      </tr>`;
+    }).join("")
+    : `<tr><td colspan="13" class="empty-table">Nenhuma demanda encontrada para os filtros.</td></tr>`;
 
   const converters = converterSummary(reportConverters);
   document.getElementById("reportConverterRecords").textContent = reportConverters.length;
@@ -291,11 +333,58 @@ function render() {
   document.getElementById("reportConverterTopLocation").title = converters.topLocation;
   document.getElementById("reportConverterTopLocationCount").textContent = converters.topLocationCount;
   document.getElementById("reportConverterSummary").textContent = `${converters.quantity} ${converters.quantity === 1 ? "equipamento" : "equipamentos"}`;
-  document.getElementById("reportConvertersBody").innerHTML = reportConverters.length ? reportConverters.map(item => `<tr>
-    <td>${escapeHtml([item.location_name, item.location_subdivision_name].filter(Boolean).join(" · ") || "—")}</td><td>${escapeHtml(item.lpu_number || "—")}</td><td>${escapeHtml(item.project || "—")}</td><td>${escapeHtml(item.manager_name || "—")}</td><td>${escapeHtml(item.equipment_type || "—")}</td><td>${escapeHtml(item.service_type || "—")}</td><td>${Number(item.quantity_replaced || 0)}</td><td>${escapeHtml(item.issue_reason || "—")}</td><td>${escapeHtml(item.notes || "—")}</td><td>${escapeHtml(item.status || "—")}</td>
-  </tr>`).join("") : `<tr><td colspan="10" class="empty-table">Nenhum atendimento de equipamento encontrado para os filtros.</td></tr>`;
+  document.getElementById("reportConvertersBody").innerHTML = reportConverters.length
+    ? reportConverters.map(item => {
+      const location = [item.location_name, item.location_subdivision_name]
+        .filter(Boolean)
+        .join(" · ") || "—";
+      const identifier = item.lpu_number
+        ? `Chamado ${item.lpu_number}`
+        : item.project || "atendimento";
+
+      return `<tr>
+        <td title="${escapeHtml(location)}">${escapeHtml(location)}</td>
+        <td title="${escapeHtml(item.lpu_number || "—")}">${escapeHtml(item.lpu_number || "—")}</td>
+        <td title="${escapeHtml(item.project || "—")}">${escapeHtml(item.project || "—")}</td>
+        <td title="${escapeHtml(item.manager_name || "—")}">${escapeHtml(item.manager_name || "—")}</td>
+        <td title="${escapeHtml(item.equipment_type || "—")}">${escapeHtml(item.equipment_type || "—")}</td>
+        <td title="${escapeHtml(item.service_type || "—")}">${escapeHtml(item.service_type || "—")}</td>
+        <td>${Number(item.quantity_replaced || 0)}</td>
+        <td title="${escapeHtml(item.issue_reason || "—")}">${escapeHtml(item.issue_reason || "—")}</td>
+        <td title="${escapeHtml(item.notes || "—")}">${escapeHtml(item.notes || "—")}</td>
+        <td title="${escapeHtml(item.status || "—")}">${escapeHtml(item.status || "—")}</td>
+        <td class="report-actions-cell">
+          <button
+            class="action-btn report-view-button"
+            type="button"
+            data-report-detail="converter"
+            data-id="${escapeHtml(item.id)}"
+            title="Visualizar todas as informações"
+            aria-label="Visualizar detalhes de ${escapeHtml(identifier)}"
+          >
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </td>
+      </tr>`;
+    }).join("")
+    : `<tr><td colspan="11" class="empty-table">Nenhum atendimento de equipamento encontrado para os filtros.</td></tr>`;
 
   updateFilterFeedback();
+}
+
+
+function handleReportDetail(event) {
+  const button = event.target.closest("[data-report-detail]");
+  if (!button) return;
+
+  if (button.dataset.reportDetail === "demand") {
+    const demand = state.demands.find(item => String(item.id) === button.dataset.id);
+    if (demand) renderDemandDetail(demand);
+    return;
+  }
+
+  const converter = state.converters.find(item => String(item.id) === button.dataset.id);
+  if (converter) renderConverterDetail(converter);
 }
 
 function setPeriod(scope, value) {
@@ -1596,6 +1685,8 @@ bootPage(() => {
   document.getElementById("clearConverterFilters").addEventListener("click", clearConverterFilters);
   setupTableToggle("demandReportSection", "toggleDemandTable");
   setupTableToggle("converterReportSection", "toggleConverterTable");
+  document.getElementById("reportBody").addEventListener("click", handleReportDetail);
+  document.getElementById("reportConvertersBody").addEventListener("click", handleReportDetail);
   document.getElementById("exportExcelButton").addEventListener("click", exportExcel);
   document.getElementById("exportPdfButton").addEventListener("click", exportPdf);
   setPeriod("demands", "month");

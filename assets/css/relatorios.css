@@ -580,10 +580,12 @@ body[data-page="relatorios"] .page-heading::after {
 }
 
 .report-table-scroll {
-  max-height: 405px;
-  overflow: auto;
+  max-height: 330px;
+  overflow-x: auto;
+  overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  padding-bottom: 2px;
 }
 
 .report-table-scroll table {
@@ -599,8 +601,8 @@ body[data-page="relatorios"] .page-heading::after {
   border-bottom-color: color-mix(in srgb, var(--border) 78%, var(--text-muted));
   background: color-mix(in srgb, var(--surface-raised) 96%, var(--background));
   color: var(--text-muted);
-  font: 800 0.67rem/1.2 var(--font-text);
-  letter-spacing: 0.075em;
+  font: 800 0.64rem/1.2 var(--font-text);
+  letter-spacing: 0.065em;
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
@@ -608,33 +610,39 @@ body[data-page="relatorios"] .page-heading::after {
 }
 
 .report-table-scroll tbody tr {
-  height: 64px;
+  height: 58px;
 }
 
 .report-table-scroll th,
 .report-table-scroll td {
   min-width: 0;
-  padding: 13px 14px;
+  padding: 10px 11px;
   overflow: hidden;
-  font-size: 0.78rem;
-  line-height: 1.35;
+  font-size: 0.74rem;
+  line-height: 1.32;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.report-table-scroll td {
+  color: var(--text-soft);
+}
+
 .report-table-scroll td.empty-table {
+  height: 150px;
   overflow: visible;
+  color: var(--text-muted);
   text-align: center;
   text-overflow: clip;
   white-space: normal;
 }
 
 .report-demands-table {
-  min-width: 1540px;
+  min-width: 1300px;
 }
 
 .report-converters-table {
-  min-width: 1460px;
+  min-width: 1260px;
 }
 
 .report-demands-table td:nth-child(3) strong,
@@ -645,77 +653,157 @@ body[data-page="relatorios"] .page-heading::after {
   white-space: nowrap;
 }
 
+.report-demands-table td:nth-child(3) strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .report-demands-table td:nth-child(3) small {
-  margin-top: 4px;
+  margin-top: 3px;
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
 }
 
-.report-demands-table th:nth-child(1) {
-  width: 10%;
+.report-demands-table th:nth-child(1),
+.report-demands-table td:nth-child(1) {
+  width: 105px;
 }
 
-.report-demands-table th:nth-child(2) {
-  width: 6%;
+.report-demands-table th:nth-child(2),
+.report-demands-table td:nth-child(2) {
+  width: 100px;
 }
 
-.report-demands-table th:nth-child(3) {
-  width: 16%;
+.report-demands-table th:nth-child(3),
+.report-demands-table td:nth-child(3) {
+  width: 190px;
 }
 
 .report-demands-table th:nth-child(4),
-.report-demands-table th:nth-child(5) {
-  width: 9%;
+.report-demands-table td:nth-child(4) {
+  width: 110px;
+}
+
+.report-demands-table th:nth-child(5),
+.report-demands-table td:nth-child(5) {
+  width: 120px;
 }
 
 .report-demands-table th:nth-child(6),
-.report-demands-table th:nth-child(11),
-.report-demands-table th:nth-child(12) {
-  width: 6%;
+.report-demands-table td:nth-child(6) {
+  width: 85px;
 }
 
-.report-demands-table th:nth-child(7) {
-  width: 8%;
+.report-demands-table th:nth-child(7),
+.report-demands-table td:nth-child(7) {
+  width: 95px;
 }
 
-.report-demands-table th:nth-child(8) {
-  width: 10%;
+.report-demands-table th:nth-child(8),
+.report-demands-table td:nth-child(8) {
+  width: 140px;
 }
 
 .report-demands-table th:nth-child(9),
-.report-demands-table th:nth-child(10) {
-  width: 7%;
+.report-demands-table td:nth-child(9),
+.report-demands-table th:nth-child(10),
+.report-demands-table td:nth-child(10) {
+  width: 85px;
 }
 
-.report-converters-table th:nth-child(1) {
-  width: 10%;
+.report-demands-table th:nth-child(11),
+.report-demands-table td:nth-child(11),
+.report-demands-table th:nth-child(12),
+.report-demands-table td:nth-child(12) {
+  width: 60px;
+  text-align: center;
 }
 
-.report-converters-table th:nth-child(2) {
-  width: 7%;
+.report-demands-table th:nth-child(13),
+.report-demands-table td:nth-child(13) {
+  width: 65px;
 }
 
-.report-converters-table th:nth-child(3) {
-  width: 15%;
+.report-converters-table th:nth-child(1),
+.report-converters-table td:nth-child(1) {
+  width: 105px;
+}
+
+.report-converters-table th:nth-child(2),
+.report-converters-table td:nth-child(2) {
+  width: 120px;
+}
+
+.report-converters-table th:nth-child(3),
+.report-converters-table td:nth-child(3) {
+  width: 150px;
 }
 
 .report-converters-table th:nth-child(4),
-.report-converters-table th:nth-child(5),
-.report-converters-table th:nth-child(6) {
-  width: 9%;
+.report-converters-table td:nth-child(4) {
+  width: 110px;
 }
 
-.report-converters-table th:nth-child(7) {
-  width: 5%;
+.report-converters-table th:nth-child(5),
+.report-converters-table td:nth-child(5) {
+  width: 125px;
+}
+
+.report-converters-table th:nth-child(6),
+.report-converters-table td:nth-child(6) {
+  width: 110px;
+}
+
+.report-converters-table th:nth-child(7),
+.report-converters-table td:nth-child(7) {
+  width: 55px;
+  text-align: center;
 }
 
 .report-converters-table th:nth-child(8),
-.report-converters-table th:nth-child(9) {
-  width: 13%;
+.report-converters-table td:nth-child(8),
+.report-converters-table th:nth-child(9),
+.report-converters-table td:nth-child(9) {
+  width: 160px;
 }
 
-.report-converters-table th:nth-child(10) {
-  width: 8%;
+.report-converters-table th:nth-child(10),
+.report-converters-table td:nth-child(10) {
+  width: 100px;
+}
+
+.report-converters-table th:nth-child(11),
+.report-converters-table td:nth-child(11) {
+  width: 65px;
+}
+
+.report-actions-cell {
+  overflow: visible !important;
+  padding-right: 9px !important;
+  padding-left: 9px !important;
+  text-align: center;
+}
+
+.report-view-button {
+  width: 34px;
+  height: 34px;
+  margin-inline: auto;
+}
+
+.report-view-button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  outline-offset: 2px;
+}
+
+.report-detail-modal {
+  width: min(900px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+}
+
+.report-detail-modal .detail-content {
+  max-height: min(62vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* ============================================================

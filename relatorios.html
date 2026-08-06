@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/relatorios.css?v=20260806-1">
+  <link rel="stylesheet" href="assets/css/relatorios.css?v=20260806-2">
   
 </head>
 <body data-page="relatorios" data-page-label="Relatórios">
@@ -59,7 +59,7 @@
 
         <section class="table-shell report-section is-collapsed" id="demandReportSection">
           <div class="panel-head"><div><small>DETALHAMENTO</small><h2>Demandas do relatório</h2></div><div class="report-section-actions"><strong id="reportDemandCount">0 registros</strong><button class="report-table-toggle" id="toggleDemandTable" type="button" aria-expanded="false" aria-controls="demandTableContent" aria-label="Mostrar tabela de demandas" title="Mostrar tabela"><i class="fa-solid fa-chevron-down"></i><span class="report-toggle-label">Mostrar tabela</span></button></div></div>
-          <div class="report-collapsible" id="demandTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-demands-table"><thead><tr><th>Polo</th><th>Número LPU</th><th>Projeto</th><th>Gestor</th><th>Responsável</th><th>Prioridade</th><th>Status</th><th>Status gestor</th><th>Entrada</th><th>Prazo</th><th>Est.</th><th>Real.</th></tr></thead><tbody id="reportBody"><tr><td colspan="12" class="empty-table">Carregando relatório...</td></tr></tbody></table></div></div></div>
+          <div class="report-collapsible" id="demandTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-demands-table"><thead><tr><th>Polo</th><th>Número LPU</th><th>Projeto</th><th>Gestor</th><th>Responsável</th><th>Prioridade</th><th>Status</th><th>Status gestor</th><th>Entrada</th><th>Prazo</th><th>Est.</th><th>Real.</th><th>Ações</th></tr></thead><tbody id="reportBody"><tr><td colspan="13" class="empty-table">Carregando relatório...</td></tr></tbody></table></div></div></div>
         </section>
       </section>
 
@@ -99,9 +99,72 @@
 
         <section class="table-shell report-section is-collapsed" id="converterReportSection">
           <div class="panel-head"><div><small>DETALHAMENTO</small><h2>Conversores e fontes PoE no período</h2></div><div class="report-section-actions"><strong id="reportConverterSummary">0 equipamentos</strong><button class="report-table-toggle" id="toggleConverterTable" type="button" aria-expanded="false" aria-controls="converterTableContent" aria-label="Mostrar tabela de equipamentos" title="Mostrar tabela"><i class="fa-solid fa-chevron-down"></i><span class="report-toggle-label">Mostrar tabela</span></button></div></div>
-          <div class="report-collapsible" id="converterTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-converters-table"><thead><tr><th>Polo</th><th>Número do chamado</th><th>LPU agregada</th><th>Gestor</th><th>Equipamento</th><th>Atendimento</th><th>Qtd.</th><th>Descrição</th><th>Resolução</th><th>Status</th></tr></thead><tbody id="reportConvertersBody"><tr><td colspan="10" class="empty-table">Carregando equipamentos...</td></tr></tbody></table></div></div></div>
+          <div class="report-collapsible" id="converterTableContent"><div class="report-collapsible-inner"><div class="report-table-scroll"><table class="report-converters-table"><thead><tr><th>Polo</th><th>Número do chamado</th><th>LPU agregada</th><th>Gestor</th><th>Equipamento</th><th>Atendimento</th><th>Qtd.</th><th>Descrição</th><th>Resolução</th><th>Status</th><th>Ações</th></tr></thead><tbody id="reportConvertersBody"><tr><td colspan="11" class="empty-table">Carregando equipamentos...</td></tr></tbody></table></div></div></div>
         </section>
       </section>
+
+
+      <div class="modal-layer" id="demandDetailModal" hidden>
+        <div class="modal-backdrop" data-close-modal="demandDetailModal"></div>
+        <section
+          class="modal-card report-detail-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="detailTitle"
+        >
+          <div class="modal-head">
+            <div>
+              <small id="detailCode">DEMANDA</small>
+              <h2 id="detailTitle">Detalhes da demanda</h2>
+            </div>
+            <button
+              class="icon-btn"
+              type="button"
+              data-close-modal="demandDetailModal"
+              aria-label="Fechar detalhes da demanda"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="detail-content" id="demandDetailContent"></div>
+          <div class="modal-actions">
+            <button class="btn-ghost" type="button" data-close-modal="demandDetailModal">
+              Fechar
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="modal-layer" id="converterDetailModal" hidden>
+        <div class="modal-backdrop" data-close-modal="converterDetailModal"></div>
+        <section
+          class="modal-card report-detail-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="converterDetailTitle"
+        >
+          <div class="modal-head">
+            <div>
+              <small id="converterDetailCode">EQUIPAMENTO</small>
+              <h2 id="converterDetailTitle">Detalhes do atendimento</h2>
+            </div>
+            <button
+              class="icon-btn"
+              type="button"
+              data-close-modal="converterDetailModal"
+              aria-label="Fechar detalhes do atendimento"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="detail-content" id="converterDetailContent"></div>
+          <div class="modal-actions">
+            <button class="btn-ghost" type="button" data-close-modal="converterDetailModal">
+              Fechar
+            </button>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
   <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
@@ -109,6 +172,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="assets/js/env.js"></script>
-  <script type="module" src="assets/js/relatorios.js?v=20260806-1"></script>
+  <script type="module" src="assets/js/relatorios.js?v=20260806-2"></script>
 </body>
 </html>

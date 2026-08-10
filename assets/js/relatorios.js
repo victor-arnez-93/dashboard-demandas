@@ -550,7 +550,7 @@ function exportExcel() {
       "Horas estimadas": Number(item.estimated_hours || 0),
       "Horas realizadas": Number(item.actual_hours || 0),
       Tags: (item.tags || []).join(", "),
-      Observações: item.notes || "",
+      "Atividades executadas": item.notes || "",
     }));
 
     const demandSheet = XLSX.utils.json_to_sheet(demandRows, { cellDates: true });

@@ -176,7 +176,7 @@ export function renderDemandDetail(demand) {
     ["Horas estimadas", formatHours(demand.estimated_hours)],
     ["Horas realizadas", formatHours(demand.actual_hours)],
     ["Descrição", demand.description, true],
-    ["Observações", demand.notes || "—", true],
+    ["Atividades executadas", demand.notes || "—", true],
     ["Tags", (demand.tags || []).join(", ") || "—", true],
   ];
   content.innerHTML = cells.map(([label, value, full]) =>

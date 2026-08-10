@@ -113,7 +113,6 @@ function getDemands() {
       item.requester,
       item.manager,
       item.responsible,
-      item.department,
       item.manager_status,
       item.priority,
       effectiveStatus(item),
@@ -541,7 +540,6 @@ function exportExcel() {
       Solicitante: item.requester || "",
       Gestor: item.manager?.trim() || "Gestor não informado",
       Responsável: item.responsible || "",
-      Departamento: item.department || "",
       Prioridade: item.priority || "",
       "Status operacional": effectiveStatus(item),
       "Status do gestor": item.manager_status || "",
@@ -554,9 +552,9 @@ function exportExcel() {
     }));
 
     const demandSheet = XLSX.utils.json_to_sheet(demandRows, { cellDates: true });
-    demandSheet["!cols"] = [24, 22, 14, 34, 48, 22, 22, 22, 20, 12, 20, 28, 14, 14, 16, 16, 24, 42]
+    demandSheet["!cols"] = [24, 22, 14, 34, 48, 22, 22, 22, 12, 20, 28, 14, 14, 16, 16, 24, 42]
       .map(wch => ({ wch }));
-    demandSheet["!autofilter"] = { ref: demandSheet["!ref"] || "A1:R1" };
+    demandSheet["!autofilter"] = { ref: demandSheet["!ref"] || "A1:Q1" };
     demandSheet["!freeze"] = { xSplit: 0, ySplit: 1 };
 
     for (let row = 2; row <= demandRows.length + 1; row += 1) {
@@ -956,10 +954,6 @@ function pdfDemandRows(records) {
 
       item.requester
         ? `Solicitante: ${pdfValue(item.requester)}`
-        : null,
-
-      item.department
-        ? `Departamento: ${pdfValue(item.department)}`
         : null,
 
       `Prioridade: ${pdfValue(item.priority)} · ` +

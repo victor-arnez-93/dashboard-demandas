@@ -15,7 +15,6 @@ import { bindSmartText, bindNumericOnly, smartName, smartSentence, numberValue }
 const catalogFields = [
   { type: "responsibles", select: "demandResponsible", other: "demandResponsibleOther", field: "demandResponsibleOtherField", required: true },
   { type: "managers", select: "demandManager", other: "demandManagerOther", field: "demandManagerOtherField", required: true },
-  { type: "departments", select: "demandDepartment", other: "demandDepartmentOther", field: "demandDepartmentOtherField", required: false },
 ];
 
 function inputDate(date) {
@@ -223,8 +222,6 @@ function payloadFrom(draft, catalogs) {
     location_name: catalogs.location?.name || draft.location.name || null,
     location_subdivision_id: draft.subdivision?.id || null,
     location_subdivision_name: draft.subdivision?.name || null,
-    department: catalogs.departments?.name || "",
-    department_id: catalogs.departments?.id || null,
     priority: draft.priority,
     status: draft.status,
     start_date: draft.start_date,
@@ -317,7 +314,6 @@ function loadDemand(id) {
   const values = {
     responsibles: [demand.responsible_id, demand.responsible],
     managers: [demand.manager_id, demand.manager],
-    departments: [demand.department_id, demand.department],
   };
   catalogFields.forEach(config => setCatalogValue(config, ...values[config.type]));
   setLocationValue(demand.location_id, demand.location_name);
@@ -348,7 +344,7 @@ bootPage(() => {
   });
   [
     ["demandTitle", "sentence"], ["demandDescription", "sentence"], ["demandRequester", "name"],
-    ["demandResponsibleOther", "name"], ["demandManagerOther", "name"], ["demandDepartmentOther", "name"],
+    ["demandResponsibleOther", "name"], ["demandManagerOther", "name"],
     ["demandLocationOther", "name"], ["demandNotes", "sentence"],
   ].forEach(([id, mode]) => bindSmartText(document.getElementById(id), mode));
   bindNumericOnly(document.getElementById("demandEstimatedHours"));

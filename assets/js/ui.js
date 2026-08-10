@@ -170,7 +170,6 @@ export function renderDemandDetail(demand) {
     ["Gestor", demand.manager || "Gestor não informado"],
     ["Responsável", demand.responsible],
     ["Solicitante", demand.requester || "—"],
-    ["Departamento", demand.department || "—"],
     ["Entrada", formatDate(demand.start_date, { year: true })],
     ["Prazo", formatDate(demand.due_date, { year: true })],
     ["Horas estimadas", formatHours(demand.estimated_hours)],

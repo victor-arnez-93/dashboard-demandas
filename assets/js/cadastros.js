@@ -27,11 +27,6 @@ const META = {
     plural: "Responsáveis",
     icon: "fa-user-check",
   },
-  departments: {
-    label: "Departamento",
-    plural: "Departamentos",
-    icon: "fa-building",
-  },
   locations: {
     label: "Polo",
     plural: "Polos",

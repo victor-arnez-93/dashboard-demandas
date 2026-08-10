@@ -233,8 +233,6 @@ export async function saveDemand(payload, id = null) {
     location_name: payload.location_name || null,
     location_subdivision_id: payload.location_subdivision_id || null,
     location_subdivision_name: payload.location_subdivision_name || null,
-    department: payload.department || null,
-    department_id: payload.department_id || null,
     priority: payload.priority,
     status: payload.status,
     start_date: payload.start_date,

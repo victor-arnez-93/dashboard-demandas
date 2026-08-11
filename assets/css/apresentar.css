@@ -13,13 +13,15 @@ body.presentation-page::before {
 
 .presentation-shell {
   display: grid;
+  height: 100vh;
+  height: 100dvh;
   min-height: 100vh;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
 }
 
 .presentation-topbar {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(260px, 1fr) auto auto;
   align-items: center;
   gap: 20px;
   padding: 14px 22px;
@@ -82,6 +84,32 @@ body.presentation-page::before {
   gap: 8px;
 }
 
+.presentation-actions .btn-compact {
+  white-space: nowrap;
+}
+
+.presentation-filter-button {
+  position: relative;
+}
+
+.presentation-filter-button.active {
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+  background: color-mix(in srgb, var(--accent) 11%, var(--surface-raised));
+}
+
+.presentation-filter-button b {
+  display: inline-grid;
+  min-width: 19px;
+  height: 19px;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  line-height: 1;
+}
+
 .presentation-custom {
   display: flex;
   align-items: center;
@@ -112,15 +140,96 @@ body.presentation-page::before {
   color: var(--text);
 }
 
+.presentation-custom small {
+  color: var(--danger, #ee5b68);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.presentation-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(180px, 240px)) auto auto;
+  align-items: end;
+  gap: 12px;
+  padding: 11px 22px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.presentation-filter-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+  align-self: center;
+}
+
+.presentation-filter-heading > i {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-raised));
+  color: var(--accent);
+}
+
+.presentation-filter-heading span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.presentation-filter-heading strong {
+  font: 700 15px var(--font-title);
+}
+
+.presentation-filter-heading small {
+  overflow: hidden;
+  color: var(--text-soft);
+  font-size: 9px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presentation-filters label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-soft);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.presentation-filters select {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 34px 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-input);
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 600;
+}
+
 .presentation-stage {
   position: relative;
-  overflow: hidden;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 22px;
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-width: thin;
 }
 
 .presentation-slide {
   display: grid;
-  height: 100%;
+  min-height: 100%;
   align-content: start;
   gap: 17px;
   animation: slide-in .32s ease both;
@@ -153,6 +262,7 @@ body.presentation-page::before {
 }
 
 .presentation-slide-head > strong {
+  max-width: 48%;
   padding: 9px 14px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -160,6 +270,8 @@ body.presentation-page::before {
   color: var(--text-soft);
   font-size: 10px;
   font-weight: 700;
+  line-height: 1.35;
+  text-align: right;
   box-shadow: var(--shadow-soft);
 }
 
@@ -192,6 +304,26 @@ body.presentation-page::before {
   display: block;
   margin-top: 5px;
   font: 700 30px var(--font-title);
+}
+
+.presentation-kpi strong[data-tone="good"] {
+  color: var(--success, #2bbf88);
+}
+
+.presentation-kpi strong[data-tone="attention"] {
+  color: var(--accent);
+}
+
+.presentation-kpi > span {
+  display: block;
+  overflow: hidden;
+  margin-top: 4px;
+  color: var(--text-soft);
+  font-size: 9px;
+  font-weight: 550;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .presentation-kpi strong.text {
@@ -239,14 +371,76 @@ body.presentation-page::before {
   box-shadow: var(--shadow-soft);
 }
 
-.presentation-chart-card h3 {
-  margin: 0 0 9px;
+.presentation-chart-card-head {
+  display: flex;
+  min-height: 28px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+
+.presentation-chart-card-head h3 {
+  margin: 0;
   font-size: 20px;
+}
+
+.presentation-chart-card-head span {
+  max-width: 48%;
+  overflow: hidden;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--text-soft);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .presentation-chart {
   position: relative;
   height: 278px;
+}
+
+.presentation-manager-chart {
+  min-height: 230px;
+  transition: height .25s ease;
+}
+
+.presentation-chart-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 5px;
+  padding: 24px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface-raised) 58%, transparent);
+  color: var(--text-soft);
+  text-align: center;
+}
+
+.presentation-chart-empty i {
+  margin-bottom: 5px;
+  color: var(--accent);
+  font-size: 22px;
+}
+
+.presentation-chart-empty strong {
+  color: var(--text);
+  font: 700 16px var(--font-title);
+}
+
+.presentation-chart-empty span {
+  max-width: 320px;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .presentation-ranking {
@@ -271,8 +465,15 @@ body.presentation-page::before {
 
 .presentation-ranking strong {
   display: block;
+  overflow: hidden;
   margin-top: 4px;
   font: 700 19px var(--font-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presentation-ranking-empty {
+  grid-column: 1 / -1;
 }
 
 .presentation-ranking span {
@@ -423,11 +624,13 @@ body.presentation-page::before {
   background: color-mix(in srgb, #fff 94%, transparent);
 }
 
-[data-theme="light"] .presentation-custom {
+[data-theme="light"] .presentation-custom,
+[data-theme="light"] .presentation-filters {
   background: color-mix(in srgb, #fff 90%, transparent);
 }
 
 [data-theme="light"] .presentation-kpi small,
+[data-theme="light"] .presentation-kpi > span,
 [data-theme="light"] .presentation-insight,
 [data-theme="light"] .presentation-ranking span,
 [data-theme="light"] .presentation-progress small,
@@ -439,9 +642,188 @@ body.presentation-page::before {
   background: color-mix(in srgb, #fff 90%, var(--surface-raised));
 }
 
-@media (max-width: 1250px) {
+@media (max-width: 1450px) {
+  .presentation-topbar {
+    gap: 14px;
+    padding-inline: 17px;
+  }
+
+  .presentation-brand img {
+    width: 76px;
+  }
+
+  .presentation-brand strong {
+    font-size: 17px;
+  }
+
+  .presentation-periods button {
+    min-height: 36px;
+    padding: 7px 10px;
+    font-size: 9px;
+  }
+
+  .presentation-actions {
+    gap: 6px;
+  }
+
+  .presentation-actions .btn-compact {
+    min-height: 38px;
+    padding-inline: 10px;
+    font-size: 10px;
+  }
+
+  .presentation-slide-head h1 {
+    font-size: clamp(34px, 3.6vw, 50px);
+  }
+
+  .presentation-filters {
+    padding-inline: 17px;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 1101px) {
+  .presentation-topbar {
+    padding-block: 8px;
+  }
+
+  .presentation-brand img {
+    width: 70px;
+  }
+
+  .presentation-brand small {
+    font-size: 8px;
+  }
+
+  .presentation-brand strong {
+    font-size: 15px;
+  }
+
+  .presentation-stage {
+    padding: 12px 16px;
+  }
+
+  .presentation-slide {
+    gap: 10px;
+  }
+
+  .presentation-slide-head h1 {
+    margin-top: 3px;
+    font-size: 38px;
+  }
+
+  .presentation-slide-head > strong {
+    padding: 7px 11px;
+    font-size: 8px;
+  }
+
+  .presentation-kpis {
+    gap: 8px;
+  }
+
+  .presentation-kpi {
+    min-height: 78px;
+    padding: 10px 12px;
+    border-radius: 13px;
+  }
+
+  .presentation-kpi small,
+  .presentation-kpi > span {
+    font-size: 8px;
+  }
+
+  .presentation-kpi strong {
+    margin-top: 2px;
+    font-size: 25px;
+  }
+
+  .presentation-kpi strong.text {
+    font-size: 17px;
+  }
+
+  .presentation-insight {
+    gap: 9px;
+    padding: 9px 12px;
+    font-size: 10px;
+  }
+
+  .presentation-chart-grid {
+    gap: 10px;
+  }
+
+  .presentation-chart-card {
+    min-height: 242px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .presentation-chart-card-head {
+    min-height: 23px;
+    margin-bottom: 5px;
+  }
+
+  .presentation-chart-card-head h3 {
+    font-size: 17px;
+  }
+
+  .presentation-chart {
+    height: 194px;
+  }
+
+  .presentation-manager-chart {
+    height: 204px !important;
+    min-height: 204px;
+  }
+
+  .presentation-ranking {
+    gap: 8px;
+  }
+
+  .presentation-ranking article {
+    padding: 9px 11px;
+  }
+
+  .presentation-ranking strong {
+    font-size: 16px;
+  }
+
+  .presentation-ranking span {
+    margin-top: 2px;
+    font-size: 8px;
+  }
+
+  .presentation-footer {
+    padding: 7px 16px;
+  }
+
+  .presentation-nav-button {
+    min-width: 112px;
+    min-height: 38px;
+    font-size: 9px;
+  }
+
+  .presentation-nav-icon {
+    width: 27px;
+    height: 27px;
+  }
+
+  .presentation-shortcuts,
+  .presentation-shortcuts kbd {
+    font-size: 8px;
+  }
+
+  .presentation-shortcuts kbd {
+    min-width: 23px;
+    min-height: 23px;
+  }
+}
+
+@media (max-width: 1100px) {
   body.presentation-page {
     overflow: auto;
+  }
+
+  .presentation-shell {
+    height: auto;
   }
 
   .presentation-topbar {
@@ -456,6 +838,14 @@ body.presentation-page::before {
 
   .presentation-stage {
     overflow: visible;
+  }
+
+  .presentation-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .presentation-filter-heading {
+    grid-column: 1 / -1;
   }
 
   .presentation-kpis {
@@ -510,9 +900,22 @@ body.presentation-page::before {
     flex-direction: column;
   }
 
+  .presentation-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .presentation-filter-heading {
+    grid-column: 1;
+  }
+
   .presentation-slide-head {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .presentation-slide-head > strong {
+    max-width: 100%;
+    text-align: left;
   }
 
   .presentation-kpis,
@@ -550,6 +953,23 @@ body.presentation-page::before {
 
   .presentation-footer {
     padding-inline: 12px;
+  }
+
+  .presentation-actions .btn-compact > span {
+    display: none;
+  }
+
+  .presentation-actions .btn-compact {
+    width: 43px;
+    min-width: 43px;
+    justify-content: center;
+    padding-inline: 8px;
+  }
+
+  .presentation-filter-button b {
+    position: absolute;
+    top: -4px;
+    right: -4px;
   }
 
   .presentation-nav-button > span:not(.presentation-nav-icon) {

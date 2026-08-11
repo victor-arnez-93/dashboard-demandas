@@ -28,6 +28,7 @@ import {
 
 const otherFields = [
   ["converterLocation", "converterLocationOtherField", "converterLocationOther"],
+  ["converterManager", "converterManagerOtherField", "converterManagerOther"],
   ["converterServiceType", "converterServiceTypeOtherField", "converterServiceTypeOther"],
   ["converterStatus", "converterStatusOtherField", "converterStatusOther"],
   ["converterResponsible", "converterResponsibleOtherField", "converterResponsibleOther"],
@@ -84,7 +85,7 @@ function populateSelects() {
 
   locationSelect.innerHTML = `<option value="">Selecione</option>${options(locations)}<option value="__other__">Outro polo</option>`;
   responsibleSelect.innerHTML = `<option value="">Não informado</option>${options(responsibles)}<option value="__other__">Outro</option>`;
-  managerSelect.innerHTML = `<option value="">Selecione</option>${options(managers)}`;
+  managerSelect.innerHTML = `<option value="">Selecione</option>${options(managers)}<option value="__other__">Outro</option>`;
   locationFilter.innerHTML = `<option value="">Todos</option>${locations.map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
   managerFilter.innerHTML = `<option value="">Todos</option>${managers.map(item => `<option>${escapeHtml(item.name)}</option>`).join("")}`;
 
@@ -112,6 +113,7 @@ function toggleOther(selectId, fieldId, inputId) {
   document.getElementById(fieldId).hidden = !visible;
   document.getElementById(inputId).required = visible && [
     "converterLocation",
+    "converterManager",
     "converterServiceType",
     "converterStatus",
   ].includes(selectId);
@@ -160,7 +162,11 @@ function collectDraft() {
     "name",
   );
   const subdivisionId = document.getElementById("converterSubdivision").value;
-  const managerId = document.getElementById("converterManager").value;
+  const manager = valueFromSelect(
+    "converterManager",
+    "converterManagerOther",
+    "name",
+  );
   return {
     id: document.getElementById("converterId").value,
     lpu_number: document.getElementById("converterLpuNumber").value.trim(),
@@ -170,7 +176,7 @@ function collectDraft() {
     subdivision: location.other
       ? null
       : (state.catalogs.locationSubdivisions || []).find(item => item.id === subdivisionId) || null,
-    manager: catalogItem("managers", managerId),
+    manager,
     equipment_type: document.getElementById("converterEquipmentType").value,
     service_type: valueFromSelect("converterServiceType", "converterServiceTypeOther", "sentence"),
     quantity_replaced: Number.parseInt(document.getElementById("converterQuantity").value, 10) || 0,
@@ -187,7 +193,7 @@ function validateDraft(draft) {
     ["converterProject", draft.project.length >= 3],
     ["converterDate", Boolean(draft.service_date)],
     ["converterLocation", Boolean(draft.location.name)],
-    ["converterManager", Boolean(draft.manager)],
+    ["converterManager", Boolean(draft.manager.name)],
     ["converterEquipmentType", Boolean(draft.equipment_type)],
     ["converterServiceType", Boolean(draft.service_type.name)],
     ["converterQuantity", draft.quantity_replaced > 0],
@@ -201,6 +207,7 @@ function validateDraft(draft) {
   });
   [
     [draft.location, "converterLocationOther"],
+    [draft.manager, "converterManagerOther"],
     [draft.service_type, "converterServiceTypeOther"],
     [draft.status, "converterStatusOther"],
     [draft.responsible, "converterResponsibleOther"],
@@ -219,6 +226,10 @@ async function payloadFromDraft(draft) {
     ? catalogItem("locations", draft.location.id)
     : await findOrCreateCatalog("locations", draft.location.name);
 
+  const manager = draft.manager.id
+    ? catalogItem("managers", draft.manager.id)
+    : await findOrCreateCatalog("managers", draft.manager.name);
+
   let responsible = null;
   if (draft.responsible.name) {
     responsible = draft.responsible.id
@@ -233,8 +244,8 @@ async function payloadFromDraft(draft) {
     location_name: location?.name || draft.location.name || null,
     location_subdivision_id: draft.subdivision?.id || null,
     location_subdivision_name: draft.subdivision?.name || null,
-    manager_id: draft.manager?.id || null,
-    manager_name: draft.manager?.name || null,
+    manager_id: manager?.id || null,
+    manager_name: manager?.name || draft.manager.name || null,
     equipment_type: draft.equipment_type,
     service_type: draft.service_type.name,
     quantity_replaced: draft.quantity_replaced,
@@ -355,7 +366,12 @@ function editRecord(record) {
     selectedLocation === "__other__" ? "" : selectedLocation,
     record.location_subdivision_id || "",
   );
-  setSelectValue("converterManager", null, record.manager_id, record.manager_name);
+    setSelectValue(
+    "converterManager",
+    "converterManagerOther",
+    record.manager_id,
+    record.manager_name,
+  );
   document.getElementById("converterEquipmentType").value = record.equipment_type || "Conversor";
   setSelectValue("converterServiceType", "converterServiceTypeOther", null, record.service_type);
   document.getElementById("converterQuantity").value = record.quantity_replaced || 1;
@@ -413,6 +429,7 @@ bootPage(() => {
   [
     ["converterProject", "sentence"],
     ["converterLocationOther", "name"],
+    ["converterManagerOther", "name"],
     ["converterServiceTypeOther", "sentence"],
     ["converterStatusOther", "sentence"],
     ["converterResponsibleOther", "name"],

@@ -136,18 +136,42 @@ export function chartColors() {
 export function baseOptions({ horizontal = false, legend = true, stacked = false, percent = false } = {}) {
   const colors = chartColors();
   const indexAxis = horizontal ? "y" : "x";
-  const axis = {
+  const valueTicks = {
+    color: colors.muted,
+    font: { family: "Inter", size: 10, weight: "500" },
+  };
+
+  if (percent) {
+    valueTicks.callback = value => `${value}%`;
+  } else {
+    valueTicks.precision = 0;
+  }
+
+  const valueAxis = {
     stacked,
     beginAtZero: true,
     grid: { color: colors.border, drawBorder: false },
     border: { display: false },
-    ticks: {
-      color: colors.muted,
-      font: { family: "Inter", size: 10 },
-      precision: percent ? undefined : 0,
-      callback: percent ? value => `${value}%` : undefined,
-    },
+    ticks: valueTicks,
   };
+
+  const categoryTicks = {
+    color: colors.muted,
+    font: { family: "Inter", size: 10, weight: "500" },
+    autoSkip: !horizontal,
+    maxRotation: 0,
+    minRotation: 0,
+  };
+
+  if (!horizontal) categoryTicks.maxTicksLimit = 12;
+
+  const categoryAxis = {
+    stacked,
+    grid: { display: false },
+    border: { display: false },
+    ticks: categoryTicks,
+  };
+
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -169,7 +193,9 @@ export function baseOptions({ horizontal = false, legend = true, stacked = false
         cornerRadius: 10,
       },
     },
-    scales: horizontal ? { x: axis, y: { ...axis, grid: { display: false } } } : { x: { ...axis, grid: { display: false } }, y: axis },
+    scales: horizontal
+      ? { x: valueAxis, y: categoryAxis }
+      : { x: categoryAxis, y: valueAxis },
   };
 }
 

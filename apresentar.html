@@ -37,25 +37,36 @@
       </div>
 
       <div class="presentation-periods" role="group" aria-label="Período da apresentação">
-        <button class="active" type="button" data-presentation-period="7">7 dias</button>
-        <button type="button" data-presentation-period="week">Semana</button>
-        <button type="button" data-presentation-period="month">Mês</button>
-        <button type="button" data-presentation-period="year">Ano</button>
-        <button type="button" data-presentation-period="custom">Personalizado</button>
+        <button type="button" data-presentation-period="7" aria-pressed="false">7 dias</button>
+        <button type="button" data-presentation-period="30" aria-pressed="false">30 dias</button>
+        <button class="active" type="button" data-presentation-period="quarter" aria-pressed="true">Trimestre</button>
+        <button type="button" data-presentation-period="year" aria-pressed="false">Ano</button>
+        <button type="button" data-presentation-period="custom" aria-pressed="false">Personalizado</button>
       </div>
 
       <div class="presentation-actions">
+        <button
+          class="btn-secondary btn-compact presentation-filter-button"
+          id="filterButton"
+          type="button"
+          aria-expanded="false"
+          aria-controls="presentationFilters"
+        >
+          <i class="fa-solid fa-filter"></i>
+          <span>Filtros</span>
+          <b id="activeFilterCount" hidden>0</b>
+        </button>
         <button class="btn-secondary btn-compact" id="fullscreenButton" type="button">
           <i class="fa-solid fa-expand"></i>
-          Tela cheia
+          <span>Tela cheia</span>
         </button>
         <button class="btn-secondary btn-compact" id="autoButton" type="button" aria-pressed="false">
           <i class="fa-solid fa-play"></i>
-          Automático
+          <span>Automático</span>
         </button>
         <a class="btn-primary btn-compact" href="inicio.html">
           <i class="fa-solid fa-arrow-left"></i>
-          Voltar
+          <span>Voltar</span>
         </a>
       </div>
     </header>
@@ -70,6 +81,41 @@
         <input id="presentationEndDate" type="date">
       </label>
       <button class="btn-secondary btn-compact" id="applyCustomPeriod" type="button">Aplicar período</button>
+      <small id="customPeriodStatus" role="status" aria-live="polite"></small>
+    </div>
+
+    <div class="presentation-filters" id="presentationFilters" hidden>
+      <div class="presentation-filter-heading">
+        <i class="fa-solid fa-sliders"></i>
+        <span>
+          <strong>Filtros executivos</strong>
+          <small id="presentationFilterStatus" role="status" aria-live="polite">Exibindo todos os registros.</small>
+        </span>
+      </div>
+
+      <label>
+        Gestor
+        <select id="presentationManagerFilter">
+          <option value="">Todos os gestores</option>
+        </select>
+      </label>
+
+      <label>
+        Polo
+        <select id="presentationLocationFilter">
+          <option value="">Todos os polos</option>
+        </select>
+      </label>
+
+      <button class="btn-secondary btn-compact" id="clearPresentationFilters" type="button">
+        <i class="fa-solid fa-filter-circle-xmark"></i>
+        Limpar
+      </button>
+
+      <button class="btn-primary btn-compact" id="closePresentationFilters" type="button">
+        <i class="fa-solid fa-check"></i>
+        Aplicar e fechar
+      </button>
     </div>
 
     <main class="presentation-stage">
@@ -79,33 +125,39 @@
             <small>RESUMO DO PERÍODO</small>
             <h1>Resultados em uma visão rápida.</h1>
           </div>
-          <strong id="periodLabel">Últimos 7 dias</strong>
+          <strong id="periodLabel">Trimestre atual</strong>
         </div>
 
         <div class="presentation-kpis">
           <article class="presentation-kpi">
             <small>Recebidas</small>
             <strong id="pReceived">0</strong>
+            <span>pela data da solicitação</span>
           </article>
           <article class="presentation-kpi">
-            <small>Concluídas</small>
+            <small>Concluídas no período</small>
             <strong id="pCompleted">0</strong>
+            <span>pela data de conclusão</span>
           </article>
           <article class="presentation-kpi">
             <small>Em andamento</small>
             <strong id="pProgress">0</strong>
+            <span>entre as recebidas</span>
           </article>
           <article class="presentation-kpi">
             <small>Atrasadas</small>
             <strong id="pOverdue">0</strong>
+            <span>entre as recebidas</span>
           </article>
           <article class="presentation-kpi">
-            <small>Taxa de entrega</small>
-            <strong id="pDoneRate">0%</strong>
+            <small>Saldo do período</small>
+            <strong id="pBalance">0</strong>
+            <span id="pBalanceDetail">Estoque estável</span>
           </article>
           <article class="presentation-kpi">
             <small>Utilização de horas</small>
             <strong id="pHoursRate">0%</strong>
+            <span id="pHoursDetail">0h de 0h estimadas</span>
           </article>
         </div>
 
@@ -116,13 +168,19 @@
 
         <div class="presentation-chart-grid">
           <article class="presentation-chart-card">
-            <h3>Recebidas × concluídas</h3>
+            <div class="presentation-chart-card-head">
+              <h3>Recebidas × concluídas</h3>
+              <span id="pFlowSummary">0 recebidas · 0 concluídas</span>
+            </div>
             <div class="presentation-chart">
               <canvas id="pFlowChart"></canvas>
             </div>
           </article>
           <article class="presentation-chart-card">
-            <h3>Distribuição por status</h3>
+            <div class="presentation-chart-card-head">
+              <h3>Distribuição por status</h3>
+              <span id="pStatusSummary">0 demandas recebidas</span>
+            </div>
             <div class="presentation-chart">
               <canvas id="pStatusChart"></canvas>
             </div>
@@ -141,14 +199,20 @@
 
         <div class="presentation-chart-grid equal">
           <article class="presentation-chart-card">
-            <h3>Demandas por gestor</h3>
-            <div class="presentation-chart">
+            <div class="presentation-chart-card-head">
+              <h3>Demandas por gestor</h3>
+              <span id="pManagersSummary">0 demandas</span>
+            </div>
+            <div class="presentation-chart presentation-manager-chart" id="pManagersChartContainer">
               <canvas id="pManagersChart"></canvas>
             </div>
           </article>
           <article class="presentation-chart-card">
-            <h3>Horas estimadas × realizadas</h3>
-            <div class="presentation-chart">
+            <div class="presentation-chart-card-head">
+              <h3>Horas estimadas × realizadas</h3>
+              <span id="pHoursSummary">0h realizadas</span>
+            </div>
+            <div class="presentation-chart presentation-manager-chart" id="pHoursChartContainer">
               <canvas id="pHoursChart"></canvas>
             </div>
           </article>
@@ -170,30 +234,40 @@
           <article class="presentation-kpi">
             <small>Atendimentos</small>
             <strong id="pConverterRecords">0</strong>
+            <span>registros no período</span>
           </article>
           <article class="presentation-kpi">
             <small>Equipamentos registrados</small>
             <strong id="pConverterQuantity">0</strong>
+            <span>quantidade total</span>
           </article>
           <article class="presentation-kpi">
             <small>Polo mais recorrente</small>
             <strong class="text" id="pConverterLocation">—</strong>
+            <span id="pConverterLocationDetail">sem ocorrências</span>
           </article>
           <article class="presentation-kpi">
             <small>Concluídos</small>
             <strong id="pConverterDoneRate">0%</strong>
+            <span id="pConverterDoneDetail">0 de 0 atendimentos</span>
           </article>
         </div>
 
         <div class="presentation-chart-grid equal">
           <article class="presentation-chart-card">
-            <h3>Evolução no período</h3>
+            <div class="presentation-chart-card-head">
+              <h3>Evolução no período</h3>
+              <span id="pConverterTrendSummary">0 equipamentos</span>
+            </div>
             <div class="presentation-chart">
               <canvas id="pConverterTrendChart"></canvas>
             </div>
           </article>
           <article class="presentation-chart-card">
-            <h3>Ocorrências por polo</h3>
+            <div class="presentation-chart-card-head">
+              <h3>Ocorrências por polo</h3>
+              <span id="pConverterLocationSummary">0 polos</span>
+            </div>
             <div class="presentation-chart">
               <canvas id="pConverterLocationChart"></canvas>
             </div>
@@ -203,14 +277,14 @@
     </main>
 
     <footer class="presentation-footer">
-      <div class="presentation-navigation" aria-label="Navegação dos slides">
+      <nav class="presentation-navigation" aria-label="Navegação dos slides">
         <button class="presentation-nav-button" id="prevSlide" type="button" aria-label="Slide anterior">
           <span class="presentation-nav-icon"><i class="fa-solid fa-arrow-left"></i></span>
           <span>Anterior</span>
         </button>
 
         <div class="presentation-progress">
-          <div class="presentation-dots" aria-label="Slides da apresentação">
+          <div class="presentation-dots" role="group" aria-label="Slides da apresentação">
             <button class="active" type="button" data-go-slide="0" aria-label="Resumo"></button>
             <button type="button" data-go-slide="1" aria-label="Gestão"></button>
             <button type="button" data-go-slide="2" aria-label="Conversores e fontes PoE"></button>
@@ -222,11 +296,11 @@
           <span>Próximo</span>
           <span class="presentation-nav-icon"><i class="fa-solid fa-arrow-right"></i></span>
         </button>
-      </div>
+      </nav>
 
-      <div class="presentation-shortcuts" aria-label="Atalhos do teclado">
+      <div class="presentation-shortcuts" role="group" aria-label="Atalhos do teclado">
         <span><kbd>←</kbd><kbd>→</kbd> Navegar</span>
-        <span><kbd>Esc</kbd> Voltar ao painel</span>
+        <span><kbd>Esc</kbd> Sair da tela cheia</span>
       </div>
     </footer>
   </section>

@@ -638,7 +638,7 @@ body[data-page="relatorios"] .page-heading::after {
 }
 
 .report-demands-table {
-  min-width: 1300px;
+  min-width: 1445px;
 }
 
 .report-converters-table {
@@ -707,20 +707,28 @@ body[data-page="relatorios"] .page-heading::after {
 .report-demands-table th:nth-child(9),
 .report-demands-table td:nth-child(9),
 .report-demands-table th:nth-child(10),
-.report-demands-table td:nth-child(10) {
-  width: 85px;
+.report-demands-table td:nth-child(10),
+.report-demands-table th:nth-child(11),
+.report-demands-table td:nth-child(11) {
+  width: 105px;
 }
 
-.report-demands-table th:nth-child(11),
-.report-demands-table td:nth-child(11),
+.report-demands-table th:nth-child(9),
+.report-demands-table th:nth-child(10),
+.report-demands-table th:nth-child(11) {
+  white-space: normal;
+}
+
 .report-demands-table th:nth-child(12),
-.report-demands-table td:nth-child(12) {
+.report-demands-table td:nth-child(12),
+.report-demands-table th:nth-child(13),
+.report-demands-table td:nth-child(13) {
   width: 60px;
   text-align: center;
 }
 
-.report-demands-table th:nth-child(13),
-.report-demands-table td:nth-child(13) {
+.report-demands-table th:nth-child(14),
+.report-demands-table td:nth-child(14) {
   width: 65px;
 }
 

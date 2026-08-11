@@ -255,7 +255,7 @@
               <h2>Planejamento e controle</h2>
 
               <p>
-                Defina prioridade, situação, prazo e esforço.
+                Defina prioridade, situação, datas e esforço.
               </p>
             </div>
           </div>
@@ -302,8 +302,8 @@
               </select>
             </label>
 
-            <label class="field">
-              <span>Data de entrada *</span>
+                        <label class="field">
+              <span>Data da solicitação *</span>
 
               <input
                 id="demandStartDate"
@@ -312,12 +312,12 @@
               >
 
               <small class="field-error">
-                Informe a data de entrada.
+                Informe a data da solicitação.
               </small>
             </label>
 
             <label class="field">
-              <span>Prazo *</span>
+              <span>Data limite de execução *</span>
 
               <input
                 id="demandDueDate"
@@ -326,8 +326,17 @@
               >
 
               <small class="field-error">
-                Informe um prazo válido.
+                Informe uma data limite válida.
               </small>
+            </label>
+
+            <label class="field">
+              <span>Data de execução</span>
+
+              <input
+                id="demandExecutionDate"
+                type="date"
+              >
             </label>
 
             <label class="field">

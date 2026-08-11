@@ -237,6 +237,7 @@ export async function saveDemand(payload, id = null) {
     status: payload.status,
     start_date: payload.start_date,
     due_date: payload.due_date,
+    execution_date: payload.execution_date || null,
     estimated_hours: Number(payload.estimated_hours || 0),
     actual_hours: Number(payload.actual_hours || 0),
     tags: payload.tags || [],

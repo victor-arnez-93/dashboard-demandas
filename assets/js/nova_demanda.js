@@ -130,6 +130,7 @@ function collectDraft() {
     manager_status: document.getElementById("demandManagerStatus").value,
     start_date: document.getElementById("demandStartDate").value,
     due_date: document.getElementById("demandDueDate").value,
+    execution_date: document.getElementById("demandExecutionDate").value || null,
     estimated_hours: numberValue(document.getElementById("demandEstimatedHours").value),
     actual_hours: numberValue(document.getElementById("demandActualHours").value),
     tags: document.getElementById("demandTags").value.split(",").map(item => smartSentence(item)).filter(Boolean),
@@ -168,7 +169,7 @@ function validateDraft(draft) {
   }
   if (draft.start_date && draft.due_date && draft.due_date < draft.start_date) {
     setInvalid("demandDueDate", true);
-    showToast("O prazo não pode ser anterior à data de entrada.", "error");
+    showToast("A data limite de execução não pode ser anterior à data da solicitação.", "error");
     valid = false;
   }
   const duplicate = state.demands.some(item =>
@@ -226,6 +227,7 @@ function payloadFrom(draft, catalogs) {
     status: draft.status,
     start_date: draft.start_date,
     due_date: draft.due_date,
+    execution_date: draft.execution_date,
     estimated_hours: draft.estimated_hours,
     actual_hours: draft.actual_hours,
     tags: draft.tags,
@@ -244,6 +246,7 @@ function resetForm() {
   due.setDate(due.getDate() + 7);
   document.getElementById("demandStartDate").value = inputDate(today);
   document.getElementById("demandDueDate").value = inputDate(due);
+  document.getElementById("demandExecutionDate").value = "";
   document.getElementById("demandPriority").value = "Normal";
   document.getElementById("demandStatus").value = "Pendente";
   document.getElementById("demandManagerStatus").value = "Solicitado";
@@ -328,6 +331,7 @@ function loadDemand(id) {
   document.getElementById("demandManagerStatus").value = demand.manager_status || "Solicitado";
   document.getElementById("demandStartDate").value = demand.start_date;
   document.getElementById("demandDueDate").value = demand.due_date;
+  document.getElementById("demandExecutionDate").value = demand.execution_date || "";
   document.getElementById("demandEstimatedHours").value = demand.estimated_hours || "";
   document.getElementById("demandActualHours").value = demand.actual_hours || "";
   document.getElementById("demandTags").value = (demand.tags || []).join(", ");

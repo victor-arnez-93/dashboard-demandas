@@ -305,6 +305,7 @@ function render() {
         <td title="${escapeHtml(item.manager_status || "—")}">${escapeHtml(item.manager_status || "—")}</td>
         <td>${formatDate(item.start_date, { year: true })}</td>
         <td>${formatDate(item.due_date, { year: true })}</td>
+        <td>${item.execution_date ? formatDate(item.execution_date, { year: true }) : "—"}</td>
         <td>${formatHours(item.estimated_hours)}</td>
         <td>${formatHours(item.actual_hours)}</td>
         <td class="report-actions-cell">
@@ -321,7 +322,7 @@ function render() {
         </td>
       </tr>`;
     }).join("")
-    : `<tr><td colspan="13" class="empty-table">Nenhuma demanda encontrada para os filtros.</td></tr>`;
+    : `<tr><td colspan="14" class="empty-table">Nenhuma demanda encontrada para os filtros.</td></tr>`;
 
   const converters = converterSummary(reportConverters);
   document.getElementById("reportConverterRecords").textContent = reportConverters.length;
@@ -543,8 +544,9 @@ function exportExcel() {
       Prioridade: item.priority || "",
       "Status operacional": effectiveStatus(item),
       "Status do gestor": item.manager_status || "",
-      Entrada: new Date(`${item.start_date}T12:00:00`),
-      Prazo: new Date(`${item.due_date}T12:00:00`),
+      "Data da solicitação": new Date(`${item.start_date}T12:00:00`),
+      "Data limite de execução": new Date(`${item.due_date}T12:00:00`),
+      "Data de execução": item.execution_date ? new Date(`${item.execution_date}T12:00:00`) : "",
       "Horas estimadas": Number(item.estimated_hours || 0),
       "Horas realizadas": Number(item.actual_hours || 0),
       Tags: (item.tags || []).join(", "),
@@ -552,12 +554,13 @@ function exportExcel() {
     }));
 
     const demandSheet = XLSX.utils.json_to_sheet(demandRows, { cellDates: true });
-    demandSheet["!cols"] = [24, 22, 14, 34, 48, 22, 22, 22, 12, 20, 28, 14, 14, 16, 16, 24, 42]
+    demandSheet["!cols"] = [24, 22, 14, 34, 48, 22, 22, 22, 12, 20, 28, 20, 24, 18, 16, 16, 24, 42]
       .map(wch => ({ wch }));
-    demandSheet["!autofilter"] = { ref: demandSheet["!ref"] || "A1:Q1" };
+    demandSheet["!autofilter"] = { ref: demandSheet["!ref"] || "A1:R1" };
     demandSheet["!freeze"] = { xSplit: 0, ySplit: 1 };
 
     for (let row = 2; row <= demandRows.length + 1; row += 1) {
+      if (demandSheet[`L${row}`]) demandSheet[`L${row}`].z = "dd/mm/yyyy";
       if (demandSheet[`M${row}`]) demandSheet[`M${row}`].z = "dd/mm/yyyy";
       if (demandSheet[`N${row}`]) demandSheet[`N${row}`].z = "dd/mm/yyyy";
     }
@@ -963,8 +966,12 @@ function pdfDemandRows(records) {
     ].filter(Boolean);
 
     const effortLines = [
-      `Entrada: ${pdfStoredDate(item.start_date)}`,
-      `Prazo: ${pdfStoredDate(item.due_date)}`,
+      `Data da solicitação: ${pdfStoredDate(item.start_date)}`,
+      `Data limite de execução: ${pdfStoredDate(item.due_date)}`,
+
+      item.execution_date
+        ? `Data de execução: ${pdfStoredDate(item.execution_date)}`
+        : "Data de execução: não informada",
 
       item.completed_at
         ? `Conclusão: ${pdfStoredDate(item.completed_at)}`

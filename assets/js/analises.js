@@ -10,14 +10,14 @@ import {
   dateInInterval,
 } from "./charts.js";
 
-let period = "month";
+let period = "quarter";
 
 const periodLabels = {
-  week: "Exibindo a semana atual.",
-  month: "Exibindo o mês atual.",
-  quarter: "Exibindo o trimestre atual.",
-  semester: "Exibindo o semestre atual.",
-  year: "Exibindo o ano atual.",
+  week: "Semana atual",
+  month: "Mês atual",
+  quarter: "Trimestre atual",
+  semester: "Semestre atual",
+  year: "Ano atual",
 };
 
 function safeText(value, fallback = "Não informado") {
@@ -49,6 +49,36 @@ function sortedEntries(map) {
 function setText(id, value) {
   const element = document.getElementById(id);
   if (element) element.textContent = value;
+}
+
+function formatPeriodDate(value) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(value);
+}
+
+function periodStatus(interval, demandCount, converterCount) {
+  return [
+    periodLabels[period] || periodLabels.quarter,
+    `${formatPeriodDate(interval.start)} a ${formatPeriodDate(interval.end)}`,
+    `${plural(demandCount, "demanda", "demandas")} pela data da solicitação`,
+    `${plural(converterCount, "atendimento", "atendimentos")} pela data do atendimento`,
+  ].join(" · ");
+}
+
+function fitHorizontalChart(id, itemCount, { base = 320, row = 54 } = {}) {
+  const canvas = document.getElementById(id);
+  const container = canvas?.parentElement;
+
+  if (!container) return;
+
+  const fittedHeight = itemCount > 0
+    ? Math.max(base, 96 + itemCount * row)
+    : base;
+
+  container.style.height = `${fittedHeight}px`;
 }
 
 function hexToRgba(color, alpha, fallback = "#284b63") {
@@ -245,8 +275,11 @@ function modernOptions({
   legend = false,
   stacked = false,
   hours = false,
+  hasData = true,
+  emptyText = "Sem dados no período",
 } = {}) {
   const colors = chartColors();
+  const axisTextColor = hexToRgba(colors.text, 0.68, colors.muted);
 
   const valueCallback = value => {
     if (hours) return formatHours(value);
@@ -263,7 +296,7 @@ function modernOptions({
       lineWidth: 1,
     },
     ticks: {
-      color: colors.muted,
+      color: axisTextColor,
       padding: 10,
       precision: hours ? 1 : 0,
       font: {
@@ -280,7 +313,7 @@ function modernOptions({
     border: { display: false },
     grid: { display: false },
     ticks: {
-      color: colors.muted,
+      color: axisTextColor,
       padding: 10,
       autoSkip: false,
       maxRotation: 0,
@@ -361,27 +394,36 @@ function modernOptions({
       },
       fluuxEmptyState: {
         color: colors.muted,
-        text: "Sem dados no período",
+        text: emptyText,
       },
       fluuxValueLabels: {
         color: colors.text,
         display: true,
       },
     },
-    scales: horizontal
-      ? {
-          x: valueAxis,
-          y: categoryAxis,
-        }
+    scales: hasData
+      ? horizontal
+        ? {
+            x: valueAxis,
+            y: categoryAxis,
+          }
+        : {
+            x: categoryAxis,
+            y: valueAxis,
+          }
       : {
-          x: categoryAxis,
-          y: valueAxis,
+          x: { display: false },
+          y: { display: false },
         },
   };
 }
 
-function lineOptions() {
-  const options = modernOptions({ legend: false });
+function lineOptions({ hasData = true, emptyText } = {}) {
+  const options = modernOptions({
+    legend: false,
+    hasData,
+    emptyText,
+  });
 
   options.interaction = {
     mode: "nearest",
@@ -409,7 +451,7 @@ function render() {
 
   setText(
     "analysisPeriodStatus",
-    periodLabels[period] || periodLabels.month
+    periodStatus(interval, demands.length, converters.length)
   );
 
   setText(
@@ -432,6 +474,14 @@ function render() {
     plural(demands.length, "demanda", "demandas")
   );
 
+  fitHorizontalChart("managerChart", managers.labels.length);
+  fitHorizontalChart("demandLocationChart", demandLocations.labels.length);
+  fitHorizontalChart(
+    "managerHoursChart",
+    managers.labels.length,
+    { base: 360, row: 62 }
+  );
+
   createChart("managerChart", {
     type: "bar",
     data: {
@@ -441,7 +491,7 @@ function render() {
           label: "Demandas",
           data: managers.counts,
           backgroundColor: context =>
-            verticalGradient(
+            horizontalGradient(
               context,
               hexToRgba(colors.primary, 0.96),
               hexToRgba(colors.primary, 0.54)
@@ -451,13 +501,17 @@ function render() {
           borderWidth: 1,
           borderRadius: 12,
           borderSkipped: false,
-          maxBarThickness: 68,
-          categoryPercentage: 0.68,
-          barPercentage: 0.74,
+          maxBarThickness: 44,
+          categoryPercentage: 0.72,
+          barPercentage: 0.78,
         },
       ],
     },
-    options: modernOptions(),
+    options: modernOptions({
+      horizontal: true,
+      hasData: managers.labels.length > 0,
+      emptyText: "Nenhuma demanda solicitada no período",
+    }),
     plugins: [emptyStatePlugin, valueLabelsPlugin],
   });
 
@@ -486,7 +540,11 @@ function render() {
         },
       ],
     },
-    options: modernOptions({ horizontal: true }),
+    options: modernOptions({
+      horizontal: true,
+      hasData: demandLocations.labels.length > 0,
+      emptyText: "Nenhuma demanda solicitada no período",
+    }),
     plugins: [emptyStatePlugin, valueLabelsPlugin],
   });
 
@@ -500,7 +558,7 @@ function render() {
           data: managers.estimated,
           valueSuffix: "h",
           backgroundColor: context =>
-            verticalGradient(
+            horizontalGradient(
               context,
               hexToRgba(colors.primary, 0.95),
               hexToRgba(colors.primary, 0.52)
@@ -508,16 +566,16 @@ function render() {
           hoverBackgroundColor: colors.primary,
           borderRadius: 11,
           borderSkipped: false,
-          maxBarThickness: 56,
-          categoryPercentage: 0.66,
-          barPercentage: 0.72,
+          maxBarThickness: 34,
+          categoryPercentage: 0.74,
+          barPercentage: 0.74,
         },
         {
           label: "Realizadas",
           data: managers.actual,
           valueSuffix: "h",
           backgroundColor: context =>
-            verticalGradient(
+            horizontalGradient(
               context,
               hexToRgba(colors.accent, 0.96),
               hexToRgba(colors.accent, 0.54)
@@ -525,13 +583,19 @@ function render() {
           hoverBackgroundColor: colors.accent,
           borderRadius: 11,
           borderSkipped: false,
-          maxBarThickness: 56,
-          categoryPercentage: 0.66,
-          barPercentage: 0.72,
+          maxBarThickness: 34,
+          categoryPercentage: 0.74,
+          barPercentage: 0.74,
         },
       ],
     },
-    options: modernOptions({ legend: true, hours: true }),
+    options: modernOptions({
+      horizontal: true,
+      legend: true,
+      hours: true,
+      hasData: managers.labels.length > 0,
+      emptyText: "Nenhuma demanda solicitada no período",
+    }),
     plugins: [emptyStatePlugin, valueLabelsPlugin],
   });
 
@@ -592,7 +656,11 @@ function render() {
         },
       ],
     },
-    options: modernOptions({ legend: true }),
+    options: modernOptions({
+      legend: true,
+      hasData: demands.length > 0,
+      emptyText: "Nenhuma demanda solicitada no período",
+    }),
     plugins: [emptyStatePlugin, valueLabelsPlugin],
   });
 
@@ -658,7 +726,10 @@ function render() {
         },
       ],
     },
-    options: lineOptions(),
+    options: lineOptions({
+      hasData: converters.length > 0,
+      emptyText: "Nenhum atendimento registrado no período",
+    }),
     plugins: [emptyStatePlugin, valueLabelsPlugin],
   });
 
@@ -671,6 +742,8 @@ function render() {
     "converterLocationSummary",
     plural(locations.labels.length, "polo", "polos")
   );
+
+  fitHorizontalChart("converterLocationChart", locations.labels.length);
 
   createChart("converterLocationChart", {
     type: "bar",
@@ -697,7 +770,11 @@ function render() {
         },
       ],
     },
-    options: modernOptions({ horizontal: true }),
+    options: modernOptions({
+      horizontal: true,
+      hasData: locations.labels.length > 0,
+      emptyText: "Nenhum atendimento registrado no período",
+    }),
     plugins: [emptyStatePlugin, valueLabelsPlugin],
   });
 }

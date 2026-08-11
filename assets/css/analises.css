@@ -34,6 +34,7 @@ body[data-page="analises"] .page-heading p {
 
 .analysis-toolbar-copy {
   display: flex;
+  flex: 1 1 420px;
   min-width: 0;
   align-items: center;
   gap: 13px;
@@ -67,11 +68,12 @@ body[data-page="analises"] .page-heading p {
 }
 
 .analysis-toolbar-copy p {
+  max-width: 760px;
   margin: 0;
   color: var(--text-soft);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.4;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.45;
 }
 
 .analysis-period-switch {
@@ -268,6 +270,7 @@ body[data-page="analises"] .page-heading p {
   z-index: 1;
   height: 320px;
   margin-top: 6px;
+  transition: height 180ms ease;
 }
 
 .analysis-chart-large {
@@ -461,11 +464,16 @@ body[data-page="analises"]
   }
 
   .analysis-period-switch {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .analysis-period-switch button {
     width: 100%;
+    grid-column: span 2;
+  }
+
+  .analysis-period-switch button:nth-last-child(-n + 2) {
+    grid-column: span 3;
   }
 
   .analysis-card,

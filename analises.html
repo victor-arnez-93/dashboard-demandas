@@ -72,7 +72,9 @@
 
           <div>
             <strong>Período das análises</strong>
-            <p id="analysisPeriodStatus">Exibindo o mês atual.</p>
+            <p id="analysisPeriodStatus" aria-live="polite">
+              Trimestre atual · carregando intervalo e registros...
+            </p>
           </div>
         </div>
 
@@ -91,17 +93,17 @@
 
           <button
             type="button"
-            class="active"
             data-analysis-period="month"
-            aria-pressed="true"
+            aria-pressed="false"
           >
             Mensal
           </button>
 
           <button
             type="button"
+            class="active"
             data-analysis-period="quarter"
-            aria-pressed="false"
+            aria-pressed="true"
           >
             Trimestral
           </button>

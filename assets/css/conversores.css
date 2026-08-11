@@ -345,6 +345,27 @@
   line-height: 1.5;
 }
 
+/* Mantém "Outro gestor" abaixo do seletor Gestor */
+.converter-form-grid:has(#converterManagerOtherField:not([hidden]))
+#converterManagerOtherField {
+  grid-column: 2;
+}
+
+/* Move Data para a coluna esquerda na mesma linha */
+.converter-form-grid:has(#converterManagerOtherField:not([hidden]))
+.field:has(#converterDate) {
+  grid-column: 1;
+  grid-row: auto;
+}
+
+/* Padroniza o aviso do cadastro automático */
+#converterManagerOtherField > small:last-child {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
 .converter-modal .modal-actions {
   box-shadow: 0 -8px 22px color-mix(in srgb, var(--background) 10%, transparent);
 }
@@ -399,7 +420,11 @@
   }
 
   .converter-filter-bar .converter-search,
-  .converter-form-grid .full {
+  .converter-form-grid .full,
+  .converter-form-grid:has(#converterManagerOtherField:not([hidden]))
+  #converterManagerOtherField,
+  .converter-form-grid:has(#converterManagerOtherField:not([hidden]))
+  .field:has(#converterDate) {
     grid-column: auto;
   }
 

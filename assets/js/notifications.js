@@ -1,7 +1,7 @@
 import { state } from "./store.js";
 import { getSupabase } from "./supabase-client.js";
 import { getPreferences } from "./preferences.js";
-import { html, localDate, serviceDate } from "./phase2-rules.js";
+import { html, serviceDate } from "./phase2-rules.js";
 import { phase2Rpc, migrationMissing, companyId } from "./phase2-api.js";
 
 let channel = null;
@@ -15,15 +15,63 @@ let queued = false;
 let realtime = false;
 let company = "";
 let recipient = "";
+let panelOpen = false;
+let closeTimer = null;
+let noticeTimer = null;
+let signalTimer = null;
+let newestTime = null;
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = id => document.getElementById(id);
 
 function visible(value) {
-  $("notificationPanel").hidden = !value;
+  const panel = $("notificationPanel");
+  if (!panel || panelOpen === value) return;
+  panelOpen = value;
+  clearTimeout(closeTimer);
   $("notificationButton").setAttribute("aria-expanded", String(value));
-  if (value) refresh(false);
+  panel.inert = !value;
+  if (value) {
+    panel.hidden = false;
+    panel.getBoundingClientRect(); // Start from the closed transform, including on a quick reopen.
+    panel.classList.add("is-open");
+    hideNotice();
+    refresh(false);
+  } else {
+    panel.classList.remove("is-open");
+    closeTimer = setTimeout(() => { if (!panelOpen) panel.hidden = true; }, reducedMotion() ? 0 : 220);
+  }
+}
+
+function hideNotice() {
+  clearTimeout(noticeTimer);
+  $("notificationArrival")?.classList.remove("is-visible");
+}
+
+function announceArrival(rows) {
+  if (!rows.length) return;
+  const button = $("notificationButton");
+  clearTimeout(signalTimer);
+  button.classList.remove("has-arrival");
+  button.getBoundingClientRect();
+  button.classList.add("has-arrival");
+  signalTimer = setTimeout(() => button.classList.remove("has-arrival"), 1800);
+  const text = rows.length === 1 ? `Nova notificação: ${rows[0].title}` : `${rows.length} novas notificações`;
+  $("notificationAnnouncement").textContent = text;
+  if (!panelOpen && !document.hidden) {
+    $("notificationArrivalTitle").textContent = text;
+    $("notificationArrivalBody").textContent = rows.length === 1 ? rows[0].body : "Abra o sino para conferir os avisos.";
+    $("notificationArrival").classList.add("is-visible");
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(hideNotice, 6500);
+  }
 }
 
 function render(data) {
+  const latest = data.items.reduce((max, item) => Math.max(max, Date.parse(item.created_at) || 0), 0);
+  const arrivals = newestTime === null ? [] : data.items.filter(item =>
+    Date.parse(item.created_at) > newestTime && !item.read_at && !item.dismissed_at && !item.resolved_at);
+  newestTime = Math.max(newestTime || 0, latest);
+  const scrollTop = $("notificationScroll").scrollTop;
   items = data.items;
   hasMore = Boolean(data.has_more);
   const count = Number(data.unread) || 0;
@@ -34,8 +82,11 @@ function render(data) {
   $("notificationList").innerHTML = items.map(item => {
     const status = item.resolved_at ? "Resolvida" : item.dismissed_at ? "Dispensada" : item.read_at ? "Lida" : "Não lida";
     const time = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }).format(new Date(item.created_at));
-    return `<li class="fluux-notification ${item.read_at ? "is-read" : ""}">
-      <strong>${html(item.title)}</strong><p>${html(item.body)}</p><small>${html(time)} · ${status}</small>
+    const statusClass = item.resolved_at ? "resolved" : item.dismissed_at ? "dismissed" : item.read_at ? "read" : "unread";
+    const category = { overdue: "Prazo vencido", due: "Prazo próximo", inactive: "Sem atualização", waiting: "Aguardando retorno", billing: "Fechamento", event: "Atividade" }[item.category] || "Atividade";
+    return `<li data-notification-row="${html(item.id)}" class="fluux-notification is-${statusClass} ${arrivals.some(row => row.id === item.id) ? "is-new" : ""}">
+      <div class="fluux-notification-meta"><span>${html(category)} · ${item.entity_kind === "demand" ? "Demanda" : "Conversor/PoE"}</span><span class="fluux-notification-status">${status}</span></div>
+      <strong>${html(item.title)}</strong><p>${html(item.body)}</p><small>${html(time)}</small>
       <div class="fluux-notification-actions">
         <button type="button" class="btn-ghost btn-compact" data-notification-id="${item.id}" data-notification-action="open">Abrir registro</button>
         ${!item.read_at && !item.resolved_at && !item.dismissed_at ? `<button type="button" class="btn-ghost btn-compact" data-notification-id="${item.id}" data-notification-action="read">Marcar lida</button>` : ""}
@@ -44,6 +95,8 @@ function render(data) {
   }).join("") || `<li class="fluux-notification-empty">${mode === "unread" ? "Nenhuma notificação não lida." : "Nenhuma notificação no histórico."}</li>`;
   $("notificationMore").hidden = !hasMore;
   $("notificationMode").value = mode;
+  $("notificationScroll").scrollTop = scrollTop;
+  announceArrival(arrivals);
 }
 
 async function refresh(sync = true) {
@@ -91,6 +144,11 @@ async function act(id, action, button) {
     }
     await phase2Rpc("fluux_notification_action", { p_id: id, p_action: action === "open" ? "read" : action });
     if (target) { location.assign(target); return; }
+    if (mode === "unread" && !reducedMotion()) {
+      const row = button.closest(".fluux-notification");
+      row?.classList.add("is-leaving");
+      await new Promise(resolve => setTimeout(resolve, 160));
+    }
     await refresh(false);
   } catch (error) { $("notificationFeedback").textContent = error.message || "Não foi possível atualizar o aviso."; }
   finally { button.disabled = false; }
@@ -98,6 +156,11 @@ async function act(id, action, button) {
 
 export function stopNotifications() {
   generation++;
+  clearTimeout(closeTimer); clearTimeout(noticeTimer); clearTimeout(signalTimer);
+  panelOpen = false; newestTime = null;
+  hideNotice();
+  $("notificationButton")?.classList.remove("has-arrival");
+  $("notificationButton")?.setAttribute("aria-expanded", "false");
   if (timer) clearInterval(timer);
   timer = null;
   if (channel) getSupabase().removeChannel(channel);
@@ -113,20 +176,28 @@ export async function mountNotifications() {
   area.className = "fluux-notification-area";
   area.innerHTML = `<button id="notificationButton" class="icon-btn" type="button" aria-label="Notificações" aria-expanded="false" aria-controls="notificationPanel">
     <i class="fa-regular fa-bell" aria-hidden="true"></i><b id="notificationBadge" hidden>0</b></button>
-    <section id="notificationPanel" class="fluux-notification-panel" hidden aria-label="Caixa de notificações">
+    <section id="notificationPanel" class="fluux-notification-panel" hidden inert aria-label="Caixa de notificações">
       <header><h2>Notificações</h2><button id="notificationClose" class="icon-btn" type="button" aria-label="Fechar notificações">×</button></header>
       <div class="fluux-notification-toolbar"><label for="notificationMode">Exibir</label><select id="notificationMode"><option value="unread">Não lidas</option><option value="history">Histórico completo</option></select>
         <button id="notificationsReadAll" class="btn-ghost btn-compact" type="button">Ler todas</button><button id="notificationRefresh" class="btn-ghost btn-compact" type="button">Atualizar</button></div>
       <p id="notificationFeedback" class="fluux-notification-feedback" role="status">Conectando…</p>
-      <ul id="notificationList" class="fluux-notification-list"></ul>
+      <div id="notificationScroll" class="fluux-notification-scroll" tabindex="0" aria-label="Lista de notificações"><ul id="notificationList" class="fluux-notification-list"></ul>
       <button id="notificationMore" class="btn-ghost" type="button" hidden>Mostrar mais</button>
-    </section>`;
+      </div>
+    </section>
+    <div id="notificationAnnouncement" class="fluux-notification-sr" role="status" aria-live="polite" aria-atomic="true"></div>
+    <aside id="notificationArrival" class="fluux-notification-arrival" aria-label="Nova notificação">
+      <button id="notificationArrivalOpen" type="button"><strong id="notificationArrivalTitle"></strong><span id="notificationArrivalBody"></span></button>
+      <button id="notificationArrivalClose" type="button" aria-label="Ocultar aviso">×</button>
+    </aside>`;
   $("themeButton").before(area);
-  $("notificationButton").addEventListener("click", () => visible($("notificationPanel").hidden));
+  $("notificationButton").addEventListener("click", () => visible(!panelOpen));
+  $("notificationArrivalOpen").addEventListener("click", () => { visible(true); $("notificationClose").focus(); });
+  $("notificationArrivalClose").addEventListener("click", hideNotice);
   $("notificationClose").addEventListener("click", () => { visible(false); $("notificationButton").focus(); });
   document.addEventListener("click", event => { if (!area.contains(event.target)) visible(false); });
-  document.addEventListener("keydown", event => { if (event.key === "Escape" && !$("notificationPanel").hidden) { visible(false); $("notificationButton").focus(); } });
-  $("notificationMode").addEventListener("change", () => { mode = $("notificationMode").value; refresh(false); });
+  document.addEventListener("keydown", event => { if (event.key === "Escape" && panelOpen) { visible(false); $("notificationButton").focus(); } });
+  $("notificationMode").addEventListener("change", () => { mode = $("notificationMode").value; $("notificationScroll").scrollTop = 0; refresh(false); });
   $("notificationMore").addEventListener("click", async () => {
     const button = $("notificationMore"); button.disabled = true;
     try {

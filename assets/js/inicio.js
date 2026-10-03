@@ -1,3 +1,4 @@
+import { getPreferences } from "./preferences.js";
 import { bootPage } from "./shell.js";
 import { state, effectiveStatus, demandCode } from "./store.js";
 import { escapeHtml, formatDate, formatHours, statusClass, priorityClass, demandCell } from "./ui.js";
@@ -17,8 +18,8 @@ function renderCharts(interval, periodDemands) {
     data: {
       labels: flow.labels,
       datasets: [
-        { label: "Recebidas", data: flow.received, borderColor: colors.primary, backgroundColor: `${colors.primary}22`, fill: true, tension: .38, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2.5 },
-        { label: "Concluídas", data: flow.completed, borderColor: colors.success, backgroundColor: `${colors.success}14`, fill: false, tension: .38, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2.5 },
+        { label: "Recebidas", data: flow.received, borderColor: colors.primary, backgroundColor: `${colors.primary}22`, fill: true, tension: .38, pointRadius: context => Number(context.raw) > 0 ? 3 : 0, pointHitRadius: 8, pointHoverRadius: context => Number(context.raw) > 0 ? 5 : 0, borderWidth: 2.5 },
+        { label: "Concluídas", data: flow.completed, borderColor: colors.success, backgroundColor: `${colors.success}14`, fill: false, tension: .38, pointRadius: context => Number(context.raw) > 0 ? 3 : 0, pointHitRadius: 8, pointHoverRadius: context => Number(context.raw) > 0 ? 5 : 0, borderWidth: 2.5 },
       ],
     },
     options: baseOptions(),
@@ -102,10 +103,16 @@ function renderDashboard() {
 }
 
 bootPage(() => {
+  activePeriod = getPreferences().dashboardPeriod;
+  document.querySelectorAll("[data-period]").forEach(button => {
+    const active = button.dataset.period === activePeriod;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
   document.querySelectorAll("[data-period]").forEach(button => {
     button.addEventListener("click", () => {
       activePeriod = button.dataset.period;
-      document.querySelectorAll("[data-period]").forEach(item => item.classList.toggle("active", item === button));
+      document.querySelectorAll("[data-period]").forEach(item => { item.classList.toggle("active", item === button); item.setAttribute("aria-pressed", String(item === button)); });
       renderDashboard();
     });
   });

@@ -381,6 +381,11 @@ async function openSavedCheck(id) {
 bootPage(async () => {
   const date = new Date();
   $("closingMonth").value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  const params = new URLSearchParams(location.search);
+  const requestedMonth = params.get("month");
+  const requestedKind = params.get("kind");
+  if (/^20\d{2}-(0[1-9]|1[0-2])$/.test(requestedMonth || "")) $("closingMonth").value = requestedMonth;
+  if (["demand", "converter"].includes(requestedKind)) $("closingKind").value = requestedKind;
   document.querySelectorAll("[data-closing-tab]").forEach((button, index, all) => {
     button.addEventListener("click", () => activateTab(button.dataset.closingTab));
     button.addEventListener("keydown", event => {

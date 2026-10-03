@@ -18,14 +18,16 @@ const WARM_BOOT_KEY = "fluux-warm-navigation";
 const NAV = [
   { label: "VISÃO GERAL" },
   { page: "inicio", href: "inicio.html", icon: "fa-table-cells-large", text: "Início" },
+  { page: "atencao", href: "atencao.html", icon: "fa-triangle-exclamation", text: "Central de atenção" },
+  { label: "OPERAÇÃO", spaced: true },
   { page: "nova_demanda", href: "nova_demanda.html", icon: "fa-plus", text: "Nova demanda", primary: true },
   { page: "demandas", href: "demandas.html", icon: "fa-list-check", text: "Demandas", count: "navDemandCount" },
-  { page: "cadastros", href: "cadastros.html", icon: "fa-address-book", text: "Cadastros" },
-  { page: "analises", href: "analises.html", icon: "fa-chart-column", text: "Análises" },
-  { page: "relatorios", href: "relatorios.html", icon: "fa-file-lines", text: "Relatórios", regular: true },
-  { label: "OPERAÇÃO", spaced: true },
   { page: "conversores", href: "conversores.html", icon: "fa-network-wired", text: "Conversores e PoE", count: "navConverterCount" },
   { page: "fechamento", href: "fechamento.html", icon: "fa-calendar-check", text: "Fechamento e conferência" },
+  { label: "GESTÃO", spaced: true },
+  { page: "analises", href: "analises.html", icon: "fa-chart-column", text: "Análises" },
+  { page: "relatorios", href: "relatorios.html", icon: "fa-file-lines", text: "Relatórios", regular: true },
+  { page: "cadastros", href: "cadastros.html", icon: "fa-address-book", text: "Cadastros" },
   { label: "SISTEMA", spaced: true },
   { page: "configuracoes", href: "configuracoes.html", icon: "fa-sliders", text: "Configurações" },
 ];
@@ -48,6 +50,13 @@ function mountShell() {
     link.id = "fluuxPhase2Styles";
     link.rel = "stylesheet";
     link.href = "assets/css/phase2.css?v=f2-1-3";
+    document.head.appendChild(link);
+  }
+  if (!document.getElementById("fluuxPhase2FinalStyles")) {
+    const link = document.createElement("link");
+    link.id = "fluuxPhase2FinalStyles";
+    link.rel = "stylesheet";
+    link.href = "assets/css/phase2-final.css?v=f2-4-6";
     document.head.appendChild(link);
   }
   const page = document.body.dataset.page || "inicio";

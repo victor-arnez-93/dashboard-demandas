@@ -1,3 +1,6 @@
+import { getPreferences } from "./preferences.js";
+import { mountAnalysisSections } from "./analysis-sections.js";
+import { readAll } from "./phase2-api.js";
 import { bootPage } from "./shell.js";
 import { state, effectiveStatus } from "./store.js";
 import {
@@ -605,9 +608,13 @@ function render() {
     demands.filter(
       item =>
         item.priority === priority &&
-        effectiveStatus(item) !== "Concluída"
+        !["Concluída", "Cancelada"].includes(effectiveStatus(item))
     ).length
   );
+
+  const cancelled = priorities.map(priority => demands.filter(item =>
+    item.priority === priority && effectiveStatus(item) === "Cancelada"
+  ).length);
 
   const completed = priorities.map(priority =>
     demands.filter(
@@ -648,6 +655,16 @@ function render() {
               hexToRgba(colors.success, 0.52)
             ),
           hoverBackgroundColor: colors.success,
+          borderRadius: 11,
+          borderSkipped: false,
+          maxBarThickness: 64,
+          categoryPercentage: 0.68,
+          barPercentage: 0.74,
+        },
+        {
+          label: "Canceladas",
+          data: cancelled,
+          backgroundColor: colors.muted,
           borderRadius: 11,
           borderSkipped: false,
           maxBarThickness: 64,
@@ -718,8 +735,9 @@ function render() {
           tension: 0.38,
           cubicInterpolationMode: "monotone",
           borderWidth: 3,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointRadius: context => Number(context.raw) > 0 ? 4 : 0,
+          pointHitRadius: 8,
+          pointHoverRadius: context => Number(context.raw) > 0 ? 6 : 0,
           pointBackgroundColor: colors.surface,
           pointBorderColor: colors.accent,
           pointBorderWidth: 2,
@@ -779,7 +797,17 @@ function render() {
   });
 }
 
-bootPage(() => {
+bootPage(async () => {
+  const loaded = await Promise.all([readAll("demands"), readAll("media_converter_records")]);
+  state.demands = loaded[0];
+  state.converters = loaded[1];
+  period = getPreferences().analysisPeriod;
+  document.querySelectorAll("[data-analysis-period]").forEach(button => {
+    const active = button.dataset.analysisPeriod === period;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  mountAnalysisSections(render);
   document
     .querySelectorAll("[data-analysis-period]")
     .forEach(button => {

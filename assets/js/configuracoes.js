@@ -1,3 +1,4 @@
+import { mountPreferenceSettings } from "./preference-settings.js";
 import { bootPage } from "./shell.js";
 import { state, saveProfile, saveSettings, uploadAvatar } from "./store.js";
 import { applyIdentity, applyAvatar, showToast } from "./ui.js";
@@ -31,6 +32,7 @@ function populate() {
 }
 
 bootPage(() => {
+  mountPreferenceSettings();
   populate();
   setEditing(false);
   bindSmartText(document.getElementById("settingsName"), "name");

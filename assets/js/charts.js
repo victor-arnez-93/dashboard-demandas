@@ -1,3 +1,4 @@
+import { getPreferences } from "./preferences.js";
 import { effectiveStatus } from "./store.js";
 
 const instances = new Map();
@@ -53,6 +54,7 @@ export function createChart(id, config) {
   destroyChart(id);
 
   const container = canvas.parentElement;
+  fitChartViewport(canvas, config);
   container?.querySelector(".chart-error-state")?.remove();
   canvas.hidden = false;
 
@@ -86,6 +88,36 @@ export function createChart(id, config) {
 
     return null;
   }
+}
+
+// Preserve every category; constrain only the visible viewport.
+function fitChartViewport(canvas, config) {
+  const frame = canvas.parentElement;
+  if (!frame) return;
+  const count = config.data?.labels?.length || 0;
+  const bars = config.type === "bar";
+  const horizontal = bars && config.options?.indexAxis === "y";
+  const visible = getPreferences().rankingRows;
+  let viewport = frame.parentElement;
+  if (!viewport.classList.contains("fluux-chart-viewport")) {
+    viewport = document.createElement("div");
+    viewport.className = "fluux-chart-viewport";
+    frame.before(viewport);
+    viewport.appendChild(frame);
+  }
+  const large = frame.classList.contains("analysis-chart-large");
+  const base = large ? 360 : 320;
+  const row = large ? 62 : 54;
+  const height = horizontal ? Math.max(base, 96 + count * row) : base;
+  const cap = horizontal ? Math.max(base, 96 + visible * row) : base;
+  // Other pages retain their original chart height.
+  if (frame.classList.contains("analysis-chart")) frame.style.height = `${height}px`;
+  viewport.style.maxHeight = horizontal ? `${cap}px` : "";
+  frame.style.minWidth = bars && !horizontal && count > 12 ? `${count * 52 + 96}px` : "";
+  const scroll = (horizontal && height > cap) || (bars && !horizontal && count > 12);
+  viewport.tabIndex = scroll ? 0 : -1;
+  viewport.setAttribute("role", "region");
+  viewport.setAttribute("aria-label", scroll ? "Gráfico completo; role para ver os demais registros" : "Gráfico");
 }
 
 export function chartColors() {

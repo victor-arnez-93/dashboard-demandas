@@ -25,6 +25,7 @@ const NAV = [
   { page: "relatorios", href: "relatorios.html", icon: "fa-file-lines", text: "Relatórios", regular: true },
   { label: "OPERAÇÃO", spaced: true },
   { page: "conversores", href: "conversores.html", icon: "fa-network-wired", text: "Conversores e PoE", count: "navConverterCount" },
+  { page: "fechamento", href: "fechamento.html", icon: "fa-calendar-check", text: "Fechamento e conferência" },
   { label: "SISTEMA", spaced: true },
   { page: "configuracoes", href: "configuracoes.html", icon: "fa-sliders", text: "Configurações" },
 ];
@@ -42,6 +43,13 @@ function navMarkup(activePage) {
 }
 
 function mountShell() {
+  if (!document.getElementById("fluuxPhase2Styles")) {
+    const link = document.createElement("link");
+    link.id = "fluuxPhase2Styles";
+    link.rel = "stylesheet";
+    link.href = "assets/css/phase2.css?v=f2-1-3";
+    document.head.appendChild(link);
+  }
   const page = document.body.dataset.page || "inicio";
   const pageLabel = document.body.dataset.pageLabel || "Início";
   const shell = document.getElementById("appShell");

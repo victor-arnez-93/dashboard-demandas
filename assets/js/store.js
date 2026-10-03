@@ -242,9 +242,29 @@ export async function saveDemand(payload, id = null) {
     actual_hours: Number(payload.actual_hours || 0),
     tags: payload.tags || [],
     notes: payload.notes || null,
-    completed_at: payload.status === "Concluída" ? (payload.completed_at || new Date().toISOString()) : null,
     updated_by: state.user.id,
   };
+
+  if (payload.status !== "Concluída") {
+    normalized.completed_at = null;
+  } else if (!id) {
+    normalized.completed_at = payload.completed_at || new Date().toISOString();
+  } else {
+    // Consulte o status atual para não depender de dados antigos desta aba.
+    const currentResult = await sb
+      .from("demands")
+      .select("id, company_id, status")
+      .eq("company_id", companyId)
+      .eq("id", id)
+      .single();
+    const currentDemand = ensureCompanyRecord(currentResult, "a demanda atual");
+
+    if (currentDemand.status !== "Concluída") {
+      normalized.completed_at = new Date().toISOString();
+    }
+    // Se já estava concluída, omita completed_at do UPDATE: preserve o valor
+    // no banco, inclusive null em registros legados sem data conhecida.
+  }
 
   let result;
   if (id) {

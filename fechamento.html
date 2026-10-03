@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d10">
+  <title>FLUUX — Fechamento mensal</title>
+  <script>document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";</script>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/phase2.css?v=f2-1-3" id="fluuxPhase2Styles">
+</head>
+<body data-page="fechamento" data-page-label="Fechamento mensal">
+  <a class="skip-link" href="#mainContent">Pular para o conteúdo</a>
+  <div class="boot-screen" id="bootScreen"><div class="boot-logo"><img src="assets/img/logo.png" alt="FLUUX"></div><span class="spinner"></span><p>Conectando ao sistema...</p></div>
+  <div class="app-shell" id="appShell" hidden>
+    <main class="main-content" id="mainContent" tabindex="-1">
+      <div class="page-heading"><div><span class="eyebrow">OPERAÇÃO</span><h1>Fechamento mensal</h1><p>Revise o que foi executado e confira a planilha de faturamento.</p></div>
+        <button class="btn-secondary" type="button" id="refreshClosing"><i class="fa-solid fa-rotate"></i> Atualizar dados</button></div>
+      <section class="panel closing-scope" aria-label="Competência do fechamento">
+        <label class="field"><span>Competência</span><input id="closingMonth" type="month" min="2000-01" max="2099-12" required></label>
+        <label class="field"><span>Origem</span><select id="closingKind"><option value="demand">Demandas / LPUs</option><option value="converter">Conversores e PoE / chamados</option></select></label>
+        <p id="closingBasis">Demandas pela data de execução; quando ausente, pela conclusão. Canceladas são excluídas.</p>
+      </section>
+      <p id="closingFeedback" class="phase2-feedback" role="status">Carregando dados...</p>
+      <div class="closing-tabs" role="tablist" aria-label="Fechamento e conferência">
+        <button id="tabClosing" role="tab" aria-selected="true" aria-controls="panelClosing" type="button" data-closing-tab="panelClosing">Fechamento</button>
+        <button id="tabImport" role="tab" aria-selected="false" tabindex="-1" aria-controls="panelImport" type="button" data-closing-tab="panelImport">Conferir Excel</button>
+        <button id="tabHistory" role="tab" aria-selected="false" tabindex="-1" aria-controls="panelHistory" type="button" data-closing-tab="panelHistory">Conferências salvas</button>
+      </div>
+      <section id="panelClosing" role="tabpanel" aria-labelledby="tabClosing">
+        <div class="closing-kpis">
+          <article class="panel"><small>Execuções no recorte</small><strong id="closingCount">0</strong><span>Registros existentes</span></article>
+          <article class="panel"><small>Valores informados</small><strong id="closingTotal">R$ 0,00</strong><span id="closingAmounts">Nenhum valor informado</span></article>
+          <article class="panel"><small>Encontrados na planilha</small><strong id="closingFound">0</strong><span>Última conferência válida</span></article>
+          <article class="panel"><small>A conferir / revisar</small><strong id="closingPending">0</strong><span>Inclui dados alterados após conferir</span></article>
+        </div>
+        <section class="panel closing-filter-panel" aria-label="Filtros do fechamento">
+          <label class="field"><span>Busca</span><input id="closingSearch" type="search" placeholder="LPU, chamado, projeto, descrição ou atividades"></label>
+          <label class="field"><span>Gestor</span><select id="closingManager"><option value="">Todos</option></select></label>
+          <label class="field"><span>Status</span><select id="closingStatus"><option value="">Todos</option></select></label>
+          <label class="closing-checkbox"><input type="checkbox" id="closingOnlyPending"> Somente pendências de conferência</label>
+          <button class="btn-secondary" id="exportClosing" type="button"><i class="fa-regular fa-file-excel"></i> Exportar fechamento</button>
+        </section>
+        <p class="closing-note">O valor é exclusivo de cada registro. Não repita o valor global da LPU em vários serviços. “Encontrado na planilha” não representa pagamento recebido.</p>
+        <section class="table-shell"><div class="panel-head"><div><small>CONSOLIDAÇÃO</small><h2>Serviços executados</h2></div><span id="closingVisibleCount"></span></div>
+          <div class="closing-table-scroll"><table class="closing-table"><thead><tr><th>Identificador / LPU agregada</th><th>Projeto / serviço</th><th>Data</th><th>Gestor / responsável</th><th>Status / gestor</th><th>Atividades / resolução</th><th>Valor deste registro</th><th>Conferência</th><th>Ações</th></tr></thead>
+            <tbody id="closingBody"><tr><td colspan="9" class="empty-table">Carregando...</td></tr></tbody></table></div>
+          <footer class="table-footer"><span id="closingPagination"></span><button id="moreClosing" type="button" class="btn-ghost btn-compact" hidden>Mostrar mais</button></footer>
+        </section>
+      </section>
+      <section id="panelImport" role="tabpanel" aria-labelledby="tabImport" hidden>
+        <section class="panel closing-import">
+          <header><span class="eyebrow">CONFERÊNCIA</span><h2>Importar a planilha recebida</h2><p>Selecione a aba, o cabeçalho e as colunas. Confira a prévia antes de salvar.</p></header>
+          <div class="closing-import-grid">
+            <label class="field"><span>Planilha .xlsx (até 10 MB)</span><input id="billingFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></label>
+            <label class="field"><span>Aba da planilha</span><select id="billingSheet" disabled><option value="">Selecione um arquivo</option></select></label>
+            <label class="field"><span>Linha do cabeçalho</span><input id="billingHeader" type="number" min="1" max="100" value="1"></label>
+            <label class="field"><span>Última linha de dados (opcional)</span><input id="billingLastRow" type="number" min="2" max="5101" placeholder="Até o fim da aba"></label>
+            <label class="field"><span>Identificador no FLUUX</span><select id="billingMatch"><option value="identifier">Número LPU</option></select></label>
+            <label class="field"><span>Coluna de identificador</span><select id="billingIdentifier" disabled><option value="">Selecione uma aba</option></select></label>
+            <label class="field"><span>Coluna de valor (opcional)</span><select id="billingAmount" disabled><option value="">Sem comparação de valor</option></select></label>
+            <label class="field"><span>Tolerância de valor (R$)</span><input id="billingTolerance" type="text" inputmode="decimal" value="0,01"></label>
+          </div>
+          <p class="closing-note" id="billingMappingHint">A competência e a origem são as selecionadas no topo. São comparadas somente as execuções desse mês.</p>
+          <p class="closing-note">Identificadores repetidos vão para revisão manual. Fórmulas nas colunas selecionadas devem ser convertidas em valores. Limite: 5000 linhas de dados por conferência.</p>
+          <p id="billingFeedback" class="phase2-feedback" role="status"></p>
+          <button id="previewBilling" class="btn-primary" type="button" disabled>Gerar prévia da conferência</button>
+        </section>
+        <section class="panel billing-results" id="billingResults" hidden>
+          <div class="panel-head"><div><small>RESULTADO</small><h2 id="billingResultTitle">Prévia da conferência</h2></div><button id="exportBilling" class="btn-secondary btn-compact" type="button">Exportar resultado</button></div>
+          <div class="billing-result-summary" id="billingSummary"></div>
+          <div class="billing-result-controls"><label class="closing-checkbox"><input id="billingOnlyPending" type="checkbox"> Mostrar somente pendências</label><p id="billingResultContext"></p></div>
+          <div class="closing-table-scroll"><table class="billing-result-table"><thead><tr><th>Identificador</th><th>Resultado</th><th>Valor FLUUX</th><th>Valor planilha</th><th>Linhas Excel</th><th>Observação</th></tr></thead><tbody id="billingResultBody"></tbody></table></div>
+          <div class="billing-result-controls"><span id="billingPagination"></span><button id="moreBilling" class="btn-ghost btn-compact" type="button" hidden>Mostrar mais</button></div>
+          <div class="billing-confirmation" id="billingConfirmation"><label class="closing-checkbox"><input id="billingReviewed" type="checkbox"> Revisei a competência, a origem, as colunas e o resultado.</label>
+            <button id="saveBilling" class="btn-primary" type="button" disabled>Salvar conferência</button><p id="billingSaveFeedback" role="status"></p></div>
+        </section>
+      </section>
+      <section id="panelHistory" role="tabpanel" aria-labelledby="tabHistory" hidden>
+        <section class="table-shell"><div class="panel-head"><div><small>HISTÓRICO</small><h2>Conferências desta competência</h2></div></div>
+          <p class="closing-note">Cada confirmação é preservada. Os resultados salvos representam os dados existentes naquele momento.</p>
+          <div class="closing-table-scroll"><table><thead><tr><th>Arquivo</th><th>Data / autor</th><th>Chave de comparação</th><th>Resultado</th><th>Ação</th></tr></thead><tbody id="billingHistoryBody"><tr><td colspan="5" class="empty-table">Carregando...</td></tr></tbody></table></div>
+        </section>
+      </section>
+      <div class="modal-layer" id="amountModal" hidden><div class="modal-backdrop" data-close-modal="amountModal"></div>
+        <section class="modal-card closing-amount-modal" role="dialog" aria-modal="true" aria-labelledby="amountTitle">
+          <div class="modal-head"><h2 id="amountTitle">Valor deste registro</h2><button class="icon-btn" type="button" data-close-modal="amountModal" aria-label="Fechar">×</button></div>
+          <form id="amountForm"><div class="modal-body"><p id="amountRecord"></p><label class="field"><span>Valor exclusivo deste serviço (R$)</span><input id="amountValue" type="text" inputmode="decimal" maxlength="24" placeholder="Ex.: 350,00"></label>
+            <p class="closing-note">Deixe em branco para remover o valor. Não repita o total global de uma LPU em seus atendimentos.</p><p id="amountFeedback" role="status"></p></div>
+            <div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="amountModal">Cancelar</button><button class="btn-primary" id="saveAmountButton" type="submit">Salvar valor</button></div></form>
+        </section></div>
+      <div class="modal-layer" id="demandDetailModal" hidden><div class="modal-backdrop" data-close-modal="demandDetailModal"></div>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="detailTitle"><div class="modal-head"><div><small id="detailCode"></small><h2 id="detailTitle">Detalhes</h2></div><button class="icon-btn" type="button" data-close-modal="demandDetailModal" aria-label="Fechar">×</button></div>
+          <div class="detail-content" id="demandDetailContent"></div><div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="demandDetailModal">Fechar</button></div></section></div>
+      <div class="modal-layer" id="converterDetailModal" hidden><div class="modal-backdrop" data-close-modal="converterDetailModal"></div>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="converterDetailTitle"><div class="modal-head"><div><small id="converterDetailCode"></small><h2 id="converterDetailTitle">Detalhes do atendimento</h2></div><button class="icon-btn" type="button" data-close-modal="converterDetailModal" aria-label="Fechar">×</button></div>
+          <div class="detail-content" id="converterDetailContent"></div><div class="modal-actions"><button class="btn-ghost" type="button" data-close-modal="converterDetailModal">Fechar</button></div></section></div>
+    </main>
+  </div>
+  <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage"></p><button class="btn-primary" type="button" onclick="location.reload()">Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="assets/js/env.js"></script>
+  <script type="module" src="assets/js/fechamento.js?v=f2-1-3"></script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import {
   demandProject,
   converterCode,
 } from "./store.js";
+import { mountTimeline } from "./timeline.js";
 
 export function escapeHtml(value = "") {
   return String(value)
@@ -184,6 +185,7 @@ export function renderDemandDetail(demand) {
   ).join("");
   const edit = document.getElementById("detailEditButton");
   if (edit) edit.dataset.id = demand.id;
+  mountTimeline(content, "demand", demand.id);
   openModal("demandDetailModal");
 }
 
@@ -212,6 +214,7 @@ export function renderConverterDetail(record) {
   ).join("");
   const edit = document.getElementById("converterDetailEditButton");
   if (edit) edit.dataset.id = record.id;
+  mountTimeline(content, "converter", record.id);
   openModal("converterDetailModal");
 }
 

@@ -1,3 +1,4 @@
+import { mountSettingsSections } from "./settings-sections.js";
 import { mountPreferenceSettings } from "./preference-settings.js";
 import { bootPage } from "./shell.js";
 import { state, saveProfile, saveSettings, uploadAvatar } from "./store.js";
@@ -33,6 +34,7 @@ function populate() {
 
 bootPage(() => {
   mountPreferenceSettings();
+  mountSettingsSections();
   populate();
   setEditing(false);
   bindSmartText(document.getElementById("settingsName"), "name");

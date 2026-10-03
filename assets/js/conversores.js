@@ -1,3 +1,4 @@
+import { openLinkedRecord } from "./notification-view.js";
 import { bootPage } from "./shell.js";
 import {
   state,
@@ -416,7 +417,7 @@ async function handleTable(event) {
   }
 }
 
-bootPage(() => {
+bootPage(async () => {
   populateSelects();
   applyDefaultFilters();
   resetForm();
@@ -480,5 +481,6 @@ bootPage(() => {
         : `<i class="fa-solid fa-floppy-disk"></i> Salvar registro`;
     }
   });
+  await openLinkedRecord("converter", renderConverterDetail);
   renderAll();
 });

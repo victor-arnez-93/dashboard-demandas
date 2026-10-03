@@ -2,7 +2,7 @@ import { bootPage } from "./shell.js";
 import { state } from "./store.js";
 import { showToast, openModal, closeModal, renderDemandDetail, renderConverterDetail } from "./ui.js";
 import { readAll, canWritePhase2, saveAmount, phase2Rpc, migrationMissing, companyId } from "./phase2-api.js";
-import { html, moneyCents, money, normalizeKey, executionRows, serviceDate, dateLabel, sheetRows, RESULT_LABELS } from "./phase2-rules.js";
+import { html, moneyCents, money, normalizeKey, isExecuted, executionRows, serviceDate, dateLabel, sheetRows, RESULT_LABELS } from "./phase2-rules.js";
 
 const $ = id => document.getElementById(id);
 let records = { demand: [], converter: [] };
@@ -92,6 +92,7 @@ function renderClosing() {
   $("closingAmounts").textContent = `${valued} com valor · ${rows.length - valued} sem valor`;
   $("closingFound").textContent = found;
   $("closingPending").textContent = rows.length - found;
+  renderSearchContext(rows);
   $("closingVisibleCount").textContent = `${rows.length} registros nos filtros`;
   $("closingBody").innerHTML = rows.length ? rows.slice(0, closingLimit).map(record => {
     const conference = checkFor(record);
@@ -107,6 +108,47 @@ function renderClosing() {
   $("closingPagination").textContent = `${Math.min(closingLimit, rows.length)} de ${rows.length} registros`;
   $("moreClosing").hidden = closingLimit >= rows.length;
   $("exportClosing").disabled = !ready || !rows.length;
+}
+
+function renderSearchContext(rows) {
+  let hint = $("closingSearchContext");
+  if (!hint) {
+    hint = document.createElement("p");
+    hint.id = "closingSearchContext";
+    hint.className = "phase2-feedback";
+    hint.setAttribute("role", "status");
+    $("closingSearch").closest(".closing-filter-panel").after(hint);
+    $("closingSearch").placeholder = "Buscar nas execuções do mês selecionado";
+    $("closingSearch").setAttribute("aria-describedby", hint.id);
+  }
+  const { kind, month } = scope();
+  const search = normalizeKey($("closingSearch").value);
+  hint.replaceChildren();
+  if (!ready) { hint.textContent = "Carregando registros…"; return; }
+  if (!search) { hint.textContent = "A busca filtra somente as execuções da origem e competência selecionadas. Para pesquisar todos os cadastros, use Demandas ou Conversores."; return; }
+  if (rows.length) { hint.textContent = `${rows.length} execução(ões) encontrada(s) nos filtros atuais.`; return; }
+  const matches = records[kind].filter(record => normalizeKey([record.lpu_number, project(record), record.description,
+    record.issue_reason, record.location_name, record.location_subdivision_name, activities(record), manager(record), responsible(record)].join(" ")).includes(search));
+  if (!matches.length) { hint.textContent = "Nenhum cadastro corresponde à busca nesta origem. Confira o número ou procure na outra origem."; return; }
+  const months = [...new Set(matches.filter(record => isExecuted(kind, record)).map(record => serviceDate(kind, record).slice(0, 7)).filter(Boolean))].sort().reverse();
+  const text = document.createElement("span");
+  text.textContent = months.includes(month) ? "O cadastro tem execução neste mês, mas foi excluído pelos filtros de gestor, status ou pendências. " :
+    months.length ? "O cadastro existe, mas não tem execução na competência selecionada. Competências com execução: " :
+    "O cadastro existe, mas não tem execução elegível com data para o fechamento. Confira o status e a data de execução nos detalhes. ";
+  hint.appendChild(text);
+  months.filter(value => value !== month).forEach(value => {
+    const button = document.createElement("button");
+    button.className = "btn-ghost btn-compact";
+    button.type = "button";
+    button.textContent = value.split("-").reverse().join("/");
+    button.addEventListener("click", async () => {
+      $("closingMonth").value = value;
+      $("closingManager").value = ""; $("closingStatus").value = ""; $("closingOnlyPending").checked = false;
+      invalidatePreview("A competência mudou. Gere uma nova prévia.");
+      await reload();
+    });
+    hint.appendChild(button);
+  });
 }
 
 function fillClosingFilters() {

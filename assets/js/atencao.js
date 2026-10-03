@@ -14,13 +14,23 @@ const $ = id => document.getElementById(id);
 
 function render() {
   const labels = ATTENTION_LABELS;
-  $("attentionCards").innerHTML = Object.entries(labels).map(([key, label]) => `
-    <button type="button" class="fluux-attention-card" data-attention="${key}" aria-pressed="${key === active}">
-      <strong>${groups[key]?.length || 0}</strong><span>${label}</span>
-    </button>`).join("");
+  const origin = $("attentionOrigin").value;
+  const onlyDemands = ["overdue", "today", "soon", "waiting", "inactive"];
+  if (origin === "converter" && onlyDemands.includes(active)) active = "closing";
+  $("attentionCards").innerHTML = Object.entries(labels).map(([key, label]) => {
+    const entries = groups[key] || [];
+    const demands = entries.filter(entry => entry.kind === "demand").length;
+    const converters = entries.filter(entry => entry.kind === "converter").length;
+    const unavailable = origin === "converter" && onlyDemands.includes(key);
+    const count = origin === "demand" ? demands : origin === "converter" ? converters : entries.length;
+    const detail = unavailable ? "Não se aplica a conversores" : onlyDemands.includes(key) ? "Somente demandas" :
+      origin === "demand" ? "Demandas" : origin === "converter" ? "Conversores / PoE" : `${demands} demandas · ${converters} conversores / PoE`;
+    return `<button type="button" class="fluux-attention-card" data-attention="${key}" aria-pressed="${key === active}" ${unavailable ? "disabled" : ""}>
+      <strong>${unavailable ? "—" : count}</strong><span>${label}</span><small>${detail}</small>
+    </button>`;
+  }).join("");
   $("attentionTitle").textContent = labels[active];
   const search = $("attentionSearch").value.trim().toLocaleLowerCase("pt-BR");
-  const origin = $("attentionOrigin").value;
   visible = (groups[active] || []).filter(entry => {
     const record = entry.record || {};
     return (!origin || entry.kind === origin) && (!search ||

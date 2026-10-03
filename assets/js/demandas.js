@@ -1,3 +1,4 @@
+import { openLinkedRecord } from "./notification-view.js";
 import { bootPage } from "./shell.js";
 import {
   state,
@@ -440,7 +441,7 @@ function clearFilters() {
   render();
 }
 
-bootPage(() => {
+bootPage(async () => {
   populateFilters();
   initializeCustomSelects();
 
@@ -472,10 +473,5 @@ bootPage(() => {
 
   render();
 
-  const viewId = new URLSearchParams(location.search).get("view");
-
-  if (viewId) {
-    const item = state.demands.find(demand => demand.id === viewId);
-    if (item) renderDemandDetail(item);
-  }
+  await openLinkedRecord("demand", renderDemandDetail);
 });

@@ -1,3 +1,4 @@
+import { mountNotifications } from "./notifications.js";
 import { log } from "./logger.js";
 import { requireSession, getSupabase, clearStoredAuthSessions } from "./supabase-client.js";
 import { initializeStore, resetStore, state, saveProfile } from "./store.js";
@@ -57,6 +58,11 @@ function mountShell() {
     link.id = "fluuxPhase2FinalStyles";
     link.rel = "stylesheet";
     link.href = "assets/css/phase2-final.css?v=f2-4-6";
+    document.head.appendChild(link);
+  }
+  if (!document.getElementById("fluuxNotificationsStyles")) {
+    const link = document.createElement("link"); link.id = "fluuxNotificationsStyles";
+    link.rel = "stylesheet"; link.href = "assets/css/notifications.css?v=f2-7";
     document.head.appendChild(link);
   }
   const page = document.body.dataset.page || "inicio";
@@ -297,6 +303,7 @@ export async function bootPage(onReady) {
     updateNavCounts();
     bindShell();
     initClock();
+    mountNotifications().catch(error => log.warn("NOTIFICAÇÕES", "Não foi possível carregar o sino.", error));
 
     appShell.hidden = false;
     bootScreen.hidden = true;

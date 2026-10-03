@@ -33,10 +33,12 @@ export function getPreferences() {
 export function savePreferences(value) {
   const result = normalizePreferences(value);
   localStorage.setItem(key(), JSON.stringify(result));
+  window.dispatchEvent(new CustomEvent("fluux:preferenceschange"));
   return result;
 }
 
 export function resetPreferences() {
   localStorage.removeItem(key());
+  window.dispatchEvent(new CustomEvent("fluux:preferenceschange"));
   return { ...DEFAULT_PREFERENCES };
 }

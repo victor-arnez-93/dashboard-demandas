@@ -25,10 +25,11 @@
         <div class="header-actions"><button type="button" class="btn-secondary" id="attentionRefresh">Atualizar</button><a href="configuracoes.html" class="btn-ghost">Preferências</a></div>
       </div>
       <p id="attentionFeedback" class="fluux-attention-feedback" role="status"></p>
+      <section class="panel fluux-attention-origin"><label class="field"><span>Origem</span><select id="attentionOrigin"><option value="">Todas</option><option value="demand">Demandas</option><option value="converter">Conversores / PoE</option></select></label><p>O filtro de origem vale para os indicadores e a lista. Prazos e inatividade são de demandas; fechamento e conferências incluem demandas e conversores.</p></section>
       <div id="attentionCards" class="fluux-attention-grid" aria-label="Indicadores de atenção"></div>
       <section class="panel fluux-attention-panel">
         <div class="fluux-attention-toolbar"><h2 id="attentionTitle">Atrasadas</h2>
-          <label class="field"><span>Origem</span><select id="attentionOrigin"><option value="">Todas</option><option value="demand">Demandas</option><option value="converter">Conversores / PoE</option></select></label>
+          
           <label class="field"><span>Buscar</span><input id="attentionSearch" type="search" placeholder="Projeto, LPU, chamado, gestor ou polo"></label>
         </div>
         <p id="attentionResults" class="fluux-attention-feedback" aria-live="polite"></p>

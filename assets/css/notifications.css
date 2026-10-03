@@ -1,0 +1,185 @@
+/* FLUUX F2.7 — sino, caixa de entrada e navegação de configurações. */
+.fluux-notification-area {
+  position: relative;
+}
+
+#notificationButton {
+  position: relative;
+}
+
+#notificationBadge {
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  min-width: 19px;
+  padding: 3px 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #ffffff;
+  font: 700 10px var(--font-body);
+  text-align: center;
+}
+
+.fluux-notification-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 80;
+  width: min(440px, calc(100vw - 28px));
+  max-height: min(680px, calc(100dvh - 120px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  color: var(--text);
+}
+
+.fluux-notification-panel[hidden],
+.fluux-settings-tabs ~ [hidden],
+#settingsForm .settings-section[hidden],
+#settingsForm .settings-actions[hidden],
+.fluux-preferences[hidden] {
+  display: none;
+}
+
+.fluux-notification-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fluux-notification-panel h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.fluux-notification-toolbar,
+.fluux-notification-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fluux-notification-toolbar select {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.fluux-notification-feedback,
+.fluux-notification small {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.fluux-notification-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.fluux-notification {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.fluux-notification.is-read {
+  border-left-color: var(--text-muted);
+}
+
+.fluux-notification p {
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.fluux-notification-empty {
+  padding: 28px 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.fluux-settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.fluux-settings-tabs button {
+  padding: 12px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.fluux-settings-tabs button[aria-selected="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 700;
+}
+
+.fluux-attention-origin {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 18px;
+}
+
+.fluux-attention-origin .field {
+  flex: 0 1 300px;
+  min-width: 0;
+}
+
+.fluux-attention-origin p {
+  flex: 1 1 300px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.fluux-attention-card small {
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.fluux-attention-card:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (max-width: 720px) {
+  .fluux-notification-panel {
+    position: fixed;
+    top: 76px;
+    right: 14px;
+    max-height: calc(100dvh - 100px);
+  }
+
+  .fluux-settings-tabs button {
+    flex: 1 1 auto;
+  }
+}

@@ -7,14 +7,19 @@
   <meta name="theme-color" content="#090d10">
   <title>FLUUX — Configurações</title>
   <script>document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";</script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/pwa/fluux-apple-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FLUUX">
+  <script src="assets/js/pwa-install.js?v=f3-0" defer></script>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="assets/css/theme.css">
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/configuracoes.css">
+  <link rel="stylesheet" href="assets/css/main.css?v=f3-0">
+  <link rel="stylesheet" href="assets/css/configuracoes.css?v=f3-0">
   
 </head>
 <body data-page="configuracoes" data-page-label="Configurações">
@@ -26,6 +31,16 @@
       <div class="settings-lock" id="settingsLock"><i class="fa-solid fa-lock"></i><span>Configurações protegidas contra alterações acidentais.</span></div>
       <form id="settingsForm"><section class="panel settings-section"><div class="settings-section-head"><i class="fa-solid fa-user"></i><div><h2>Perfil</h2><p>Estas informações aparecem na saudação e no menu do usuário.</p></div></div><div class="profile-settings"><div class="avatar-settings"><span class="avatar" id="settingsAvatar">FG</span><label class="btn-secondary btn-compact" for="avatarInput"><i class="fa-solid fa-camera"></i> Escolher foto</label><input id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp" hidden disabled><small>PNG, JPG ou WebP · até 2 MB</small></div><div class="settings-fields"><label class="field"><span>Nome de exibição</span><input id="settingsName" type="text" maxlength="120" disabled></label><label class="field"><span>Cargo / área</span><input id="settingsRole" type="text" maxlength="120" disabled></label><label class="field full"><span>E-mail de acesso</span><input id="settingsEmail" type="email" disabled></label></div></div></section>
       <section class="panel settings-section"><div class="settings-section-head"><i class="fa-solid fa-desktop"></i><div><h2>Sistema</h2><p>O nome salvo é aplicado no título, menu e identidade do painel.</p></div></div><div class="system-settings"><label class="field"><span>Nome do sistema</span><input id="settingsAppName" type="text" maxlength="60" disabled></label><label class="field"><span>Subtítulo</span><input id="settingsAppSubtitle" type="text" maxlength="120" disabled></label></div><div class="settings-actions"><button class="btn-primary" id="saveSettingsButton" type="submit" disabled><i class="fa-solid fa-floppy-disk"></i> Salvar configurações</button></div></section></form>
+      <section class="panel settings-section settings-install" id="pwaInstall" aria-labelledby="pwaInstallTitle" hidden>
+        <div class="settings-section-head">
+          <i class="fa-solid fa-mobile-screen" aria-hidden="true"></i>
+          <div><h2 id="pwaInstallTitle">Instalação do FLUUX</h2></div>
+        </div>
+        <button class="btn-secondary" id="pwaInstallButton" type="button" hidden>
+          <i class="fa-solid fa-download" aria-hidden="true"></i> Instalar FLUUX
+        </button>
+        <p id="pwaInstallHelp" role="status" hidden></p>
+      </section>
     </main>
   </div>
   <div class="fatal-layer" id="fatalLayer" hidden><section><i class="fa-solid fa-plug-circle-xmark"></i><h1>Não foi possível iniciar o FLUUX</h1><p id="fatalMessage">Confira a configuração e tente novamente.</p><button class="btn-primary" type="button" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button><a href="index.html">Voltar ao login</a></section></div>

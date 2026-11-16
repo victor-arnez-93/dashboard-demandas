@@ -8,14 +8,18 @@
   <script>
     document.documentElement.dataset.theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   </script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/pwa/fluux-apple-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FLUUX">
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="assets/css/theme.css">
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/apresentar.css">
+  <link rel="stylesheet" href="assets/css/main.css?v=f3-0">
+  <link rel="stylesheet" href="assets/css/apresentar.css?v=f3-0">
 </head>
 <body class="presentation-page">
   <div class="boot-screen" id="bootScreen">
@@ -47,7 +51,7 @@
       <div class="presentation-actions">
         <button
           class="btn-secondary btn-compact presentation-filter-button"
-          id="filterButton"
+          id="filterButton" aria-label="Filtros"
           type="button"
           aria-expanded="false"
           aria-controls="presentationFilters"
@@ -56,15 +60,15 @@
           <span>Filtros</span>
           <b id="activeFilterCount" hidden>0</b>
         </button>
-        <button class="btn-secondary btn-compact" id="fullscreenButton" type="button">
+        <button class="btn-secondary btn-compact" id="fullscreenButton" aria-label="Tela cheia" type="button" hidden>
           <i class="fa-solid fa-expand"></i>
           <span>Tela cheia</span>
         </button>
-        <button class="btn-secondary btn-compact" id="autoButton" type="button" aria-pressed="false">
+        <button class="btn-secondary btn-compact" id="autoButton" aria-label="Reprodução automática" type="button" aria-pressed="false">
           <i class="fa-solid fa-play"></i>
           <span>Automático</span>
         </button>
-        <a class="btn-primary btn-compact" href="inicio.html">
+        <a class="btn-primary btn-compact" href="inicio.html" aria-label="Voltar ao painel">
           <i class="fa-solid fa-arrow-left"></i>
           <span>Voltar</span>
         </a>
@@ -305,6 +309,7 @@
     </footer>
   </section>
 
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
   <div class="fatal-layer" id="fatalLayer" hidden>
     <section>
       <i class="fa-solid fa-plug-circle-xmark"></i>
@@ -317,6 +322,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
   <script src="assets/js/env.js"></script>
-  <script type="module" src="assets/js/apresentar.js"></script>
+  <script type="module" src="assets/js/apresentar.js?v=f3-0"></script>
 </body>
 </html>

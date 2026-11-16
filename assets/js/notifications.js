@@ -23,6 +23,29 @@ let newestTime = null;
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = id => document.getElementById(id);
 
+// Measure rendered cards so wrapped messages and translated labels stay visible.
+function limitVisibleNotifications(list, scroll) {
+  const resize = new ResizeObserver(() => {
+    const [first, second] = list.children;
+    if (!first?.matches(".fluux-notification") || first.offsetHeight === 0) {
+      scroll.style.removeProperty("--notification-mobile-height");
+      scroll.style.removeProperty("--notification-desktop-height");
+      return;
+    }
+    const firstHeight = first.offsetHeight;
+    const desktopHeight = second ? second.offsetTop - first.offsetTop + second.offsetHeight : firstHeight;
+    scroll.style.setProperty("--notification-mobile-height", `${firstHeight}px`);
+    scroll.style.setProperty("--notification-desktop-height", `${desktopHeight}px`);
+  });
+  function observeCards() {
+    resize.disconnect();
+    resize.observe(list);
+    [...list.children].slice(0, 2).forEach(card => resize.observe(card));
+  }
+  new MutationObserver(observeCards).observe(list, { childList: true });
+  observeCards();
+}
+
 function visible(value) {
   const panel = $("notificationPanel");
   if (!panel || panelOpen === value) return;
@@ -191,6 +214,7 @@ export async function mountNotifications() {
       <button id="notificationArrivalClose" type="button" aria-label="Ocultar aviso">×</button>
     </aside>`;
   $("themeButton").before(area);
+  limitVisibleNotifications($("notificationList"), $("notificationScroll"));
   $("notificationButton").addEventListener("click", () => visible(!panelOpen));
   $("notificationArrivalOpen").addEventListener("click", () => { visible(true); $("notificationClose").focus(); });
   $("notificationArrivalClose").addEventListener("click", hideNotice);

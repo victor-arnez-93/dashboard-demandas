@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "FLUUX",
+  "short_name": "FLUUX",
+  "description": "Organização de demandas, análises e operação.",
+  "lang": "pt-BR",
+  "start_url": "./login.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090d10",
+  "theme_color": "#090d10",
+  "icons": [
+    {
+      "src": "assets/img/pwa/fluux-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/pwa/fluux-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/pwa/fluux-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

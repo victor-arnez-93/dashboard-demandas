@@ -1,7 +1,7 @@
 import { log } from "./logger.js";
 import { requireSession } from "./supabase-client.js";
 import { initializeStore, state, effectiveStatus } from "./store.js";
-import { applyTheme, escapeHtml } from "./ui.js";
+import { applyTheme, escapeHtml, showToast } from "./ui.js";
 import {
   createChart,
   destroyChart,
@@ -743,6 +743,7 @@ function updateFullscreenButton() {
   button.innerHTML = active
     ? `<i class="fa-solid fa-compress"></i><span>Sair da tela cheia</span>`
     : `<i class="fa-solid fa-expand"></i><span>Tela cheia</span>`;
+  button.setAttribute("aria-label", active ? "Sair da tela cheia" : "Tela cheia");
   button.setAttribute("aria-pressed", String(active));
 }
 
@@ -830,13 +831,17 @@ async function boot() {
       setAuto(event.currentTarget.getAttribute("aria-pressed") !== "true");
     });
 
-    document.getElementById("fullscreenButton").addEventListener("click", async () => {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen?.();
-        return;
+    const fullscreenButton = document.getElementById("fullscreenButton");
+    fullscreenButton.hidden = !document.fullscreenEnabled ||
+      typeof document.documentElement.requestFullscreen !== "function";
+    updateFullscreenButton();
+    fullscreenButton.addEventListener("click", async () => {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await document.documentElement.requestFullscreen();
+      } catch {
+        showToast("O navegador não permitiu abrir ou fechar a tela cheia.", "info");
       }
-
-      await document.exitFullscreen?.();
     });
 
     document.addEventListener("fullscreenchange", () => {

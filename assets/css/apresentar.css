@@ -947,6 +947,23 @@ body.presentation-page::before {
 }
 
 @media (max-width: 520px) {
+  .presentation-periods {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    border-radius: 16px;
+  }
+
+  .presentation-periods button {
+    grid-column: span 2;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 4px;
+  }
+
+  .presentation-periods button:nth-last-child(-n + 2) {
+    grid-column: span 3;
+  }
+
   .presentation-stage {
     padding: 16px 13px;
   }

@@ -386,11 +386,31 @@ a { color: inherit; }
     );
 }
 .nav-count { display: grid; min-width: 28px; height: 28px; place-items: center; border-radius: 99px; background: color-mix(in srgb, var(--primary) 38%, var(--surface)); color: var(--text); font-size: 9px; }
-.sidebar-footer { padding: 18px 24px 22px; border-top: 1px solid var(--border); }
-.sidebar-footer span, .sidebar-footer strong, .sidebar-footer small { display: block; }
-.sidebar-footer span { color: var(--text-muted); font-size: 9px; }
-.sidebar-footer strong { margin: 2px 0 12px; font: 700 16px var(--font-title); }
-.sidebar-footer small { color: var(--text-muted); font-size: 9px; }
+.sidebar-footer {
+  flex: 0 0 auto;
+  padding: 12px 10px 14px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.sidebar-footer span,
+.sidebar-footer small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+.sidebar-footer a {
+  display: inline-block;
+  padding: 3px 6px;
+  color: var(--text);
+  font: 700 16px var(--font-title);
+  text-decoration: none;
+}
+.sidebar-footer a:hover,
+.sidebar-footer a:focus-visible {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+}
 
 .app-column { min-height: 100vh; margin-left: var(--sidebar-width); transition: margin-left var(--transition); }
 .topbar {
@@ -473,16 +493,16 @@ a { color: inherit; }
 .app-shell.sidebar-collapsed .nav-item > span,
 .app-shell.sidebar-collapsed .nav-label,
 .app-shell.sidebar-collapsed .nav-count,
-.app-shell.sidebar-collapsed .sidebar-footer span,
-.app-shell.sidebar-collapsed .sidebar-footer strong { display: none; }
+.app-shell.sidebar-collapsed .sidebar-footer > span { display: none; }
 .app-shell.sidebar-collapsed .sidebar-control { justify-content: center; padding-inline: 8px; }
 .app-shell.sidebar-collapsed .sidebar-toggle { width: 42px; padding: 0; }
 .app-shell.sidebar-collapsed .sidebar-toggle i { transform: rotate(180deg); }
 .app-shell.sidebar-collapsed .sidebar-nav { align-items: center; padding-inline: 8px; }
 .app-shell.sidebar-collapsed .nav-item { width: 54px; justify-content: center; padding-inline: 0; }
 .app-shell.sidebar-collapsed .nav-item i { width: auto; }
-.app-shell.sidebar-collapsed .sidebar-footer { min-height: 62px; padding: 17px 8px; text-align: center; }
-.app-shell.sidebar-collapsed .sidebar-footer small { font-size: 8px; }
+.app-shell.sidebar-collapsed .sidebar-footer { padding-inline: 4px; }
+.app-shell.sidebar-collapsed .sidebar-footer a { font-size: 13px; }
+.app-shell.sidebar-collapsed .sidebar-footer small { font-size: 9px; }
 
 /* Clima compacto no estilo do dashboard DISC */
 .weather-popover {
@@ -711,6 +731,18 @@ tbody tr:hover td { background: color-mix(in srgb, var(--primary) 5%, transparen
   background: var(--surface-solid);
 }
 .confirm-card { width: min(470px, 100%); overflow-y: auto; text-align: center; }
+#logoutConfirmModal .modal-actions {
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-inline: 12px;
+}
+#logoutConfirmModal .modal-actions button {
+  width: auto;
+  min-width: 88px;
+  min-height: 44px;
+}
 .confirm-icon { display: grid; width: 58px; height: 58px; margin: 22px auto 12px; place-items: center; border-radius: 18px; background: color-mix(in srgb, var(--danger) 13%, transparent); color: var(--danger); font-size: 22px; }
 .confirm-card p { margin: 0; padding: 0 24px 8px; color: var(--text-soft); }
 .detail-content { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; padding: 22px; }
@@ -760,7 +792,25 @@ tbody tr:hover td { background: color-mix(in srgb, var(--primary) 5%, transparen
   .modal-actions button { width: 100%; }
 }
 @media (max-width: 540px) {
+  .topbar,
+  .topbar-actions { gap: 8px; }
+  .topbar .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
   .toast-region { right: 12px; bottom: 12px; width: calc(100vw - 24px); }
+}
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 760px) {
+    body .login-input input,
+    body .field :is(input, select, textarea),
+    body .modal-card .field :is(input, select, textarea),
+    body .converter-filter-bar .field :is(input, select),
+    body .converter-form-grid .field :is(input, select, textarea) {
+      min-width: 0;
+      font-size: 16px;
+    }
+  }
 }
 @media (hover: none) {
   .btn-primary:hover, .btn-secondary:hover, .icon-btn:hover, .nav-item:hover { transform: none; }

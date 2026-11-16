@@ -13,4 +13,13 @@
 .settings-fields .full { grid-column: 1 / -1; }
 .system-settings { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; padding: 24px; }
 .settings-actions { display: flex; justify-content: flex-end; padding: 18px 22px; border-top: 1px solid var(--border); }
+.settings-install > button,
+.settings-install > p {
+  margin: 12px 22px 16px;
+}
+.settings-install > p {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
 @media (max-width: 760px) { .profile-settings { grid-template-columns: 1fr; } .settings-fields, .system-settings { grid-template-columns: 1fr; } .settings-fields .full { grid-column: auto; } }

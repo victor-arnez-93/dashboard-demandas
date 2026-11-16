@@ -12,9 +12,10 @@ import {
 } from "./ui.js";
 import { initializeWeather, openWeather, closeWeather, refreshWeather } from "./weather.js";
 
-const VERSION = "v1.3.0";
+const VERSION = "v1.4.0";
 const COLLAPSED_KEY = "fluux-sidebar-collapsed";
 const WARM_BOOT_KEY = "fluux-warm-navigation";
+const drawerLayout = matchMedia("(max-width: 960px)");
 
 const NAV = [
   { label: "VISÃO GERAL" },
@@ -62,7 +63,7 @@ function mountShell() {
   }
   if (!document.getElementById("fluuxNotificationsStyles")) {
     const link = document.createElement("link"); link.id = "fluuxNotificationsStyles";
-    link.rel = "stylesheet"; link.href = "assets/css/notifications.css?v=f2-7";
+    link.rel = "stylesheet"; link.href = "assets/css/notifications.css?v=f3-0";
     document.head.appendChild(link);
   }
   const page = document.body.dataset.page || "inicio";
@@ -80,7 +81,11 @@ function mountShell() {
       </div>
       <div class="sidebar-control"><button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Recolher menu"><i class="fa-solid fa-angles-left"></i><span>Recolher menu</span></button></div>
       <nav class="sidebar-nav">${navMarkup(page)}</nav>
-      <footer class="sidebar-footer"><span>Desenvolvido por</span><strong>Victor Arnez</strong><small>FLUUX · <span>${VERSION}</span></small></footer>
+      <footer class="sidebar-footer">
+        <span>Desenvolvido por</span>
+        <a href="https://arnzlabs.onrender.com/" target="_blank" rel="noopener">ARNZ LABS</a>
+        <small>FLUUX · ${VERSION}</small>
+      </footer>
     </aside>
     <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
   `);
@@ -90,7 +95,7 @@ function mountShell() {
   column.innerHTML = `
     <header class="topbar">
       <div class="topbar-start">
-        <button class="icon-btn mobile-menu" id="mobileMenuButton" type="button" aria-label="Abrir menu"><i class="fa-solid fa-bars"></i></button>
+        <button class="icon-btn mobile-menu" id="mobileMenuButton" type="button" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
         <div class="breadcrumb"><span>Organização</span><i class="fa-solid fa-chevron-right"></i><strong>${pageLabel}</strong></div>
       </div>
       <div class="topbar-actions">
@@ -109,7 +114,7 @@ function mountShell() {
         <div class="topbar-info clock" aria-live="polite"><i class="fa-regular fa-clock"></i><span><strong id="currentTime">--:--</strong><small id="currentDate">--</small></span></div>
         <button class="icon-btn" id="themeButton" type="button" aria-label="Alternar tema"><i class="fa-solid fa-sun"></i></button>
         <div class="user-area">
-          <button class="user-chip" id="userMenuButton" type="button" aria-expanded="false">
+          <button class="user-chip" id="userMenuButton" type="button" aria-label="Menu do usuário" aria-controls="userMenu" aria-expanded="false">
             <span class="avatar" id="headerAvatar">FG</span><span><strong id="headerUserName">Usuário</strong><small id="headerUserRole">Gestão de Demandas</small></span><i class="fa-solid fa-chevron-down"></i>
           </button>
           <div class="user-menu" id="userMenu" hidden>
@@ -172,6 +177,8 @@ function mountShell() {
 function setSidebarMobile(open) {
   const shell = document.getElementById("appShell");
   const backdrop = document.getElementById("sidebarBackdrop");
+  document.getElementById("sidebar").inert = drawerLayout.matches && !open;
+  document.getElementById("mobileMenuButton").setAttribute("aria-expanded", String(open));
   shell.classList.toggle("sidebar-mobile-open", open);
   backdrop.hidden = !open;
   document.body.classList.toggle("sidebar-open", open);
@@ -179,17 +186,34 @@ function setSidebarMobile(open) {
 
 function bindShell() {
   const shell = document.getElementById("appShell");
-  const collapsed = localStorage.getItem(COLLAPSED_KEY) === "1";
-  shell.classList.toggle("sidebar-collapsed", collapsed);
+  function syncSidebarLayout() {
+    const collapsed = !drawerLayout.matches && localStorage.getItem(COLLAPSED_KEY) === "1";
+    shell.classList.toggle("sidebar-collapsed", collapsed);
+    setSidebarMobile(false);
+  }
+  syncSidebarLayout();
+  drawerLayout.addEventListener("change", syncSidebarLayout);
 
   document.getElementById("sidebarToggle")?.addEventListener("click", () => {
     const next = !shell.classList.contains("sidebar-collapsed");
     shell.classList.toggle("sidebar-collapsed", next);
     localStorage.setItem(COLLAPSED_KEY, next ? "1" : "0");
   });
-  document.getElementById("mobileMenuButton")?.addEventListener("click", () => setSidebarMobile(true));
-  document.getElementById("sidebarClose")?.addEventListener("click", () => setSidebarMobile(false));
-  document.getElementById("sidebarBackdrop")?.addEventListener("click", () => setSidebarMobile(false));
+  const mobileMenuButton = document.getElementById("mobileMenuButton");
+  const sidebarClose = document.getElementById("sidebarClose");
+  function closeSidebar() {
+    setSidebarMobile(false);
+    mobileMenuButton.focus();
+  }
+  mobileMenuButton.addEventListener("click", () => {
+    setSidebarMobile(true);
+    sidebarClose.focus();
+  });
+  sidebarClose.addEventListener("click", closeSidebar);
+  document.getElementById("sidebarBackdrop").addEventListener("click", closeSidebar);
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && shell.classList.contains("sidebar-mobile-open")) closeSidebar();
+  });
 
   const userButton = document.getElementById("userMenuButton");
   const userMenu = document.getElementById("userMenu");

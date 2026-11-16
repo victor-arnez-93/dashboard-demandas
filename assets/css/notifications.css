@@ -1,4 +1,4 @@
-/* FLUUX F2.8 — caixa compacta e sinalização suave de novas notificações. */
+/* Caixa de notificações do FLUUX */
 .fluux-notification-area { position: relative; }
 #notificationButton { position: relative; }
 #notificationBadge {
@@ -9,7 +9,7 @@
   padding: 2px 5px;
   border-radius: 999px;
   background: var(--accent);
-  color: #fff;
+  color: #16100c;
   font: 700 10px var(--font-body);
   text-align: center;
 }
@@ -88,12 +88,13 @@
 .fluux-notification-feedback,
 .fluux-notification small {
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.5;
 }
 .fluux-notification-feedback { margin: 8px 0 10px; }
 .fluux-notification-scroll {
   min-height: 0;
+  max-height: var(--notification-desktop-height, none);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -101,9 +102,15 @@
   scrollbar-gutter: stable;
   padding-right: 3px;
 }
-.fluux-notification-list { padding: 0; margin: 0; list-style: none; }
+.fluux-notification-list {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
 .fluux-notification {
-  margin: 0 0 8px;
   padding: 10px 11px;
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
@@ -112,8 +119,8 @@
   overflow-wrap: anywhere;
   transition: opacity 160ms ease, transform 180ms ease, border-color 180ms ease;
 }
-.fluux-notification strong { display: block; font-size: 12px; line-height: 1.4; }
-.fluux-notification p { margin: 5px 0; font-size: 11px; line-height: 1.5; }
+.fluux-notification strong { display: block; font-size: 13px; line-height: 1.4; }
+.fluux-notification p { margin: 5px 0; font-size: 12px; line-height: 1.5; }
 .fluux-notification-meta {
   display: flex;
   justify-content: space-between;
@@ -121,15 +128,16 @@
   gap: 4px 8px;
   margin-bottom: 5px;
   color: var(--text-muted);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.5;
 }
 .fluux-notification-status { font-weight: 700; }
 .is-unread .fluux-notification-status { color: var(--accent); }
+[data-theme="light"] .is-unread .fluux-notification-status { color: #a34a0e; }
 .fluux-notification.is-read { border-left-color: var(--text-muted); }
 .fluux-notification.is-dismissed { border-left-color: var(--border); }
-.fluux-notification.is-resolved { border-left-color: #3d9b78; }
-.is-resolved .fluux-notification-status { color: #3d9b78; }
+.fluux-notification.is-resolved { border-left-color: var(--success); }
+.is-resolved .fluux-notification-status { color: var(--success); }
 .fluux-notification-actions { margin-top: 5px; }
 .fluux-notification.is-leaving { opacity: 0; transform: translateX(12px); pointer-events: none; }
 .fluux-notification.is-new { animation: fluux-notification-in 260ms ease-out; }
@@ -247,14 +255,17 @@
   cursor: default;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px), (max-width: 960px) and (pointer: coarse) {
+  .fluux-notification-scroll {
+    max-height: var(--notification-mobile-height, none);
+  }
   .fluux-notification-panel {
     position: fixed;
-    top: 76px;
+    top: calc(var(--topbar-height) + 10px);
     right: 14px;
-    max-height: calc(100dvh - 100px);
+    max-height: calc(100dvh - var(--topbar-height) - 24px);
   }
-  .fluux-notification-arrival { top: 76px; right: 14px; }
+  .fluux-notification-arrival { top: calc(var(--topbar-height) + 10px); right: 14px; }
   .fluux-settings-tabs button { flex: 1 1 auto; }
 }
 @media (prefers-reduced-motion: reduce) {

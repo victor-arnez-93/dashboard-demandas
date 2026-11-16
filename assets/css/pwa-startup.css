@@ -1,0 +1,47 @@
+.pwa-startup-entry {
+  display: none;
+}
+
+html[data-pwa-starting] .login-shell {
+  visibility: hidden;
+}
+
+html[data-pwa-starting] .pwa-startup:not([hidden]) {
+  position: fixed;
+  z-index: 9000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #0b1115;
+  backdrop-filter: none;
+}
+
+html[data-pwa-starting] .pwa-startup:not([hidden])::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../img/pwa/fluux-splash.webp") center / cover no-repeat;
+}
+
+html[data-pwa-starting] .pwa-startup > :is(.boot-logo, .spinner) {
+  display: none;
+}
+
+html[data-pwa-starting] .pwa-startup > :is(p, .pwa-startup-status) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-aspect-ratio: 3/4) {
+  html[data-pwa-starting] .pwa-startup:not([hidden])::before {
+    background-size: auto 100%;
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    width: min(100%, 56.25dvh);
+    margin-inline: auto;
+  }
+}

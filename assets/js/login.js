@@ -140,31 +140,32 @@ form?.addEventListener("submit", async event => {
 });
 
 async function boot() {
-  log.boot();
-
-  const savedTheme =
-    localStorage.getItem("fluux-landing-theme") ||
-    root.dataset.theme ||
-    "dark";
-
-  applyLoginTheme(savedTheme);
-
-  if (remember) {
-    remember.checked = false;
-  }
-
-  if (!isConfigured()) {
-    setMessage(
-      "Conecte este projeto ao Supabase preenchendo assets/js/env.js."
-    );
-    return;
-  }
-
-  if (!shouldRememberSession()) {
-    return;
-  }
-
+  let openingPanel = false;
   try {
+    log.boot();
+
+    const savedTheme =
+      localStorage.getItem("fluux-landing-theme") ||
+      root.dataset.theme ||
+      "dark";
+
+    applyLoginTheme(savedTheme);
+
+    if (remember) {
+      remember.checked = false;
+    }
+
+    if (!isConfigured()) {
+      setMessage(
+        "Conecte este projeto ao Supabase preenchendo assets/js/env.js."
+      );
+      return;
+    }
+
+    if (!shouldRememberSession()) {
+      return;
+    }
+
     const { data, error } = await getSupabase().auth.getSession();
 
     if (error) {
@@ -180,13 +181,25 @@ async function boot() {
       remember.checked = true;
     }
 
+    if (root.hasAttribute("data-pwa-starting")) {
+      // Let the dashboard keep showing the same artwork while its data loads.
+      try {
+        sessionStorage.setItem("fluux-pwa-startup", "1");
+      } catch {
+        // The dashboard can still open when session storage is unavailable.
+      }
+    }
+
     location.replace("inicio.html");
+    openingPanel = true;
   } catch (error) {
     log.error(
       "AUTH",
       "Não foi possível verificar a sessão.",
       error
     );
+  } finally {
+    if (!openingPanel) delete root.dataset.pwaStarting;
   }
 }
 

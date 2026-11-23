@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Primeiro acesso — FLUUX</title>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/login.css">
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card" aria-labelledby="inviteTitle">
+      <div class="login-brand">
+        <img src="assets/img/logo.png" alt="FLUUX">
+      </div>
+
+      <div class="login-heading">
+        <h1 id="inviteTitle">Defina sua senha</h1>
+        <p id="inviteDescription">Crie uma senha para o seu primeiro acesso ao FLUUX.</p>
+      </div>
+
+      <form id="inviteForm" method="post" hidden>
+        <label class="login-field">
+          <span>Nova senha</span>
+          <span class="login-input">
+            <input id="invitePassword" type="password" autocomplete="new-password" required>
+          </span>
+        </label>
+        <label class="login-field">
+          <span>Confirme a nova senha</span>
+          <span class="login-input">
+            <input id="inviteConfirmation" type="password" autocomplete="new-password" required>
+          </span>
+        </label>
+        <button class="login-submit" id="inviteSubmit" type="submit">Salvar senha</button>
+      </form>
+
+      <p class="login-message" id="inviteMessage" role="alert" hidden></p>
+      <noscript>Ative o JavaScript e abra novamente o link do convite.</noscript>
+      <footer><a href="login.html">Ir para o login</a></footer>
+    </section>
+  </main>
+
+  <script src="assets/js/env.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="assets/js/primeiro-acesso.js"></script>
+</body>
+</html>

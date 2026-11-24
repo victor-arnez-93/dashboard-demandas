@@ -235,6 +235,7 @@
 .login-security {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 11px;
   margin-top: 22px;
   padding: 13px;
@@ -250,6 +251,7 @@
 
 .login-security span {
   display: grid;
+  text-align: center;
 }
 
 .login-security strong {

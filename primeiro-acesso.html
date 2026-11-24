@@ -8,39 +8,50 @@
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/theme.css">
   <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/login.css">
+  <link rel="stylesheet" href="assets/css/primeiro-acesso.css">
 </head>
-<body class="login-page">
-  <main class="login-shell">
-    <section class="login-card" aria-labelledby="inviteTitle">
-      <div class="login-brand">
+<body class="invite-page">
+  <main class="invite-shell">
+    <section class="invite-card" aria-labelledby="inviteTitle">
+      <div class="invite-brand">
         <img src="assets/img/logo.png" alt="FLUUX">
       </div>
 
-      <div class="login-heading">
+      <header class="invite-heading">
         <h1 id="inviteTitle">Defina sua senha</h1>
         <p id="inviteDescription">Crie uma senha para o seu primeiro acesso ao FLUUX.</p>
-      </div>
+      </header>
 
-      <form id="inviteForm" method="post" hidden>
-        <label class="login-field">
+      <form class="invite-form" id="inviteForm" method="post" hidden>
+        <label class="invite-field" for="invitePassword">
           <span>Nova senha</span>
-          <span class="login-input">
-            <input id="invitePassword" type="password" autocomplete="new-password" required>
-          </span>
+          <input class="invite-input" id="invitePassword" type="password"
+                 autocomplete="new-password" required>
         </label>
-        <label class="login-field">
+
+        <label class="invite-field" for="inviteConfirmation">
           <span>Confirme a nova senha</span>
-          <span class="login-input">
-            <input id="inviteConfirmation" type="password" autocomplete="new-password" required>
-          </span>
+          <input class="invite-input" id="inviteConfirmation" type="password"
+                 autocomplete="new-password" required>
         </label>
-        <button class="login-submit" id="inviteSubmit" type="submit">Salvar senha</button>
+
+        <button class="invite-submit" id="inviteSubmit" type="submit">
+          Salvar senha
+        </button>
       </form>
 
-      <p class="login-message" id="inviteMessage" role="alert" hidden></p>
-      <noscript>Ative o JavaScript e abra novamente o link do convite.</noscript>
-      <footer><a href="login.html">Ir para o login</a></footer>
+      <p class="invite-message" id="inviteMessage" role="alert" hidden></p>
+
+      <noscript>
+        <p class="invite-message">Ative o JavaScript e abra novamente o link do convite.</p>
+      </noscript>
+
+      <footer class="invite-footer">
+        <a class="invite-login" href="login.html">
+          Ir para o login
+          <span aria-hidden="true">→</span>
+        </a>
+      </footer>
     </section>
   </main>
 
